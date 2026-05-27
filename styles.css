@@ -127,3 +127,74 @@
 @media(max-width:560px){
   #awards .award-img{height:230px !important;}
 }
+
+
+/* Mobile-only prize card fix: keep desktop unchanged, show award cards like desktop using horizontal scroll */
+@media (max-width: 960px){
+  #awards .award-grid{
+    display:flex !important;
+    grid-template-columns:none !important;
+    gap:16px !important;
+    overflow-x:auto !important;
+    overflow-y:hidden !important;
+    -webkit-overflow-scrolling:touch;
+    scroll-snap-type:x mandatory;
+    padding:4px 4vw 14px !important;
+    margin-left:-4vw !important;
+    margin-right:-4vw !important;
+  }
+  #awards .award-grid::-webkit-scrollbar{height:6px}
+  #awards .award-grid::-webkit-scrollbar-thumb{
+    background:rgba(141,255,57,.45);
+    border-radius:999px;
+  }
+  #awards .award-card{
+    flex:0 0 min(86vw,390px) !important;
+    min-height:430px !important;
+    scroll-snap-align:start;
+  }
+  #awards .award-img{
+    height:245px !important;
+    padding:12px !important;
+    display:grid !important;
+    place-items:center !important;
+    overflow:hidden !important;
+    background:
+      radial-gradient(circle at 50% 48%,rgba(255,211,90,.20),transparent 60%),
+      linear-gradient(180deg,rgba(255,255,255,.035),rgba(0,0,0,.18)) !important;
+  }
+  #awards .award-card.silver .award-img{
+    background:
+      radial-gradient(circle at 50% 48%,rgba(101,199,255,.18),transparent 60%),
+      linear-gradient(180deg,rgba(255,255,255,.035),rgba(0,0,0,.18)) !important;
+  }
+  #awards .award-card.orange .award-img{
+    background:
+      radial-gradient(circle at 50% 48%,rgba(255,157,54,.20),transparent 60%),
+      linear-gradient(180deg,rgba(255,255,255,.035),rgba(0,0,0,.18)) !important;
+  }
+  #awards .award-img img{
+    width:100% !important;
+    height:100% !important;
+    object-fit:contain !important;
+    object-position:center center !important;
+    border-radius:16px !important;
+    filter:drop-shadow(0 16px 22px rgba(0,0,0,.42)) !important;
+  }
+  #awards .award-card .copy{
+    min-height:185px !important;
+  }
+  #awards .mini-grid{
+    display:flex !important;
+    grid-template-columns:none !important;
+    overflow-x:auto !important;
+    -webkit-overflow-scrolling:touch;
+    gap:12px !important;
+    padding:4px 4vw 12px !important;
+    margin-left:-4vw !important;
+    margin-right:-4vw !important;
+  }
+  #awards .mini-award{
+    flex:0 0 min(76vw,310px) !important;
+  }
+}
