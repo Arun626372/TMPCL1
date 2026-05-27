@@ -395,3 +395,19 @@ body[data-page="home"] .ambassador-grid{margin-top:28px}
   body[data-page="home"] .hero-full-image .money{font-size:50px!important}
   body[data-page="home"] .hero-full-image .gold{font-size:26px!important}
 }
+
+
+
+/* Registration page category logic update */
+.single-fee-card{display:grid;grid-template-columns:1fr auto;gap:26px;align-items:center;background:linear-gradient(135deg,rgba(255,211,90,.12),rgba(8,24,39,.96),rgba(141,255,57,.08));border-color:rgba(255,211,90,.32)}
+.single-fee-card h2{font-size:clamp(54px,8vw,96px);line-height:.85;margin:14px 0 8px;color:var(--gold);letter-spacing:-3px}
+.single-fee-card p{color:var(--muted);font-size:17px;line-height:1.65;max-width:660px}
+.fee-points{display:grid;gap:10px;min-width:230px}
+.fee-points span{display:block;padding:12px 14px;border-radius:999px;background:rgba(141,255,57,.08);border:1px solid rgba(141,255,57,.2);color:#e7f4ec;font-weight:900;font-size:13px;text-transform:uppercase}
+.reg-info-panel{background:linear-gradient(180deg,rgba(12,32,48,.78),rgba(5,16,24,.86));border:1px solid rgba(141,255,57,.18);border-radius:22px;padding:18px;margin-top:16px}
+.reg-info-panel h3{margin:0 0 10px}
+.reg-info-panel p,.reg-info-panel li{color:var(--muted);line-height:1.6}
+.reg-info-panel ul{margin:10px 0 0;padding-left:20px}
+.register-hero .hero-player{max-height:560px}
+@media(max-width:960px){.single-fee-card{grid-template-columns:1fr}.fee-points{min-width:0}.register-hero .hero-visual{min-height:320px}.register-hero .hero-player{width:min(82%,340px)}}
+@media(max-width:560px){.single-fee-card h2{font-size:58px}.single-fee-card{padding:22px}.fee-points span{font-size:11px}}

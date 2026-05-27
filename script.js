@@ -7,12 +7,12 @@
   if(hamb && links) hamb.addEventListener('click', () => links.classList.toggle('open'));
   const get = k => { try{return JSON.parse(localStorage.getItem(k)||'[]')}catch(e){return []} };
   const set = (k,v) => localStorage.setItem(k, JSON.stringify(v));
-  const feeMap = {'Batsman':999,'Bowler':999,'Wicket Keeper':999,'All-Rounder':1299};
+  const feeMap = {'Batsman':999,'Bowler':999,'Wicket Keeper':999,'All-Rounder':999};
   const fmt = () => new Date().toLocaleString('en-IN');
   const id = () => 'TMPCL-' + Date.now().toString().slice(-7);
 
   const roleSelect = $('#roleSelect');
-  function updateFee(){ const fee = feeMap[roleSelect?.value] || 999; const f=$('#regFee'), t=$('#regTotal'); if(f) f.textContent='₹'+fee; if(t) t.textContent='₹'+fee; }
+  function updateFee(){ const fee = 999; const f=$('#regFee'), t=$('#regTotal'); if(f) f.textContent='₹'+fee; if(t) t.textContent='₹'+fee; }
   if(roleSelect){ roleSelect.addEventListener('change', updateFee); updateFee(); }
 
   const regForm = $('#registrationForm');
@@ -20,8 +20,8 @@
     e.preventDefault();
     const data = Object.fromEntries(new FormData(regForm).entries());
     const age = parseInt(data.age||0,10);
-    if(data.category === 'D' && age > 19){ alert('D Category only U19 players ke liye hai. Age 19 ya usse kam honi chahiye.'); return; }
-    const entry = {id:id(), date:fmt(), fee:feeMap[data.role]||999, ...data, age};
+    if(data.ageGroup === 'U19' && age > 19){ alert('U19 age group ke liye age 19 ya usse kam honi chahiye.'); return; }
+    const entry = {id:id(), date:fmt(), fee:999, assignedCategory:'Pending after trials', ...data, age};
     const all = get('tmpclRegs'); all.unshift(entry); set('tmpclRegs', all);
     const success = $('#regSuccess');
     if(success){ success.style.display='block'; success.innerHTML=`<strong>Registration successful!</strong><br>Registration ID: <strong>${entry.id}</strong><br>Amount: ₹${entry.fee}`; }
@@ -75,8 +75,8 @@
     const regs = get('tmpclRegs'), msgs = get('tmpclMessages');
     $('#statRegistrations').textContent = regs.length; $('#statMessages').textContent = msgs.length;
     $('#statAllRounder').textContent = regs.filter(r=>r.role==='All-Rounder').length;
-    $('#statU19').textContent = regs.filter(r=>r.category==='D').length;
-    const rb = $('#regTable tbody'); if(regs.length){ $('#emptyRegs').style.display='none'; rb.innerHTML = regs.map(r=>`<tr><td>${r.id}</td><td>${r.name||''}</td><td>${r.mobile||''}</td><td>${r.city||''}</td><td>${r.age||''}</td><td>${r.role||''}</td><td>${r.category||''}</td><td>₹${r.fee||''}</td><td>${r.date||''}</td></tr>`).join(''); }
+    $('#statU19').textContent = regs.filter(r=>r.ageGroup==='U19' || Number(r.age)<=19).length;
+    const rb = $('#regTable tbody'); if(regs.length){ $('#emptyRegs').style.display='none'; rb.innerHTML = regs.map(r=>`<tr><td>${r.id}</td><td>${r.name||''}</td><td>${r.mobile||''}</td><td>${r.city||''}</td><td>${r.age||''}</td><td>${r.role||''}</td><td>${r.ageGroup||''}</td><td>${r.assignedCategory||'Pending after trials'}</td><td>₹${r.fee||''}</td><td>${r.date||''}</td></tr>`).join(''); }
     const mb = $('#msgTable tbody'); if(msgs.length){ $('#emptyMsgs').style.display='none'; mb.innerHTML = msgs.map(m=>`<tr><td>${m.name||''}</td><td>${m.mobile||''}</td><td>${m.email||''}</td><td>${m.subject||''}</td><td>${m.message||''}</td><td>${m.date||''}</td></tr>`).join(''); }
     $('#logoutBtn')?.addEventListener('click',()=>{sessionStorage.removeItem('tmpclAdmin'); location.href='admin-login.html';});
   }
