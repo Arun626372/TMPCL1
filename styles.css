@@ -97,3 +97,33 @@
 @media(max-width:560px){
   #awards .award-img{height:205px;padding:12px}
 }
+
+/* Final prize image fix: image fills the existing card area without changing card size */
+#awards .award-card{
+  min-height:430px !important;
+}
+#awards .award-img{
+  height:245px !important;
+  padding:0 !important;
+  overflow:hidden !important;
+  display:block !important;
+  background:#07131d !important;
+}
+#awards .award-img img{
+  width:100% !important;
+  height:100% !important;
+  object-fit:cover !important;
+  object-position:center center !important;
+  border-radius:0 !important;
+  filter:none !important;
+}
+#awards .award-card .copy{
+  min-height:185px !important;
+}
+@media(max-width:960px){
+  #awards .award-card{min-height:auto !important;}
+  #awards .award-img{height:245px !important;}
+}
+@media(max-width:560px){
+  #awards .award-img{height:230px !important;}
+}
