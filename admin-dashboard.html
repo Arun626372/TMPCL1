@@ -1,31 +1,22 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TMPCL | Admin Dashboard</title><link rel="stylesheet" href="styles.css"></head><body data-page="dashboard"><header class="topbar"><div class="wrap nav"><a class="brand" href="index.html"><img src="tmpcl-logo.png"></a><button id="logoutBtn" class="btn ghost">Logout</button></div></header><main class="dash-shell"><div class="wrap"><div class="dash-top"><div><span class="eyebrow">TMPCL Dashboard</span><h1>Admin Dashboard</h1><p class="muted">Manage registrations, teams, squads and contact messages.</p></div><a class="btn" href="index.html">View Website</a></div>
-<div class="stat-grid"><article class="card"><small>Total Registrations</small><div id="statRegistrations" class="stat-value">0</div></article><article class="card"><small>Total Teams</small><div id="statTeams" class="stat-value">0</div></article><article class="card"><small>Squad Players</small><div id="statSquad" class="stat-value">0</div></article><article class="card"><small>U19 Players</small><div id="statU19" class="stat-value">0</div></article></div>
+<div class="stat-grid"><article class="card"><small>Total Registrations</small><div id="statRegistrations" class="stat-value">0</div></article><article class="card"><small>Total Teams</small><div id="statTeams" class="stat-value">0</div></article><article class="card"><small>Squad Banners</small><div id="statSquadBanners" class="stat-value">0</div></article><article class="card"><small>U19 Players</small><div id="statU19" class="stat-value">0</div></article></div>
 
-<section class="admin-manage-grid">
-  <article class="card"><h3>Manage Teams</h3><p class="muted">Team card public Teams page par show hoga. Logo optional hai.</p><form id="teamForm" class="admin-small-form">
+<section class="admin-manage-grid single-admin-manage">
+  <article class="card"><h3>Manage Teams</h3><p class="muted">Team card public Teams page par show hoga. Team logo aur squad banner dono admin side se upload kar sakte hain. Random/demo team names yahin se edit/delete ho jayenge.</p><form id="teamForm" class="admin-small-form">
     <input type="hidden" name="teamId" id="teamId">
     <div class="admin-field"><label>Team Name *</label><input name="teamName" id="teamName" required placeholder="Bhopal Strikers"></div>
     <div class="admin-field"><label>City / District *</label><input name="teamCity" id="teamCity" required placeholder="Bhopal"></div>
     <div class="admin-field"><label>Owner / Captain</label><input name="teamOwner" id="teamOwner" placeholder="Optional"></div>
     <div class="admin-field"><label>Status</label><select name="teamStatus" id="teamStatus"><option>Coming Soon</option><option>Draft Pending</option><option>Squad Final</option></select></div>
     <div class="admin-field"><label>Team Logo</label><input name="teamLogo" id="teamLogo" type="file" accept="image/*"></div>
-    <button class="btn" type="submit">Save Team</button>
+    <div class="admin-field"><label>Squad Banner / Poster</label><input name="squadBanner" id="squadBanner" type="file" accept="image/*"><small class="muted">Best size: 1080×1350 ya 1080×1920. View Squad par ye banner popup me open hoga.</small></div>
+    <button class="btn" type="submit">Save / Update Team</button>
     <button class="btn ghost" type="button" id="teamFormReset">Clear Form</button>
     <div id="teamSuccess" class="success"></div>
   </form></article>
-
-  <article class="card"><h3>Manage Squad</h3><p class="muted">Squad player ko team ke andar add karein. A/B/C max 5, D max 3 aur total max 18 rakha gaya hai.</p><form id="squadForm" class="admin-small-form">
-    <div class="admin-field"><label>Select Team *</label><select name="squadTeamId" id="squadTeamSelect" required></select></div>
-    <div class="admin-field"><label>Player Name *</label><input name="playerName" required placeholder="Player name"></div>
-    <div class="admin-field"><label>Playing Role *</label><select name="playerRole" required><option>Batsman</option><option>Bowler</option><option>Wicket Keeper</option><option>All-Rounder</option></select></div>
-    <div class="admin-field"><label>Assigned Category *</label><select name="playerCategory" required><option>A</option><option>B</option><option>C</option><option>D</option></select></div>
-    <div class="admin-field"><label>Age Group</label><select name="playerAgeGroup"><option>Open</option><option>U19</option></select></div>
-    <button class="btn" type="submit">Add Squad Player</button>
-    <div id="squadSuccess" class="success"></div>
-  </form></article>
 </section>
 
-<article class="card" style="margin-top:18px"><h3>Teams List</h3><div style="overflow:auto"><table id="adminTeamsTable" class="table"><thead><tr><th>Logo</th><th>Team</th><th>City</th><th>Owner/Captain</th><th>Status</th><th>Squad</th><th>Actions</th></tr></thead><tbody></tbody></table></div><p id="emptyTeams" class="muted">No teams yet.</p></article>
+<article class="card" style="margin-top:18px"><h3>Teams List</h3><div style="overflow:auto"><table id="adminTeamsTable" class="table"><thead><tr><th>Logo</th><th>Team</th><th>City</th><th>Owner/Captain</th><th>Status</th><th>Squad Banner</th><th>Actions</th></tr></thead><tbody></tbody></table></div><p id="emptyTeams" class="muted">No teams yet.</p></article>
 
 <article class="card" style="margin-top:18px"><h3>Player Registrations</h3><div style="overflow:auto"><table id="regTable" class="table"><thead><tr><th>ID</th><th>Name</th><th>Mobile</th><th>City</th><th>DOB</th><th>Age</th><th>Role</th><th>Age Group</th><th>Assigned Category</th><th>Photo</th><th>Aadhaar/Age Proof</th><th>Fee</th><th>Date</th></tr></thead><tbody></tbody></table></div><p id="emptyRegs" class="muted">No registrations yet.</p></article>
 <article class="card" style="margin-top:18px"><h3>Contact Messages</h3><div style="overflow:auto"><table id="msgTable" class="table"><thead><tr><th>Name</th><th>Mobile</th><th>Email</th><th>Subject</th><th>Message</th><th>Date</th></tr></thead><tbody></tbody></table></div><p id="emptyMsgs" class="muted">No contact messages yet.</p></article></div></main><script src="script.js"></script></body></html>
