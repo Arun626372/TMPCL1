@@ -10,6 +10,15 @@
   const feeMap = {'Batsman':999,'Bowler':999,'Wicket Keeper':999,'All-Rounder':999};
   const fmt = () => new Date().toLocaleString('en-IN');
   const id = () => 'TMPCL-' + Date.now().toString().slice(-7);
+  const ageFromDob = (dob) => {
+    if(!dob) return 0;
+    const birth = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birth.getFullYear();
+    const m = today.getMonth() - birth.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+    return age;
+  };
 
   const roleSelect = $('#roleSelect');
   function updateFee(){ const fee = 999; const f=$('#regFee'), t=$('#regTotal'); if(f) f.textContent='₹'+fee; if(t) t.textContent='₹'+fee; }
@@ -19,9 +28,14 @@
   if(regForm){ regForm.addEventListener('submit', e => {
     e.preventDefault();
     const data = Object.fromEntries(new FormData(regForm).entries());
-    const age = parseInt(data.age||0,10);
-    if(data.ageGroup === 'U19' && age > 19){ alert('U19 age group ke liye age 19 ya usse kam honi chahiye.'); return; }
-    const entry = {id:id(), date:fmt(), fee:999, assignedCategory:'Pending after trials', ...data, age};
+    const age = ageFromDob(data.dob);
+    const photoInput = regForm.querySelector('input[name="photo"]');
+    const aadhaarInput = regForm.querySelector('input[name="aadhaar"]');
+    if(!data.dob){ alert('Date of Birth mandatory hai.'); return; }
+    if(!photoInput || !photoInput.files.length){ alert('Player photo upload mandatory hai.'); return; }
+    if(!aadhaarInput || !aadhaarInput.files.length){ alert('Aadhaar Card / Age Proof upload mandatory hai.'); return; }
+    if(data.ageGroup === 'U19' && age > 19){ alert('U19 age group ke liye Date of Birth ke hisab se age 19 ya usse kam honi chahiye.'); return; }
+    const entry = {id:id(), date:fmt(), fee:999, assignedCategory:'Pending after trials', ...data, age, photoFile: photoInput.files[0].name, aadhaarFile: aadhaarInput.files[0].name};
     const all = get('tmpclRegs'); all.unshift(entry); set('tmpclRegs', all);
     const success = $('#regSuccess');
     if(success){ success.style.display='block'; success.innerHTML=`<strong>Registration successful!</strong><br>Registration ID: <strong>${entry.id}</strong><br>Amount: ₹${entry.fee}`; }
@@ -76,7 +90,7 @@
     $('#statRegistrations').textContent = regs.length; $('#statMessages').textContent = msgs.length;
     $('#statAllRounder').textContent = regs.filter(r=>r.role==='All-Rounder').length;
     $('#statU19').textContent = regs.filter(r=>r.ageGroup==='U19' || Number(r.age)<=19).length;
-    const rb = $('#regTable tbody'); if(regs.length){ $('#emptyRegs').style.display='none'; rb.innerHTML = regs.map(r=>`<tr><td>${r.id}</td><td>${r.name||''}</td><td>${r.mobile||''}</td><td>${r.city||''}</td><td>${r.age||''}</td><td>${r.role||''}</td><td>${r.ageGroup||''}</td><td>${r.assignedCategory||'Pending after trials'}</td><td>₹${r.fee||''}</td><td>${r.date||''}</td></tr>`).join(''); }
+    const rb = $('#regTable tbody'); if(regs.length){ $('#emptyRegs').style.display='none'; rb.innerHTML = regs.map(r=>`<tr><td>${r.id}</td><td>${r.name||''}</td><td>${r.mobile||''}</td><td>${r.city||''}</td><td>${r.dob||''}</td><td>${r.age||''}</td><td>${r.role||''}</td><td>${r.ageGroup||''}</td><td>${r.assignedCategory||'Pending after trials'}</td><td>${r.photoFile||''}</td><td>${r.aadhaarFile||''}</td><td>₹${r.fee||''}</td><td>${r.date||''}</td></tr>`).join(''); }
     const mb = $('#msgTable tbody'); if(msgs.length){ $('#emptyMsgs').style.display='none'; mb.innerHTML = msgs.map(m=>`<tr><td>${m.name||''}</td><td>${m.mobile||''}</td><td>${m.email||''}</td><td>${m.subject||''}</td><td>${m.message||''}</td><td>${m.date||''}</td></tr>`).join(''); }
     $('#logoutBtn')?.addEventListener('click',()=>{sessionStorage.removeItem('tmpclAdmin'); location.href='admin-login.html';});
   }

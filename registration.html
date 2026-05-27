@@ -36,7 +36,7 @@
         <div class="field"><label>Full Name *</label><input required name="name" placeholder="Enter your full name"></div>
         <div class="field"><label>Mobile Number *</label><input required name="mobile" pattern="[0-9]{10}" placeholder="10-digit mobile number"></div>
         <div class="field"><label>City / District *</label><input required name="city" placeholder="Enter city / district"></div>
-        <div class="field"><label>Age *</label><input required type="number" min="10" max="60" name="age" id="ageInput" placeholder="Enter age"></div>
+        <div class="field"><label>Date of Birth *</label><input required type="date" name="dob" id="dobInput"></div>
         <div class="field"><label>Age Group *</label><select required name="ageGroup" id="ageGroupSelect"><option value="">Select age group</option><option value="U19">U19</option><option value="Open">Open</option></select></div>
         <div class="field"><label>Playing Role *</label><select required name="role" id="roleSelect"><option value="">Select Role</option><option>Batsman</option><option>Bowler</option><option>Wicket Keeper</option><option>All-Rounder</option></select></div>
         <div class="field"><label>Batting Style</label><select name="batting"><option>Right Hand</option><option>Left Hand</option><option>Not Applicable</option></select></div>
@@ -44,7 +44,11 @@
         <div class="field"><label>Experience</label><select name="experience"><option>Beginner</option><option>Local Tournament</option><option>District Level</option><option>State Level</option></select></div>
         <div class="field"><label>Email</label><input name="email" type="email" placeholder="Enter email"></div>
       </div>
-      <div class="field" style="margin-top:14px"><label>Upload Photo (Optional)</label><input name="photo" type="file" accept="image/*"></div>
+      <div class="upload-grid">
+        <div class="field"><label>Upload Player Photo *</label><input required name="photo" type="file" accept="image/*"></div>
+        <div class="field"><label>Upload Aadhaar Card / Age Proof *</label><input required name="aadhaar" type="file" accept="image/*,.pdf"></div>
+      </div>
+      <p class="muted upload-note">Photo aur Aadhaar/Age Proof mandatory hai. D/O/B aur U19 eligibility verification ke liye document required rahega.</p>
       <button class="btn" style="margin-top:18px" type="submit">Pay ₹999 & Register →</button>
       <div id="regSuccess" class="success"></div>
     </form>
@@ -55,7 +59,7 @@
       <div class="summary-row total"><span>Total Amount</span><strong id="regTotal">₹999</strong></div>
       <div class="reg-info-panel">
         <h3>Category Assignment</h3>
-        <p>A/B/C category player khud select nahi karega. TMPCL selectors trial performance, fitness, experience and role ke basis par category assign karenge.</p>
+        <p>A/B/C category player khud select nahi karega. TMPCL selectors trial performance, fitness, experience and role ke basis par category assign karenge. Date of Birth aur document verification record me save rahega.</p>
         <ul>
           <li>A Category: top performer / experienced</li>
           <li>B Category: strong and consistent</li>
@@ -65,7 +69,7 @@
       </div>
       <article class="card notice" style="margin-top:16px">
         <h3>U19 Notice</h3>
-        <p>D Category sirf U19 players ke liye hai. Age proof trial time par verify ho sakta hai.</p>
+        <p>D Category sirf U19 players ke liye hai. Date of Birth aur Aadhaar/Age Proof se eligibility verify hogi.</p>
       </article>
     </aside>
   </div>
