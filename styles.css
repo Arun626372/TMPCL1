@@ -425,3 +425,63 @@ body:not([data-page="home"]) .hero-visual,body:not([data-page="home"]) .hero-pla
 .upload-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:14px}
 .upload-note{margin-top:10px;font-size:13px}
 @media(max-width:760px){.upload-grid{grid-template-columns:1fr}}
+
+/* Teams page: team cards + expandable squads */
+.teams-hero-clean{min-height:auto;padding:72px 0 58px;background:radial-gradient(circle at 84% 10%,rgba(141,255,57,.12),transparent 28%),radial-gradient(circle at 12% 0,rgba(255,211,90,.13),transparent 30%),linear-gradient(180deg,#061421,#02070d)}
+.teams-hero-grid{grid-template-columns:1fr .92fr;align-items:center}
+.compact-formula{min-height:auto}
+.teams-showcase-section{background:linear-gradient(180deg,rgba(5,16,25,.62),rgba(2,7,13,.72))}
+.team-cards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.team-card{position:relative;overflow:hidden;padding:20px;border-radius:28px;background:linear-gradient(180deg,rgba(15,41,57,.92),rgba(5,15,23,.98));border:1px solid rgba(141,255,57,.20);box-shadow:var(--shadow);cursor:pointer;transition:.25s ease}
+.team-card:hover{transform:translateY(-4px);border-color:rgba(141,255,57,.42);box-shadow:0 28px 86px rgba(0,0,0,.48)}
+.team-card:before{content:"";position:absolute;inset:-25% -25% auto auto;width:190px;height:190px;background:radial-gradient(circle,rgba(141,255,57,.15),transparent 65%);pointer-events:none}
+.team-card-head{position:relative;display:grid;grid-template-columns:82px 1fr;gap:16px;align-items:center}
+.team-logo-box{width:82px;height:82px;border-radius:24px;background:linear-gradient(135deg,rgba(255,211,90,.25),rgba(141,255,57,.12));border:1px solid rgba(255,211,90,.32);display:grid;place-items:center;overflow:hidden;box-shadow:0 14px 34px rgba(0,0,0,.32)}
+.team-logo-box img{width:100%;height:100%;object-fit:cover}
+.team-logo-box span{font-size:28px;font-weight:1000;color:var(--gold)}
+.team-card h3{margin:0 0 6px;font-size:26px;line-height:1.05}
+.team-city{color:var(--muted);font-weight:800;font-size:13px}
+.team-meta-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}
+.team-meta{padding:12px;border-radius:18px;background:rgba(3,12,18,.58);border:1px solid rgba(255,255,255,.07);text-align:center}
+.team-meta strong{display:block;color:var(--green);font-size:18px;line-height:1}
+.team-meta span{display:block;margin-top:5px;color:var(--muted);font-size:10px;font-weight:900;text-transform:uppercase}
+.team-status{display:inline-flex;margin-top:12px;padding:8px 11px;border-radius:999px;background:rgba(141,255,57,.11);border:1px solid rgba(141,255,57,.24);color:var(--green);font-size:11px;font-weight:950;text-transform:uppercase}
+.team-card .btn{width:100%;margin-top:14px;justify-content:center}
+.squad-panel{display:none;margin-top:18px;border-top:1px solid rgba(255,255,255,.08);padding-top:16px}
+.team-card.open .squad-panel{display:block}
+.squad-title{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+.squad-title strong{font-size:16px}.squad-title span{color:var(--muted);font-size:12px;font-weight:900}
+.squad-groups{display:grid;gap:10px}
+.squad-group{border:1px solid rgba(255,255,255,.08);background:rgba(3,12,18,.52);border-radius:18px;overflow:hidden}
+.squad-group-head{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:rgba(141,255,57,.08);font-weight:950;color:#fff}
+.squad-list{display:grid;gap:0}
+.squad-player{display:grid;grid-template-columns:1fr auto;gap:10px;padding:9px 12px;border-top:1px solid rgba(255,255,255,.06);font-size:13px;color:#dfeee6}
+.squad-player small{color:var(--muted);font-weight:800}
+.empty-squad{padding:12px;color:var(--muted);font-size:13px;line-height:1.5}
+.team-page-help{margin-top:18px;padding:16px 18px;border-radius:22px;background:rgba(255,211,90,.10);border:1px solid rgba(255,211,90,.24);color:#e8d7aa;font-weight:800}
+.rule-card{min-height:auto}
+.grid-6{grid-template-columns:repeat(6,1fr)}
+.selection-flow .card{padding:18px}.selection-flow .card b{display:inline-flex;background:var(--green);color:#061018;padding:7px 10px;border-radius:999px;font-weight:1000}.selection-flow .card h3{font-size:20px;margin:14px 0 6px}
+
+/* Admin team manager */
+.admin-manage-grid{display:grid;grid-template-columns:.85fr 1.15fr;gap:18px;align-items:start;margin:22px 0}
+.admin-small-form{display:grid;gap:12px}
+.admin-field{display:grid;gap:7px}
+.admin-field label{font-size:12px;color:#cfe3d8;font-weight:950}
+.admin-field input,.admin-field select{width:100%;border:1px solid rgba(141,255,57,.18);background:rgba(3,12,18,.74);color:#fff;border-radius:14px;padding:12px 13px;outline:none}
+.admin-table-actions{display:flex;gap:8px;flex-wrap:wrap}
+.mini-btn{border:1px solid rgba(141,255,57,.22);background:rgba(7,22,33,.74);color:#fff;border-radius:999px;padding:8px 11px;font-weight:900;cursor:pointer}
+.mini-btn.danger{border-color:rgba(255,90,90,.35);color:#ffb6b6}
+@media(max-width:960px){
+  .teams-hero-grid,.team-cards-grid,.grid-6,.admin-manage-grid{grid-template-columns:1fr}
+  .team-meta-row{grid-template-columns:repeat(3,1fr)}
+  .team-card-head{grid-template-columns:72px 1fr}.team-logo-box{width:72px;height:72px}
+  .selection-flow{gap:12px}
+}
+@media(max-width:560px){
+  .team-cards-grid{gap:14px}
+  .team-card{padding:16px;border-radius:24px}
+  .team-card h3{font-size:22px}
+  .team-meta-row{grid-template-columns:1fr 1fr 1fr;gap:8px}
+  .team-meta{padding:10px 6px}.team-meta strong{font-size:16px}.team-meta span{font-size:9px}
+}

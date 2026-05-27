@@ -77,6 +77,61 @@
     newsList.innerHTML = posts.map(p=>`<article class="card news-card"><div class="thumb"></div><div><span class="tag">${p[0]}</span><h3>${p[1]}</h3><p>${p[2]}</p><a class="btn ghost" href="#">Read More →</a></div></article>`).join('');
   }
 
+
+  const sampleTeams = [
+    {id:'team-bhopal', name:'Bhopal Strikers', city:'Bhopal', owner:'Captain Coming Soon', status:'Draft Pending', logo:'', squad:[
+      {name:'A Category Slot 1', role:'Batsman', category:'A', ageGroup:'Open'},
+      {name:'A Category Slot 2', role:'Bowler', category:'A', ageGroup:'Open'},
+      {name:'B Category Slot 1', role:'All-Rounder', category:'B', ageGroup:'Open'},
+      {name:'C Category Slot 1', role:'Wicket Keeper', category:'C', ageGroup:'Open'},
+      {name:'D U19 Slot 1', role:'Batsman', category:'D', ageGroup:'U19'}
+    ]},
+    {id:'team-indore', name:'Indore Warriors', city:'Indore', owner:'Captain Coming Soon', status:'Coming Soon', logo:'', squad:[]},
+    {id:'team-gwalior', name:'Gwalior Royals', city:'Gwalior', owner:'Captain Coming Soon', status:'Coming Soon', logo:'', squad:[]}
+  ];
+  function getTeams(){
+    const teams = get('tmpclTeams');
+    return teams.length ? teams : sampleTeams;
+  }
+  function teamInitials(name){
+    return (name||'TMPCL Team').split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase() || 'TM';
+  }
+  function squadCounts(squad){
+    const counts = {A:0,B:0,C:0,D:0};
+    (squad||[]).forEach(p=>{ if(counts[p.category] !== undefined) counts[p.category]++; });
+    return counts;
+  }
+  function renderPublicTeams(){
+    const grid = $('#teamsGrid');
+    if(!grid) return;
+    const teams = getTeams();
+    grid.innerHTML = teams.map(team => {
+      const squad = team.squad || [];
+      const counts = squadCounts(squad);
+      const groups = ['A','B','C','D'].map(cat => {
+        const limit = cat==='D' ? 3 : 5;
+        const players = squad.filter(p=>p.category===cat);
+        const rows = players.length ? players.map(p=>`<div class="squad-player"><span>${p.name}<br><small>${p.role} · ${p.ageGroup||'Open'}</small></span><b>${p.category}</b></div>`).join('') : `<div class="empty-squad">Squad players will be updated after trials and team draft.</div>`;
+        return `<div class="squad-group"><div class="squad-group-head"><span>Category ${cat}${cat==='D'?' · U19':''}</span><span>${players.length}/${limit}</span></div><div class="squad-list">${rows}</div></div>`;
+      }).join('');
+      const logo = team.logo ? `<img src="${team.logo}" alt="${team.name} logo">` : `<span>${teamInitials(team.name)}</span>`;
+      return `<article class="team-card" data-team-id="${team.id}">
+        <div class="team-card-head"><div class="team-logo-box">${logo}</div><div><h3>${team.name}</h3><div class="team-city">${team.city}</div><span class="team-status">${team.status||'Coming Soon'}</span></div></div>
+        <div class="team-meta-row"><div class="team-meta"><strong>18</strong><span>Total Squad</span></div><div class="team-meta"><strong>${squad.length}</strong><span>Added</span></div><div class="team-meta"><strong>${counts.D}</strong><span>U19</span></div></div>
+        <button class="btn ghost team-toggle" type="button">View Squad</button>
+        <div class="squad-panel"><div class="squad-title"><strong>${team.name} Squad</strong><span>A-5 · B-5 · C-5 · D-3 U19</span></div><div class="squad-groups">${groups}</div></div>
+      </article>`;
+    }).join('');
+    $$('.team-card', grid).forEach(card => card.addEventListener('click', e => {
+      if(e.target.closest('a')) return;
+      card.classList.toggle('open');
+      const btn = card.querySelector('.team-toggle');
+      if(btn) btn.textContent = card.classList.contains('open') ? 'Hide Squad' : 'View Squad';
+    }));
+  }
+  renderPublicTeams();
+
+
   const adminLogin = $('#adminLoginForm');
   if(adminLogin){ adminLogin.addEventListener('submit', e => {
     e.preventDefault(); const data = Object.fromEntries(new FormData(adminLogin).entries());
@@ -86,12 +141,104 @@
 
   if($('#regTable')){
     if(sessionStorage.getItem('tmpclAdmin') !== '1'){ location.href='admin-login.html'; return; }
-    const regs = get('tmpclRegs'), msgs = get('tmpclMessages');
-    $('#statRegistrations').textContent = regs.length; $('#statMessages').textContent = msgs.length;
-    $('#statAllRounder').textContent = regs.filter(r=>r.role==='All-Rounder').length;
-    $('#statU19').textContent = regs.filter(r=>r.ageGroup==='U19' || Number(r.age)<=19).length;
-    const rb = $('#regTable tbody'); if(regs.length){ $('#emptyRegs').style.display='none'; rb.innerHTML = regs.map(r=>`<tr><td>${r.id}</td><td>${r.name||''}</td><td>${r.mobile||''}</td><td>${r.city||''}</td><td>${r.dob||''}</td><td>${r.age||''}</td><td>${r.role||''}</td><td>${r.ageGroup||''}</td><td>${r.assignedCategory||'Pending after trials'}</td><td>${r.photoFile||''}</td><td>${r.aadhaarFile||''}</td><td>₹${r.fee||''}</td><td>${r.date||''}</td></tr>`).join(''); }
-    const mb = $('#msgTable tbody'); if(msgs.length){ $('#emptyMsgs').style.display='none'; mb.innerHTML = msgs.map(m=>`<tr><td>${m.name||''}</td><td>${m.mobile||''}</td><td>${m.email||''}</td><td>${m.subject||''}</td><td>${m.message||''}</td><td>${m.date||''}</td></tr>`).join(''); }
+    const renderAdmin = () => {
+      const regs = get('tmpclRegs'), msgs = get('tmpclMessages'), teams = getTeams();
+      const totalSquad = teams.reduce((sum,t)=>sum + ((t.squad||[]).length), 0);
+      $('#statRegistrations').textContent = regs.length;
+      $('#statMessages') && ($('#statMessages').textContent = msgs.length);
+      $('#statTeams') && ($('#statTeams').textContent = teams.length);
+      $('#statSquad') && ($('#statSquad').textContent = totalSquad);
+      $('#statAllRounder') && ($('#statAllRounder').textContent = regs.filter(r=>r.role==='All-Rounder').length);
+      $('#statU19').textContent = regs.filter(r=>r.ageGroup==='U19' || Number(r.age)<=19).length;
+
+      const tb = $('#adminTeamsTable tbody');
+      if(tb){
+        if(teams.length){ $('#emptyTeams').style.display='none'; }
+        tb.innerHTML = teams.map(t => {
+          const logo = t.logo ? `<img src="${t.logo}" style="width:42px;height:42px;border-radius:12px;object-fit:cover">` : `<strong>${teamInitials(t.name)}</strong>`;
+          return `<tr><td>${logo}</td><td>${t.name}</td><td>${t.city||''}</td><td>${t.owner||''}</td><td>${t.status||''}</td><td>${(t.squad||[]).length}/18</td><td><div class="admin-table-actions"><button class="mini-btn" data-edit-team="${t.id}">Edit</button><button class="mini-btn danger" data-delete-team="${t.id}">Delete</button></div></td></tr>`;
+        }).join('');
+        tb.querySelectorAll('[data-edit-team]').forEach(btn=>btn.addEventListener('click',()=>{
+          const team = teams.find(t=>t.id===btn.dataset.editTeam);
+          if(!team) return;
+          $('#teamId').value=team.id; $('#teamName').value=team.name; $('#teamCity').value=team.city||''; $('#teamOwner').value=team.owner||''; $('#teamStatus').value=team.status||'Coming Soon';
+          window.scrollTo({top:0, behavior:'smooth'});
+        }));
+        tb.querySelectorAll('[data-delete-team]').forEach(btn=>btn.addEventListener('click',()=>{
+          if(!confirm('Delete this team?')) return;
+          set('tmpclTeams', teams.filter(t=>t.id!==btn.dataset.deleteTeam));
+          renderAdmin();
+        }));
+      }
+      const squadSelect = $('#squadTeamSelect');
+      if(squadSelect){
+        squadSelect.innerHTML = teams.map(t=>`<option value="${t.id}">${t.name}</option>`).join('');
+      }
+
+      const rb = $('#regTable tbody');
+      if(regs.length){ $('#emptyRegs').style.display='none'; rb.innerHTML = regs.map(r=>`<tr><td>${r.id}</td><td>${r.name||''}</td><td>${r.mobile||''}</td><td>${r.city||''}</td><td>${r.dob||''}</td><td>${r.age||''}</td><td>${r.role||''}</td><td>${r.ageGroup||''}</td><td>${r.assignedCategory||'Pending after trials'}</td><td>${r.photoFile||''}</td><td>${r.aadhaarFile||''}</td><td>₹${r.fee||''}</td><td>${r.date||''}</td></tr>`).join(''); }
+      const mb = $('#msgTable tbody');
+      if(msgs.length){ $('#emptyMsgs').style.display='none'; mb.innerHTML = msgs.map(m=>`<tr><td>${m.name||''}</td><td>${m.mobile||''}</td><td>${m.email||''}</td><td>${m.subject||''}</td><td>${m.message||''}</td><td>${m.date||''}</td></tr>`).join(''); }
+    };
+
+    const teamForm = $('#teamForm');
+    if(teamForm){
+      teamForm.addEventListener('submit', e => {
+        e.preventDefault();
+        const fd = new FormData(teamForm);
+        const teamId = fd.get('teamId') || ('team-' + Date.now());
+        const logoInput = $('#teamLogo');
+        const saveTeam = (logoData='') => {
+          const teams = get('tmpclTeams').length ? get('tmpclTeams') : getTeams();
+          const existing = teams.find(t=>t.id===teamId);
+          const obj = {
+            id: teamId,
+            name: fd.get('teamName'),
+            city: fd.get('teamCity'),
+            owner: fd.get('teamOwner') || '',
+            status: fd.get('teamStatus') || 'Coming Soon',
+            logo: logoData || (existing && existing.logo) || '',
+            squad: (existing && existing.squad) || []
+          };
+          const updated = teams.filter(t=>t.id!==teamId);
+          updated.unshift(obj);
+          set('tmpclTeams', updated);
+          const s=$('#teamSuccess'); if(s){s.style.display='block'; s.innerHTML='<strong>Team saved successfully.</strong>'}
+          teamForm.reset(); $('#teamId').value='';
+          renderAdmin();
+        };
+        if(logoInput && logoInput.files && logoInput.files[0]){
+          const reader = new FileReader();
+          reader.onload = () => saveTeam(reader.result);
+          reader.readAsDataURL(logoInput.files[0]);
+        } else saveTeam();
+      });
+      $('#teamFormReset')?.addEventListener('click',()=>{teamForm.reset(); $('#teamId').value='';});
+    }
+
+    const squadForm = $('#squadForm');
+    if(squadForm){
+      squadForm.addEventListener('submit', e => {
+        e.preventDefault();
+        const fd = new FormData(squadForm);
+        const teams = get('tmpclTeams').length ? get('tmpclTeams') : getTeams();
+        const team = teams.find(t=>t.id===fd.get('squadTeamId'));
+        if(!team){ alert('Please add/select a team first.'); return; }
+        team.squad = team.squad || [];
+        if(team.squad.length >= 18){ alert('This team already has 18 players.'); return; }
+        const cat = fd.get('playerCategory');
+        const limit = cat === 'D' ? 3 : 5;
+        if(cat === 'D' && fd.get('playerAgeGroup') !== 'U19'){ alert('Category D is only for U19 players.'); return; }
+        if(team.squad.filter(p=>p.category===cat).length >= limit){ alert(`Category ${cat} limit reached.`); return; }
+        team.squad.push({name:fd.get('playerName'), role:fd.get('playerRole'), category:cat, ageGroup:fd.get('playerAgeGroup')});
+        set('tmpclTeams', teams);
+        const s=$('#squadSuccess'); if(s){s.style.display='block'; s.innerHTML='<strong>Squad player added.</strong>'}
+        squadForm.reset();
+        renderAdmin();
+      });
+    }
+
+    renderAdmin();
     $('#logoutBtn')?.addEventListener('click',()=>{sessionStorage.removeItem('tmpclAdmin'); location.href='admin-login.html';});
   }
 })();
