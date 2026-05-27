@@ -215,3 +215,21 @@
     $('#logoutBtn')?.addEventListener('click',()=>{sessionStorage.removeItem('tmpclAdmin'); location.href='admin-login.html';});
   }
 })();
+
+// Gallery lightbox preview
+(function(){
+  const modal = document.getElementById('galleryModal');
+  if(!modal) return;
+  const title = document.getElementById('galleryModalTitle');
+  const closeBtn = modal.querySelector('.gallery-modal-close');
+  document.querySelectorAll('#galleryGrid .media-card').forEach(card => {
+    card.addEventListener('click', () => {
+      title.textContent = card.dataset.title || card.querySelector('h3')?.textContent || 'TMPCL Media';
+      modal.classList.add('open');
+    });
+  });
+  function closeModal(){ modal.classList.remove('open'); }
+  closeBtn && closeBtn.addEventListener('click', closeModal);
+  modal.addEventListener('click', e => { if(e.target === modal) closeModal(); });
+  document.addEventListener('keydown', e => { if(e.key === 'Escape') closeModal(); });
+})();
