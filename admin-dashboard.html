@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>TMPCL | Admin Dashboard</title><link rel="stylesheet" href="styles.css"></head>
+<body>
+  <main class="dashboard-shell">
+    <div class="dashboard-wrap">
+      <div class="dash-top">
+        <div><span class="helper-chip">TMPCL DASHBOARD</span><h1>Admin Dashboard</h1><div class="note">Manage registrations and contact messages from one place.</div></div>
+        <div class="dash-actions"><a class="btn-outline" href="index.html">View Website</a><button id="logoutBtn" class="btn-solid">Logout</button></div>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-label">Total Registrations</div><div class="stat-value" id="statRegistrations">0</div></div>
+        <div class="stat-card"><div class="stat-label">Total Contact Messages</div><div class="stat-value" id="statMessages">0</div></div>
+        <div class="stat-card"><div class="stat-label">All-Rounder Entries</div><div class="stat-value" id="statAllRounder">0</div></div>
+        <div class="stat-card"><div class="stat-label">D Category (U19)</div><div class="stat-value" id="statU19">0</div></div>
+      </div>
+      <div class="table-card" style="margin-bottom:18px"><h3>Player Registrations</h3><div class="table-wrap"><table id="regTable"><thead><tr><th>ID</th><th>Name</th><th>Mobile</th><th>City</th><th>Age</th><th>Role</th><th>Category</th><th>Fee</th><th>Date</th></tr></thead><tbody></tbody></table><div id="emptyRegs" class="empty">No registrations yet.</div></div></div>
+      <div class="table-card"><h3>Contact Messages</h3><div class="table-wrap"><table id="msgTable"><thead><tr><th>Name</th><th>Mobile</th><th>Email</th><th>Subject</th><th>Message</th><th>Date</th></tr></thead><tbody></tbody></table><div id="emptyMsgs" class="empty">No contact messages yet.</div></div></div>
+    </div>
+  </main>
+  <script src="script.js"></script>
+</body></html>

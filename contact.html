@@ -8,25 +8,62 @@
 </head>
 <body data-page="contact">
   <main class="page-shell">
-    <img class="page-img" src="contact.png" alt="TMPCL | Contact website design">
+    <div class="page-canvas">
+      <img class="page-img" src="contact.png" alt="TMPCL | Contact">
 
-    <div class="hotspots" aria-label="Clickable navigation overlay">
-      <a class="logo" href="index.html" data-target="home">TMPCL Home</a>
-      <a class="home" href="index.html" data-target="home">Home</a>
-      <a class="register" href="registration.html" data-target="register">Register</a>
-      <a class="categories" href="categories.html" data-target="categories">Categories</a>
-      <a class="teams" href="teams.html" data-target="teams">Teams</a>
-      <a class="gallery" href="gallery.html" data-target="gallery">Gallery</a>
-      <a class="news" href="news.html" data-target="news">News</a>
-      <a class="partners" href="partners.html" data-target="partners">Partners</a>
-      <a class="about" href="about.html" data-target="about">About</a>
-      <a class="contact" href="contact.html" data-target="contact">Contact</a>
-      <a class="top-cta" href="registration.html" data-target="register">Register Now</a>
-      <a class="hero-register" href="registration.html" data-target="register">Register Now</a>
-      <a class="hero-awards" href="index.html#awards" data-target="home">View Awards</a>
-      <a class="footer-register" href="registration.html" data-target="register">Register Now</a>
-      <a class="footer-whatsapp" href="contact.html" data-target="contact">WhatsApp Support</a>
-      <a class="admin" href="admin-login.html" data-target="admin">Admin Login</a>
+      <div class="hotspots" aria-label="Clickable navigation overlay">
+        <a class="logo" href="index.html">TMPCL Home</a>
+        <a class="home" href="index.html">Home</a>
+        <a class="register" href="registration.html">Register</a>
+        <a class="categories" href="categories.html">Categories</a>
+        <a class="teams" href="teams.html">Teams</a>
+        <a class="gallery" href="gallery.html">Gallery</a>
+        <a class="news" href="news.html">News</a>
+        <a class="partners" href="partners.html">Partners</a>
+        <a class="about" href="about.html">About</a>
+        <a class="contact" href="contact.html">Contact</a>
+        <a class="top-cta" href="registration.html">Register Now</a>
+        <a class="hero-register" href="registration.html">Register Now</a>
+        <a class="hero-awards" href="index.html#awards">View Awards</a>
+        <a class="footer-register" href="registration.html">Register Now</a>
+        <a class="footer-whatsapp" href="contact.html">WhatsApp Support</a>
+        <a class="admin" href="admin-login.html">Admin Login</a>
+      </div>
+
+      <div class="overlay-layer">
+<form id="contactForm" class="card-overlay contact-form">
+  <h3 class="overlay-title">Send Us a Message</h3>
+  <div class="grid-2">
+    <div class="form-group"><label class="label">Full Name *</label><input class="input" name="name" placeholder="Enter your name" required></div>
+    <div class="form-group"><label class="label">Mobile *</label><input class="input" name="mobile" placeholder="10-digit mobile number" pattern="[0-9]{10}" required></div>
+  </div>
+  <div class="form-group"><label class="label">Email</label><input class="input" name="email" type="email" placeholder="Email address"></div>
+  <div class="form-group"><label class="label">Subject *</label><input class="input" name="subject" placeholder="Subject" required></div>
+  <div class="form-group"><label class="label">Message *</label><textarea class="textarea" name="message" placeholder="Write your message" required></textarea></div>
+  <button type="submit" class="btn-solid">Send Message →</button>
+  <div id="contactSuccess" class="success-box hidden"></div>
+</form>
+<div class="card-overlay contact-mini">
+  <h3 class="overlay-title">Contact Information</h3>
+  <div class="contact-info-grid">
+    <div class="info-card"><h4>Phone</h4><p>+91 70000 12345</p></div>
+    <div class="info-card"><h4>Email</h4><p>info@tmpcl.com</p></div>
+    <div class="info-card"><h4>Location</h4><p>Bhopal, Madhya Pradesh</p></div>
+    <div class="info-card"><h4>WhatsApp</h4><p><a href="https://wa.me/917000012345" target="_blank">Chat on WhatsApp</a></p></div>
+  </div>
+</div>
+<div class="card-overlay map-overlay">
+  <h3 class="overlay-title">League Office Location</h3>
+  <div class="map-fake"><div class="map-pin"></div></div>
+  <div class="note">TMPCL operations are based in Bhopal, Madhya Pradesh. Use the contact form or WhatsApp for registration help.</div>
+</div>
+<div class="card-overlay faq-overlay">
+  <h3 class="overlay-title">Quick Help</h3>
+  <div class="faq-item"><div class="faq-q">What is the registration fee?</div><div class="faq-a">Batsman, Bowler and Wicket Keeper ₹999. All-Rounder ₹1299.</div></div>
+  <div class="faq-item"><div class="faq-q">Who can join D category?</div><div class="faq-a">Only U19 players can join D category.</div></div>
+  <div class="faq-item"><div class="faq-q">How will I receive confirmation?</div><div class="faq-a">After registration you get a TMPCL registration ID and admin can see your entry in the dashboard.</div></div>
+</div>
+</div>
     </div>
   </main>
   <script src="script.js"></script>

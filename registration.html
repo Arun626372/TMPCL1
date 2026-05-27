@@ -8,25 +8,68 @@
 </head>
 <body data-page="register">
   <main class="page-shell">
-    <img class="page-img" src="register.png" alt="TMPCL | Register website design">
+    <div class="page-canvas">
+      <img class="page-img" src="register.png" alt="TMPCL | Register">
 
-    <div class="hotspots" aria-label="Clickable navigation overlay">
-      <a class="logo" href="index.html" data-target="home">TMPCL Home</a>
-      <a class="home" href="index.html" data-target="home">Home</a>
-      <a class="register" href="registration.html" data-target="register">Register</a>
-      <a class="categories" href="categories.html" data-target="categories">Categories</a>
-      <a class="teams" href="teams.html" data-target="teams">Teams</a>
-      <a class="gallery" href="gallery.html" data-target="gallery">Gallery</a>
-      <a class="news" href="news.html" data-target="news">News</a>
-      <a class="partners" href="partners.html" data-target="partners">Partners</a>
-      <a class="about" href="about.html" data-target="about">About</a>
-      <a class="contact" href="contact.html" data-target="contact">Contact</a>
-      <a class="top-cta" href="registration.html" data-target="register">Register Now</a>
-      <a class="hero-register" href="registration.html" data-target="register">Register Now</a>
-      <a class="hero-awards" href="index.html#awards" data-target="home">View Awards</a>
-      <a class="footer-register" href="registration.html" data-target="register">Register Now</a>
-      <a class="footer-whatsapp" href="contact.html" data-target="contact">WhatsApp Support</a>
-      <a class="admin" href="admin-login.html" data-target="admin">Admin Login</a>
+      <div class="hotspots" aria-label="Clickable navigation overlay">
+        <a class="logo" href="index.html">TMPCL Home</a>
+        <a class="home" href="index.html">Home</a>
+        <a class="register" href="registration.html">Register</a>
+        <a class="categories" href="categories.html">Categories</a>
+        <a class="teams" href="teams.html">Teams</a>
+        <a class="gallery" href="gallery.html">Gallery</a>
+        <a class="news" href="news.html">News</a>
+        <a class="partners" href="partners.html">Partners</a>
+        <a class="about" href="about.html">About</a>
+        <a class="contact" href="contact.html">Contact</a>
+        <a class="top-cta" href="registration.html">Register Now</a>
+        <a class="hero-register" href="registration.html">Register Now</a>
+        <a class="hero-awards" href="index.html#awards">View Awards</a>
+        <a class="footer-register" href="registration.html">Register Now</a>
+        <a class="footer-whatsapp" href="contact.html">WhatsApp Support</a>
+        <a class="admin" href="admin-login.html">Admin Login</a>
+      </div>
+
+      <div class="overlay-layer">
+<form id="registrationForm" class="card-overlay reg-form">
+  <h3 class="overlay-title">Player Registration Form</h3>
+  <div class="grid-2">
+    <div class="form-group"><label class="label">Full Name *</label><input class="input" name="name" placeholder="Enter your full name" required></div>
+    <div class="form-group"><label class="label">Mobile Number *</label><input class="input" name="mobile" placeholder="Enter 10-digit mobile number" pattern="[0-9]{10}" required></div>
+    <div class="form-group"><label class="label">City / District *</label><input class="input" name="city" placeholder="Enter city / district" required></div>
+    <div class="form-group"><label class="label">Age *</label><input class="input" name="age" type="number" min="10" max="50" placeholder="Enter age" required></div>
+    <div class="form-group"><label class="label">Role *</label><select class="select" name="role" id="roleSelect" required><option value="">Select your role</option><option value="Batsman">Batsman</option><option value="Bowler">Bowler</option><option value="Wicket Keeper">Wicket Keeper</option><option value="All-Rounder">All-Rounder</option></select></div>
+    <div class="form-group"><label class="label">Category *</label><select class="select" name="category" id="categorySelect" required><option value="">Select category</option><option value="A">Category A</option><option value="B">Category B</option><option value="C">Category C</option><option value="D">Category D (Only U19)</option></select></div>
+    <div class="form-group"><label class="label">Batting Style</label><select class="select" name="battingStyle"><option>Right Hand</option><option>Left Hand</option><option>Not Applicable</option></select></div>
+    <div class="form-group"><label class="label">Bowling Style</label><select class="select" name="bowlingStyle"><option>Right Arm Fast</option><option>Right Arm Medium</option><option>Left Arm Fast</option><option>Spin</option><option>Not Applicable</option></select></div>
+    <div class="form-group"><label class="label">Cricket Experience</label><select class="select" name="experience"><option>Beginner</option><option>Local Tournaments</option><option>District Level</option><option>State Level</option></select></div>
+    <div class="form-group"><label class="label">Email Address</label><input class="input" type="email" name="email" placeholder="Enter your email"></div>
+  </div>
+  <div class="form-group"><label class="label">Upload Photo</label><input class="file" type="file" name="photo" accept="image/*"></div>
+  <button type="submit" class="btn-solid payment-btn">Pay & Register →</button>
+  <div class="note">After successful registration you will get a TMPCL registration ID and the entry will appear in admin dashboard.</div>
+  <div id="regSuccess" class="success-box hidden"></div>
+</form>
+<div class="card-overlay reg-summary">
+  <h3 class="overlay-title">Order Summary</h3>
+  <div class="small-meta"><span>Registration Fee</span><strong id="regFee">₹999</strong></div>
+  <div class="small-meta"><span>Platform Fee</span><strong>₹0</strong></div>
+  <div class="small-meta total-row"><span>Total Amount</span><strong id="regTotal">₹999</strong></div>
+  <div class="quick-pill-grid">
+    <div class="quick-pill">Secured by Razorpay</div>
+    <div class="quick-pill">Instant Trial ID</div>
+    <div class="quick-pill">No Hidden Charges</div>
+  </div>
+  <div class="kpi-list">
+    <div class="kpi-item"><div class="kpi-icon">✔</div><div>100% Secure registration simulation with full form validation.</div></div>
+    <div class="kpi-item"><div class="kpi-icon">✔</div><div>Champion Team ₹20,00,000 | Runner-Up ₹10,00,000 | Player of the Series Bullet Bike.</div></div>
+  </div>
+</div>
+<div class="card-overlay u19-note">
+  <h3 class="overlay-title">U19 Notice</h3>
+  <div class="note" style="font-size:13px;color:#e6eef8">D Category is only for U19 players. If you choose category D then your age must be 19 or below.</div>
+</div>
+</div>
     </div>
   </main>
   <script src="script.js"></script>
