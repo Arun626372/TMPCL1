@@ -1,8 +1,8 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TMPCL | Admin Dashboard</title><link rel="stylesheet" href="styles.css"></head><body data-page="dashboard"><header class="topbar"><div class="wrap nav"><a class="brand" href="index.html"><img src="tmpcl-logo.png"></a><button id="logoutBtn" class="btn ghost">Logout</button></div></header><main class="dash-shell"><div class="wrap"><div class="dash-top"><div><span class="eyebrow">TMPCL Dashboard</span><h1>Admin Dashboard</h1><p class="muted">Manage registrations, teams, squads and contact messages.</p></div><a class="btn" href="index.html">View Website</a></div>
-<div class="stat-grid"><article class="card"><small>Total Registrations</small><div id="statRegistrations" class="stat-value">0</div></article><article class="card"><small>Total Teams</small><div id="statTeams" class="stat-value">0</div></article><article class="card"><small>Squad Banners</small><div id="statSquadBanners" class="stat-value">0</div></article><article class="card"><small>U19 Players</small><div id="statU19" class="stat-value">0</div></article></div>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TMPCL | TMPCL Team Dashboard</title><link rel="stylesheet" href="styles.css"></head><body data-page="dashboard"><header class="topbar"><div class="wrap nav"><a class="brand" href="index.html"><img src="tmpcl-logo.png"></a><button id="logoutBtn" class="btn ghost">Logout</button></div></header><main class="dash-shell"><div class="wrap"><div class="dash-top"><div><span class="eyebrow">TMPCL Dashboard</span><h1>TMPCL Team Dashboard</h1><p class="muted">Manage registrations, teams, squad banners, gallery media and contact messages.</p></div><a class="btn" href="index.html">View Website</a></div>
+<div class="stat-grid"><article class="card"><small>Total Registrations</small><div id="statRegistrations" class="stat-value">0</div></article><article class="card"><small>Total Teams</small><div id="statTeams" class="stat-value">0</div></article><article class="card"><small>Squad Banners</small><div id="statSquadBanners" class="stat-value">0</div></article><article class="card"><small>U19 Players</small><div id="statU19" class="stat-value">0</div></article><article class="card"><small>Gallery Media</small><div id="statGallery" class="stat-value">0</div></article></div>
 
 <section class="admin-manage-grid single-admin-manage">
-  <article class="card"><h3>Manage Teams</h3><p class="muted">Team card public Teams page par show hoga. Team logo aur squad banner dono admin side se upload kar sakte hain. Random/demo team names yahin se edit/delete ho jayenge.</p><form id="teamForm" class="admin-small-form">
+  <article class="card"><h3>Manage Teams</h3><p class="muted">Team card public Teams page par show hoga. Team logo aur squad banner dono TMPCL Team panel se upload kar sakte hain. Team names yahin se edit/delete ho jayenge.</p><form id="teamForm" class="admin-small-form">
     <input type="hidden" name="teamId" id="teamId">
     <div class="admin-field"><label>Team Name *</label><input name="teamName" id="teamName" required placeholder="Bhopal Strikers"></div>
     <div class="admin-field"><label>City / District *</label><input name="teamCity" id="teamCity" required placeholder="Bhopal"></div>
@@ -17,6 +17,23 @@
 </section>
 
 <article class="card" style="margin-top:18px"><h3>Teams List</h3><div style="overflow:auto"><table id="adminTeamsTable" class="table"><thead><tr><th>Logo</th><th>Team</th><th>City</th><th>Owner/Captain</th><th>Status</th><th>Squad Banner</th><th>Actions</th></tr></thead><tbody></tbody></table></div><p id="emptyTeams" class="muted">No teams yet.</p></article>
+<section class="admin-manage-grid single-admin-manage">
+  <article class="card"><h3>Manage Gallery Media</h3><p class="muted">Yahan se TMPCL Team photos, video thumbnails aur highlight media publish karegi. Public Gallery page par sirf yahin se add kiye gaye media cards show honge.</p><form id="galleryForm" class="admin-small-form">
+    <input type="hidden" name="mediaId" id="mediaId">
+    <div class="admin-field"><label>Media Title *</label><input name="mediaTitle" id="mediaTitle" required placeholder="Opening Ceremony Highlights"></div>
+    <div class="admin-field"><label>Media Type</label><select name="mediaType" id="mediaType"><option value="photos">Photo</option><option value="videos">Video</option></select></div>
+    <div class="admin-field"><label>Category</label><select name="mediaCategory" id="mediaCategory"><option value="events">Events</option><option value="trials">Trials</option><option value="matches">Matches</option><option value="videos">Videos</option><option value="awards">Awards</option></select></div>
+    <div class="admin-field"><label>Date</label><input name="mediaDate" id="mediaDate" type="date"></div>
+    <div class="admin-field"><label>Thumbnail / Photo</label><input name="mediaImage" id="mediaImage" type="file" accept="image/*"><small class="muted">Photo ya video thumbnail upload karein.</small></div>
+    <div class="admin-field"><label>Video URL / Reel Link</label><input name="mediaUrl" id="mediaUrl" placeholder="YouTube / Instagram / Facebook link optional"></div>
+    <button class="btn" type="submit">Publish / Update Media</button>
+    <button class="btn ghost" type="button" id="galleryFormReset">Clear Form</button>
+    <div id="gallerySuccess" class="success"></div>
+  </form></article>
+</section>
+
+<article class="card" style="margin-top:18px"><h3>Gallery Media List</h3><div style="overflow:auto"><table id="galleryAdminTable" class="table"><thead><tr><th>Preview</th><th>Title</th><th>Type</th><th>Category</th><th>Date</th><th>Video Link</th><th>Actions</th></tr></thead><tbody></tbody></table></div><p id="emptyGalleryAdmin" class="muted">No gallery media yet.</p></article>
+
 
 <article class="card" style="margin-top:18px"><h3>Player Registrations</h3><div style="overflow:auto"><table id="regTable" class="table"><thead><tr><th>ID</th><th>Name</th><th>Mobile</th><th>City</th><th>DOB</th><th>Age</th><th>Role</th><th>Age Group</th><th>Assigned Category</th><th>Photo</th><th>Aadhaar/Age Proof</th><th>Fee</th><th>Date</th></tr></thead><tbody></tbody></table></div><p id="emptyRegs" class="muted">No registrations yet.</p></article>
 <article class="card" style="margin-top:18px"><h3>Contact Messages</h3><div style="overflow:auto"><table id="msgTable" class="table"><thead><tr><th>Name</th><th>Mobile</th><th>Email</th><th>Subject</th><th>Message</th><th>Date</th></tr></thead><tbody></tbody></table></div><p id="emptyMsgs" class="muted">No contact messages yet.</p></article></div></main><script src="script.js"></script></body></html>
