@@ -1,5 +1,5 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TMPCL | TMPCL Team Dashboard</title><link rel="stylesheet" href="styles.css"></head><body data-page="dashboard"><header class="topbar"><div class="wrap nav"><a class="brand" href="index.html"><img src="tmpcl-logo.png"></a><button id="logoutBtn" class="btn ghost">Logout</button></div></header><main class="dash-shell"><div class="wrap"><div class="dash-top"><div><span class="eyebrow">TMPCL Dashboard</span><h1>TMPCL Team Dashboard</h1><p class="muted">Manage registrations, teams, squad banners, gallery media and contact messages.</p></div><a class="btn" href="index.html">View Website</a></div>
-<div class="stat-grid"><article class="card"><small>Total Registrations</small><div id="statRegistrations" class="stat-value">0</div></article><article class="card"><small>Total Teams</small><div id="statTeams" class="stat-value">0</div></article><article class="card"><small>Squad Banners</small><div id="statSquadBanners" class="stat-value">0</div></article><article class="card"><small>U19 Players</small><div id="statU19" class="stat-value">0</div></article><article class="card"><small>Gallery Media</small><div id="statGallery" class="stat-value">0</div></article></div>
+<div class="stat-grid"><article class="card"><small>Total Registrations</small><div id="statRegistrations" class="stat-value">0</div></article><article class="card"><small>Total Teams</small><div id="statTeams" class="stat-value">0</div></article><article class="card"><small>Squad Banners</small><div id="statSquadBanners" class="stat-value">0</div></article><article class="card"><small>U19 Players</small><div id="statU19" class="stat-value">0</div></article><article class="card"><small>Gallery Media</small><div id="statGallery" class="stat-value">0</div></article><article class="card"><small>News Posts</small><div id="statNews" class="stat-value">0</div></article></div>
 
 <section class="admin-manage-grid single-admin-manage">
   <article class="card"><h3>Manage Teams</h3><p class="muted">Team card public Teams page par show hoga. Team logo aur squad banner dono TMPCL Team panel se upload kar sakte hain. Team names yahin se edit/delete ho jayenge.</p><form id="teamForm" class="admin-small-form">
@@ -33,6 +33,22 @@
 </section>
 
 <article class="card" style="margin-top:18px"><h3>Gallery Media List</h3><div style="overflow:auto"><table id="galleryAdminTable" class="table"><thead><tr><th>Preview</th><th>Title</th><th>Type</th><th>Category</th><th>Date</th><th>Video Link</th><th>Actions</th></tr></thead><tbody></tbody></table></div><p id="emptyGalleryAdmin" class="muted">No gallery media yet.</p></article>
+<section class="admin-manage-grid single-admin-manage">
+  <article class="card"><h3>Manage News Updates</h3><p class="muted">Yahan se TMPCL Team official news publish/edit/delete karegi. Public News page par sirf yahin se published news cards show honge.</p><form id="newsForm" class="admin-small-form">
+    <input type="hidden" name="newsId" id="newsId">
+    <div class="admin-field"><label>News Title *</label><input name="newsTitle" id="newsTitle" required placeholder="TMPCL Opening Ceremony on 01 June"></div>
+    <div class="admin-field"><label>Category / Tag</label><select name="newsTag" id="newsTag"><option>Announcement</option><option>Trials</option><option>Opening Ceremony</option><option>Selection</option><option>Results</option><option>Sponsors</option></select></div>
+    <div class="admin-field"><label>Date</label><input name="newsDate" id="newsDate" type="date"></div>
+    <div class="admin-field"><label>Short Summary *</label><textarea name="newsSummary" id="newsSummary" required placeholder="Opening ceremony update short text"></textarea></div>
+    <div class="admin-field"><label>Thumbnail / News Image</label><input name="newsImage" id="newsImage" type="file" accept="image/*"><small class="muted">Optional. Image upload karne par news card me show hogi.</small></div>
+    <button class="btn" type="submit">Publish / Update News</button>
+    <button class="btn ghost" type="button" id="newsFormReset">Clear Form</button>
+    <div id="newsSuccess" class="success"></div>
+  </form></article>
+</section>
+
+<article class="card" style="margin-top:18px"><h3>News List</h3><div style="overflow:auto"><table id="newsAdminTable" class="table"><thead><tr><th>Preview</th><th>Title</th><th>Tag</th><th>Date</th><th>Summary</th><th>Actions</th></tr></thead><tbody></tbody></table></div><p id="emptyNewsAdmin" class="muted">No news yet.</p></article>
+
 
 
 <article class="card" style="margin-top:18px"><h3>Player Registrations</h3><div style="overflow:auto"><table id="regTable" class="table"><thead><tr><th>ID</th><th>Name</th><th>Mobile</th><th>City</th><th>DOB</th><th>Age</th><th>Role</th><th>Age Group</th><th>Assigned Category</th><th>Photo</th><th>Aadhaar/Age Proof</th><th>Fee</th><th>Date</th></tr></thead><tbody></tbody></table></div><p id="emptyRegs" class="muted">No registrations yet.</p></article>

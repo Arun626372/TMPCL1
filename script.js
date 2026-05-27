@@ -133,17 +133,23 @@
     });
   }
 
-  // News default content
+  const defaultNews = [{id:'news-opening-ceremony-01-jun', tag:'Opening Ceremony', title:'TMPCL Opening Ceremony on 01 June', summary:'TMPCL ki grand opening ceremony 01 June ko hogi. League updates, team presentation aur event moments yahin publish honge.', date:'2026-06-01', image:''}];
+  function getNewsItems(){
+    if(localStorage.getItem('tmpclNews') === null){ set('tmpclNews', defaultNews); }
+    return get('tmpclNews');
+  }
+
+  // News public render
   const newsList = $('#newsList');
   if(newsList){
-    const posts = [
-      ['TRIALS','U19 Player Trials – Registrations Open Now','Young talent alert! TMPCL U19 trials are now open across major districts of Madhya Pradesh.'],
-      ['ANNOUNCEMENT','TMPCL Season Schedule Announced','Check match dates, venues and key fixtures for the upcoming TMPCL season.'],
-      ['SELECTIONS','Final Squad Announcement Update','Shortlisted players and selected squad updates will be published here.'],
-      ['RESULTS','Super Striker Tournament Results Out','Check award winners and tournament performance updates.'],
-      ['SPONSORS','Partner Announcement','New partners and sponsor updates will appear in this section.']
-    ];
-    newsList.innerHTML = posts.map(p=>`<article class="card news-card"><div class="thumb"></div><div><span class="tag">${p[0]}</span><h3>${p[1]}</h3><p>${p[2]}</p><a class="btn ghost" href="#">Read More →</a></div></article>`).join('');
+    const empty = $('#newsEmpty');
+    const posts = getNewsItems();
+    if(empty) empty.style.display = posts.length ? 'none' : 'block';
+    newsList.innerHTML = posts.map(p=>{
+      const img = p.image ? `<div class="thumb news-thumb-img" style="background-image:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.55)),url('${p.image}')"></div>` : `<div class="thumb"></div>`;
+      const date = p.date ? `<small class="muted">${p.date}</small>` : '';
+      return `<article class="card news-card">${img}<div><span class="tag">${p.tag||'Update'}</span><h3>${p.title}</h3>${date}<p>${p.summary||''}</p></div></article>`;
+    }).join('');
   }
 
   // Gallery public render
@@ -215,12 +221,13 @@
       return;
     }
     function renderDashboard(){
-      const regs = get('tmpclRegs'), msgs = get('tmpclMessages'), teams = getTeams(), galleryItems = get('tmpclGallery');
+      const regs = get('tmpclRegs'), msgs = get('tmpclMessages'), teams = getTeams(), galleryItems = get('tmpclGallery'), newsItems = getNewsItems();
       $('#statRegistrations').textContent = regs.length;
       $('#statTeams') && ($('#statTeams').textContent = teams.length);
       $('#statSquadBanners') && ($('#statSquadBanners').textContent = teams.filter(t=>!!t.squadBanner).length);
       $('#statU19') && ($('#statU19').textContent = regs.filter(r=>r.ageGroup==='U19' || Number(r.age)<=19).length);
       $('#statGallery') && ($('#statGallery').textContent = galleryItems.length);
+      $('#statNews') && ($('#statNews').textContent = newsItems.length);
 
       const tb = $('#adminTeamsTable tbody');
       if(tb){
@@ -281,6 +288,32 @@
         }));
       }
 
+      const nb = $('#newsAdminTable tbody');
+      if(nb){
+        if(newsItems.length){ $('#emptyNewsAdmin').style.display='none'; } else { $('#emptyNewsAdmin').style.display='block'; }
+        nb.innerHTML = newsItems.map(item=>{
+          const preview = item.image ? `<img src="${item.image}" style="width:60px;height:42px;border-radius:10px;object-fit:cover">` : `<span class="badge muted-badge">No Image</span>`;
+          return `<tr><td>${preview}</td><td>${item.title}</td><td>${item.tag||''}</td><td>${item.date||''}</td><td>${item.summary||''}</td><td><div class="admin-table-actions"><button class="mini-btn" data-edit-news="${item.id}">Edit</button><button class="mini-btn danger" data-delete-news="${item.id}">Delete</button></div></td></tr>`;
+        }).join('');
+        $$('[data-edit-news]', nb).forEach(btn=>btn.addEventListener('click',()=>{
+          const item = newsItems.find(n=>n.id === btn.dataset.editNews);
+          if(!item) return;
+          $('#newsId').value = item.id;
+          $('#newsTitle').value = item.title || '';
+          $('#newsTag').value = item.tag || 'Announcement';
+          $('#newsDate').value = item.date || '';
+          $('#newsSummary').value = item.summary || '';
+          const s = $('#newsSuccess');
+          if(s){ s.style.display='block'; s.innerHTML='<strong>Edit mode:</strong> Change fields and click Publish / Update News. Existing image will remain unless you upload a new one.'; }
+          window.scrollTo({top:0, behavior:'smooth'});
+        }));
+        $$('[data-delete-news]', nb).forEach(btn=>btn.addEventListener('click',()=>{
+          if(!confirm('Delete this news update?')) return;
+          set('tmpclNews', newsItems.filter(n=>n.id !== btn.dataset.deleteNews));
+          renderDashboard();
+        }));
+      }
+
       const rb = $('#regTable tbody');
       if(rb){
         if(regs.length){ $('#emptyRegs').style.display='none'; } else { $('#emptyRegs').style.display='block'; }
@@ -334,6 +367,27 @@
         renderDashboard();
       });
       $('#galleryFormReset')?.addEventListener('click',()=>{ galleryForm.reset(); $('#mediaId').value=''; const s=$('#gallerySuccess'); if(s) s.style.display='none'; });
+    }
+
+    const newsForm = $('#newsForm');
+    if(newsForm){
+      newsForm.addEventListener('submit', async e=>{
+        e.preventDefault();
+        const fd = new FormData(newsForm);
+        const newsId = fd.get('newsId') || ('news-' + Date.now());
+        const items = getNewsItems();
+        const existing = items.find(n=>n.id === newsId);
+        const imageData = await readFileAsDataURL($('#newsImage'));
+        const news = {id:newsId, title:fd.get('newsTitle'), tag:fd.get('newsTag')||'Announcement', date:fd.get('newsDate')||'', summary:fd.get('newsSummary')||'', image:imageData || (existing && existing.image) || ''};
+        const updated = items.filter(n=>n.id !== newsId);
+        updated.unshift(news);
+        set('tmpclNews', updated);
+        const s=$('#newsSuccess');
+        if(s){ s.style.display='block'; s.innerHTML='<strong>News published.</strong> Public News page par card show hoga.'; }
+        newsForm.reset(); $('#newsId').value='';
+        renderDashboard();
+      });
+      $('#newsFormReset')?.addEventListener('click',()=>{ newsForm.reset(); $('#newsId').value=''; const s=$('#newsSuccess'); if(s) s.style.display='none'; });
     }
 
     renderDashboard();
