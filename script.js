@@ -51,7 +51,37 @@
 
   const regFee=$('#regFee'), regTotal=$('#regTotal'); if(regFee) regFee.textContent='₹999'; if(regTotal) regTotal.textContent='₹999';
   const regForm=$('#registrationForm');
-  if(regForm){ regForm.addEventListener('submit', e=>{ e.preventDefault(); const data=Object.fromEntries(new FormData(regForm).entries()); const age=ageFromDob(data.dob); const photo=regForm.querySelector('input[name="photo"]'); const aadhaar=regForm.querySelector('input[name="aadhaar"]'); if(!data.dob){ alert('Date of Birth mandatory hai.'); return; } if(!photo || !photo.files.length){ alert('Player photo upload mandatory hai.'); return; } if(!aadhaar || !aadhaar.files.length){ alert('Aadhaar Card / Age Proof upload mandatory hai.'); return; } if(data.ageGroup==='U19' && age>19){ alert('U19 age group ke liye Date of Birth ke hisab se age 19 ya usse kam honi chahiye.'); return; } const entry={...data,id:makeId('TMPCL'),date:fmt(),fee:999,age,assignedCategory:'Pending after trials',photoFile:photo.files[0].name,aadhaarFile:aadhaar.files[0].name}; const regs=get('tmpclRegs'); regs.unshift(entry); set('tmpclRegs',regs); const success=$('#regSuccess'); if(success){ success.style.display='block'; success.innerHTML=`<strong>Registration successful!</strong><br>Registration ID: <strong>${entry.id}</strong><br>Amount: ₹999`; } regForm.reset(); }); }
+  const dobInput=$('#dobInput'), ageGroupHidden=$('#ageGroupSelect'), ageGroupDisplay=$('#ageGroupDisplay');
+  function syncAgeGroup(){
+    if(!dobInput || !ageGroupHidden || !ageGroupDisplay) return;
+    const age=ageFromDob(dobInput.value);
+    if(!dobInput.value){ ageGroupHidden.value=''; ageGroupDisplay.value=''; return; }
+    const group=age<=19?'U19':'Open';
+    ageGroupHidden.value=group;
+    ageGroupDisplay.value=`${group} · Age ${age}`;
+  }
+  dobInput && dobInput.addEventListener('change', syncAgeGroup);
+  syncAgeGroup();
+  if(regForm){ regForm.addEventListener('submit', e=>{
+    e.preventDefault();
+    syncAgeGroup();
+    const data=Object.fromEntries(new FormData(regForm).entries());
+    const age=ageFromDob(data.dob);
+    const photo=regForm.querySelector('input[name="photo"]');
+    const aadhaar=regForm.querySelector('input[name="aadhaar"]');
+    if(!data.dob){ alert('Date of Birth mandatory hai.'); return; }
+    if(age<=0){ alert('Please enter a valid Date of Birth.'); return; }
+    if(!photo || !photo.files.length){ alert('Player photo upload mandatory hai.'); return; }
+    if(!aadhaar || !aadhaar.files.length){ alert('Aadhaar Card / Age Proof upload mandatory hai.'); return; }
+    const entry={...data,id:makeId('TMPCL'),date:fmt(),fee:999,age,ageGroup:age<=19?'U19':'Open',assignedCategory:'Pending after trials',photoFile:photo.files[0].name,aadhaarFile:aadhaar.files[0].name};
+    const regs=get('tmpclRegs');
+    regs.unshift(entry);
+    set('tmpclRegs',regs);
+    const success=$('#regSuccess');
+    if(success){ success.style.display='block'; success.innerHTML=`<strong>Registration successful!</strong><br>Registration ID: <strong>${entry.id}</strong><br>Age Group: <strong>${entry.ageGroup}</strong><br>Amount: ₹999`; }
+    regForm.reset();
+    syncAgeGroup();
+  }); }
 
   const contactForm=$('#contactForm');
   if(contactForm){ contactForm.addEventListener('submit', e=>{ e.preventDefault(); const data=Object.fromEntries(new FormData(contactForm).entries()); const msgs=get('tmpclMessages'); msgs.unshift({...data,date:fmt()}); set('tmpclMessages',msgs); const s=$('#contactSuccess'); if(s){ s.style.display='block'; s.innerHTML='<strong>Message sent successfully.</strong> TMPCL Team will contact you soon.'; } contactForm.reset(); }); }

@@ -1,85 +1,72 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TMPCL | Register</title><meta name="description" content="TMPCL Tennis Madhya Pradesh Cricket League"><link rel="stylesheet" href="styles.css"><script src="https://checkout.razorpay.com/v1/checkout.js"></script></head><body data-page="registration"><header class="topbar"><div class="wrap nav"><a class="brand" href="index.html"><img src="tmpcl-logo.png" alt="TMPCL"></a><nav class="links"><a href="index.html" data-nav="home">Home</a><a href="registration.html" data-nav="registration">Register</a><a href="categories.html" data-nav="categories">Categories</a><a href="teams.html" data-nav="teams">Teams</a><a href="gallery.html" data-nav="gallery">Gallery</a><a href="news.html" data-nav="news">News</a><a href="partners.html" data-nav="partners">Partners</a><a href="about.html" data-nav="about">About</a><a href="contact.html" data-nav="contact">Contact</a></nav><a class="btn" href="registration.html">Register Now →</a><button class="hamb" aria-label="menu">☰</button></div></header><main>
-<section class="hero register-hero">
-  <div class="wrap hero-grid">
-    <div>
-      <span class="eyebrow">One Fee. One Registration.</span>
-      <h1 class="title">Register for <span class="gold">TMPCL Player Trials</span></h1>
-      <p class="lead">Player category A/B/C/D registration ke time select nahi hogi. Trial performance ke baad selectors category assign karenge. Registration fee sabhi roles ke liye ₹999 only hai.</p>
-      <div class="actions"><a class="btn" href="#registrationForm">Start Registration →</a><a class="btn ghost" href="categories.html">View Category Rules</a></div>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TMPCL | Register</title><meta name="description" content="TMPCL Tennis Madhya Pradesh Cricket League player trials registration"><link rel="stylesheet" href="styles.css"><script src="https://checkout.razorpay.com/v1/checkout.js"></script></head><body data-page="registration"><header class="topbar"><div class="wrap nav"><a class="brand" href="index.html"><img src="tmpcl-logo.png" alt="TMPCL"></a><nav class="links"><a href="index.html" data-nav="home">Home</a><a href="registration.html" data-nav="registration">Register</a><a href="categories.html" data-nav="categories">Categories</a><a href="teams.html" data-nav="teams">Teams</a><a href="gallery.html" data-nav="gallery">Gallery</a><a href="news.html" data-nav="news">News</a><a href="partners.html" data-nav="partners">Partners</a><a href="about.html" data-nav="about">About</a><a href="contact.html" data-nav="contact">Contact</a></nav><a class="btn" href="registration.html">Register Now →</a><button class="hamb" aria-label="menu">☰</button></div></header><main>
+
+<section class="register-hero-v2">
+  <div class="wrap register-hero-shell">
+    <div class="register-hero-copy">
+      <span class="eyebrow">Official Player Trials</span>
+      <h1>Register for <span>TMPCL Player Trials</span></h1>
+      <p>One registration fee, one clean process. Submit your details, upload photo and Aadhaar/Age Proof, then complete ₹999 registration for TMPCL trials.</p>
+      <div class="actions"><a class="btn" href="#registrationForm">Start Registration →</a><a class="btn ghost" href="categories.html">Category Rules</a></div>
+    </div>
+    <div class="registration-fee-panel">
+      <small>Trial Registration Fee</small>
+      <strong>₹999</strong>
+      <span>For Batsman, Bowler, Wicket Keeper & All-Rounder</span>
+      <div class="fee-mini-grid"><b>DOB Required</b><b>Photo Required</b><b>Aadhaar Required</b></div>
     </div>
   </div>
 </section>
 
-<section class="section">
-  <div class="wrap">
-    <div class="single-fee-card card">
-      <div>
-        <span class="eyebrow">Player Trial Registration Fee</span>
-        <h2>₹999 <span class="green">Only</span></h2>
-        <p>Same fee for Batsman, Bowler, Wicket Keeper and All-Rounder. Category will be finalized after trials.</p>
+<section class="section registration-main-section">
+  <div class="wrap registration-layout-v2">
+    <form id="registrationForm" class="card registration-form-v2">
+      <div class="form-title-row">
+        <div><span class="eyebrow">Player Details</span><h2>Complete Your Registration</h2><p class="muted">A/B/C/D category registration ke time select nahi hogi. Category trial performance ke baad TMPCL selectors assign karenge.</p></div>
+        <div class="reg-id-preview"><small>Fee</small><strong>₹999</strong></div>
       </div>
-      <div class="fee-points">
-        <span>All Roles Included</span>
-        <span>Razorpay Payment</span>
-        <span>Trial ID After Registration</span>
-      </div>
-    </div>
-  </div>
-</section>
 
-<section class="section">
-  <div class="wrap form-layout">
-    <form id="registrationForm" class="card">
-      <h3>Player Registration Form</h3>
-      <p class="muted">Fill your details carefully. A/B/C/D category will be assigned by TMPCL after trial evaluation.</p>
-      <div class="field-grid">
+      <div class="field-grid polished-fields">
         <div class="field"><label>Full Name *</label><input required name="name" placeholder="Enter your full name"></div>
-        <div class="field"><label>Mobile Number *</label><input required name="mobile" pattern="[0-9]{10}" placeholder="10-digit mobile number"></div>
+        <div class="field"><label>Mobile Number *</label><input required name="mobile" pattern="[0-9]{10}" maxlength="10" placeholder="10-digit mobile number"></div>
         <div class="field"><label>City / District *</label><input required name="city" placeholder="Enter city / district"></div>
         <div class="field"><label>Date of Birth *</label><input required type="date" name="dob" id="dobInput"></div>
-        <div class="field"><label>Age Group *</label><select required name="ageGroup" id="ageGroupSelect"><option value="">Select age group</option><option value="U19">U19</option><option value="Open">Open</option></select></div>
+        <div class="field"><label>Age Group</label><input id="ageGroupDisplay" readonly placeholder="Auto calculated from DOB"><input type="hidden" name="ageGroup" id="ageGroupSelect"></div>
         <div class="field"><label>Playing Role *</label><select required name="role" id="roleSelect"><option value="">Select Role</option><option>Batsman</option><option>Bowler</option><option>Wicket Keeper</option><option>All-Rounder</option></select></div>
         <div class="field"><label>Batting Style</label><select name="batting"><option>Right Hand</option><option>Left Hand</option><option>Not Applicable</option></select></div>
         <div class="field"><label>Bowling Style</label><select name="bowling"><option>Right Arm Fast</option><option>Right Arm Medium</option><option>Left Arm Fast</option><option>Spin</option><option>Not Applicable</option></select></div>
-        <div class="field"><label>Experience</label><select name="experience"><option>Beginner</option><option>Local Tournament</option><option>District Level</option><option>State Level</option></select></div>
-        <div class="field"><label>Email</label><input name="email" type="email" placeholder="Enter email"></div>
+        <div class="field"><label>Cricket Experience</label><select name="experience"><option>Beginner</option><option>Local Tournament</option><option>District Level</option><option>State Level</option></select></div>
+        <div class="field"><label>Email</label><input name="email" type="email" placeholder="Enter email address"></div>
       </div>
-      <div class="upload-grid">
-        <div class="field"><label>Upload Player Photo *</label><input required name="photo" type="file" accept="image/*"></div>
-        <div class="field"><label>Upload Aadhaar Card / Age Proof *</label><input required name="aadhaar" type="file" accept="image/*,.pdf"></div>
+
+      <div class="upload-grid polished-upload-grid">
+        <div class="field upload-card-v2"><label>Player Photo *</label><input required name="photo" type="file" accept="image/*"><small>Clear recent player photo required.</small></div>
+        <div class="field upload-card-v2"><label>Aadhaar Card / Age Proof *</label><input required name="aadhaar" type="file" accept="image/*,.pdf"><small>DOB/U19 verification ke liye mandatory.</small></div>
       </div>
-      <p class="muted upload-note">Photo aur Aadhaar/Age Proof mandatory hai. D/O/B aur U19 eligibility verification ke liye document required rahega.</p>
-      <button class="btn" style="margin-top:18px" type="submit">Pay ₹999 & Register →</button>
+
+      <div class="registration-note-box">
+        <strong>Category after trials:</strong> A/B/C categories performance, fitness, experience and selector evaluation ke baad decide hongi. D category only U19 players ke liye reserved rahegi.
+      </div>
+      <button class="btn register-submit-btn" type="submit">Pay ₹999 & Register →</button>
       <div id="regSuccess" class="success"></div>
     </form>
-    <aside class="card">
-      <h3>Order Summary</h3>
-      <div class="summary-row"><span>Registration Fee</span><strong id="regFee">₹999</strong></div>
-      <div class="summary-row"><span>Platform Fee</span><strong>₹0</strong></div>
-      <div class="summary-row total"><span>Total Amount</span><strong id="regTotal">₹999</strong></div>
-      <div class="reg-info-panel">
-        <h3>Category Assignment</h3>
-        <p>A/B/C category player khud select nahi karega. TMPCL selectors trial performance, fitness, experience and role ke basis par category assign karenge. Date of Birth aur document verification record me save rahega.</p>
-        <ul>
-          <li>A Category: top performer / experienced</li>
-          <li>B Category: strong and consistent</li>
-          <li>C Category: emerging talent</li>
-          <li>D Category: only U19 players</li>
-        </ul>
+
+    <aside class="registration-summary-v2">
+      <div class="card order-card-v2">
+        <h3>Order Summary</h3>
+        <div class="summary-row"><span>Registration Fee</span><strong id="regFee">₹999</strong></div>
+        <div class="summary-row"><span>Platform Fee</span><strong>₹0</strong></div>
+        <div class="summary-row total"><span>Total Amount</span><strong id="regTotal">₹999</strong></div>
+        <div class="summary-points"><span>Single fee for all roles</span><span>Registration ID after submit</span><span>TMPCL Team verification</span></div>
       </div>
-      <article class="card notice" style="margin-top:16px">
-        <h3>U19 Notice</h3>
-        <p>D Category sirf U19 players ke liye hai. Date of Birth aur Aadhaar/Age Proof se eligibility verify hogi.</p>
-      </article>
+      <div class="card reg-info-panel-v2">
+        <h3>How Category Works</h3>
+        <p>Players category khud choose nahi karenge. TMPCL Team trial performance ke baad category assign karegi.</p>
+        <ul><li><b>A:</b> Top performer / experienced</li><li><b>B:</b> Strong and consistent</li><li><b>C:</b> Emerging talent</li><li><b>D:</b> Only U19 players</li></ul>
+      </div>
+      <div class="card notice-v2"><h3>DOB & Proof Required</h3><p>Age group DOB se auto calculate hoga. Aadhaar/Age Proof upload mandatory hai.</p></div>
     </aside>
   </div>
 </section>
 
-<section class="section">
-  <div class="wrap cta">
-    <img src="tmpcl-logo.png" alt="TMPCL">
-    <div><h2>Ready for TMPCL Trials?</h2><p>Register now with one simple fee and let your performance decide your category.</p></div>
-    <a class="btn" href="#registrationForm">Start Registration</a>
-  </div>
-</section>
+<section class="section"><div class="wrap cta"><img src="tmpcl-logo.png" alt="TMPCL"><div><h2>Ready for TMPCL Trials?</h2><p>Register with one simple fee and let your performance decide your category.</p></div><a class="btn" href="#registrationForm">Start Registration</a></div></section>
 </main><footer class="footer"><div class="wrap"><div class="footer-grid"><div class="foot-brand"><img src="tmpcl-logo.png" alt="TMPCL"><p>TMPCL – Tennis Madhya Pradesh Cricket League is MP’s biggest tennis ball cricket platform for talent discovery, competition and recognition.</p></div><div><h4>Quick Links</h4><a href="index.html">Home</a><a href="registration.html">Register</a><a href="categories.html">Categories</a><a href="teams.html">Teams</a><a href="gallery.html">Gallery</a></div><div><h4>More</h4><a href="news.html">News</a><a href="partners.html">Partners</a><a href="about.html">About</a><a href="contact.html">Contact</a><a href="admin-login.html">TMPCL Team Login</a></div><div><h4>Contact Info</h4><p>+91 70000 12345</p><p>info@tmpcl.com</p><p>Bhopal, Madhya Pradesh</p><p>Instagram · YouTube · Facebook</p></div></div><div class="copy"><span>© 2026 TMPCL. All Rights Reserved.</span><span>Privacy Policy · Terms & Conditions</span></div></div></footer><nav class="bottom-nav"><a href="index.html" data-nav="home">Home</a><a href="teams.html" data-nav="teams">Teams</a><a href="gallery.html" data-nav="gallery">Gallery</a><a href="news.html" data-nav="news">News</a><a href="partners.html" data-nav="partners">Partners</a></nav><div class="mobile-cta"><a href="registration.html">Register Now</a><a href="contact.html">WhatsApp</a></div><script src="script.js"></script></body></html>
