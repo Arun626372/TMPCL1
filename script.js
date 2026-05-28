@@ -26,6 +26,73 @@
   const initials = (name, fallback='TM') => (name||fallback).split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase() || fallback;
 
 
+  function formatDateSafe(value){
+    if(!value) return '';
+    const d = new Date(value);
+    if(Number.isNaN(d.getTime())) return String(value);
+    return d.toLocaleDateString('en-IN');
+  }
+
+  function buildRegistrationSlip(reg){
+    const rows = [
+      ['Registration ID', reg.id || 'TMPCL-XXXX'],
+      ['Player Name', reg.name || ''],
+      ['Mobile', reg.mobile || ''],
+      ['City / District', reg.city || ''],
+      ['Date of Birth', reg.dob || ''],
+      ['Age Group', reg.age_group || reg.ageGroup || ''],
+      ['Playing Role', reg.role || ''],
+      ['Registration Fee', '₹' + (reg.fee || '999')],
+      ['Payment Status', reg.payment_status || 'Pending'],
+      ['Current Status', 'Registered for Trials']
+    ];
+    return `<div class="registration-slip-card" id="registrationSlipCard">
+      <div class="slip-head">
+        <img src="tmpcl-logo.png" alt="TMPCL">
+        <div>
+          <small>TMPCL Registration Confirmation Slip</small>
+          <h3>Registered for Trials</h3>
+          <p>Trial venue, date and reporting time will be announced by TMPCL Team.</p>
+        </div>
+      </div>
+      <div class="slip-grid">${rows.map(([k,v])=>`<div><span>${esc(k)}</span><strong>${esc(v)}</strong></div>`).join('')}</div>
+      <div class="slip-note"><strong>Important:</strong> This is a registration confirmation slip, not final trial pass. Final trial pass/admit card will be issued after TMPCL Team announces venue, date and reporting time.</div>
+      <div class="slip-actions"><button type="button" class="btn" id="printSlipBtn">Print / Save Slip</button></div>
+    </div>`;
+  }
+
+  function printRegistrationSlip(){
+    const slip = $('#registrationSlipCard');
+    if(!slip) return;
+    const win = window.open('', '_blank');
+    if(!win) { alert('Popup blocked. Please allow popup to print slip.'); return; }
+    win.document.write(`<!doctype html><html><head><title>TMPCL Registration Slip</title><style>
+      body{margin:0;padding:24px;background:#f4f7fb;font-family:Arial,sans-serif;color:#07111b}.registration-slip-card{max-width:760px;margin:auto;background:#fff;border:1px solid #dbe3ee;border-radius:22px;padding:22px;box-shadow:0 14px 40px rgba(0,0,0,.08)}.slip-head{display:flex;gap:16px;align-items:center;border-bottom:1px solid #e8edf4;padding-bottom:16px;margin-bottom:16px}.slip-head img{width:80px;height:80px;object-fit:contain}.slip-head small{font-weight:800;color:#16802f;text-transform:uppercase}.slip-head h3{margin:6px 0;font-size:30px}.slip-head p{margin:0;color:#586574}.slip-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.slip-grid div{border:1px solid #e8edf4;border-radius:14px;padding:12px}.slip-grid span{display:block;font-size:12px;color:#667386;text-transform:uppercase;font-weight:800}.slip-grid strong{display:block;margin-top:5px;font-size:17px}.slip-note{margin-top:16px;padding:14px;border-radius:14px;background:#fff7d8;border:1px solid #f1d06d;color:#3b2a00}.slip-actions{display:none}@media print{body{background:#fff}.registration-slip-card{box-shadow:none}}</style></head><body>${slip.outerHTML}</body></html>`);
+    win.document.close();
+    win.focus();
+    setTimeout(()=>win.print(), 350);
+  }
+
+  function rowsToCsv(rows){
+    return rows.map(row=>row.map(value=>`"${String(value ?? '').replace(/"/g,'""')}"`).join(',')).join('\n');
+  }
+
+  function downloadCsv(filename, regs){
+    const header = ['Registration ID','Name','Mobile','City','DOB','Age','Age Group','Role','Batting','Bowling','Experience','Email','Payment Status','Assigned Category','Fee','Created At'];
+    const body = regs.map(r=>[r.id,r.name,r.mobile,r.city,r.dob,r.age,r.age_group,r.role,r.batting,r.bowling,r.experience,r.email,r.payment_status,r.assigned_category,r.fee,r.created_at]);
+    const csv = rowsToCsv([header, ...body]);
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+
   function ensureProfileModal(){
     let modal = $('#profileModal');
     if(modal) return modal;
@@ -274,8 +341,11 @@
         const id=makeId('TMPCL');
         const photoUrl=await uploadFile(STORAGE_BUCKETS.playerPhoto, photoInput, id);
         const proofUrl=await uploadFile(STORAGE_BUCKETS.idProof, proofInput, id);
-        await insertRow('players',{id,name:data.name,mobile:data.mobile,city:data.city,dob:data.dob,age,age_group:data.ageGroup,role:data.role,batting:data.batting,bowling:data.bowling,experience:data.experience,email:data.email||'',photo_url:photoUrl,proof_url:proofUrl,fee:999,assigned_category:'Pending until trials & auction',payment_status:'Pending'});
-        showSuccess($('#regSuccess'), `<strong>Registration saved successfully!</strong><br>Registration ID: <strong>${id}</strong><br>Amount: ₹999`);
+        const savedReg = await insertRow('players',{id,name:data.name,mobile:data.mobile,city:data.city,dob:data.dob,age,age_group:data.ageGroup,role:data.role,batting:data.batting,bowling:data.bowling,experience:data.experience,email:data.email||'',photo_url:photoUrl,proof_url:proofUrl,fee:999,assigned_category:'Pending until trials & auction',payment_status:'Pending'});
+        const regRecord = savedReg || {id,name:data.name,mobile:data.mobile,city:data.city,dob:data.dob,age,age_group:data.ageGroup,role:data.role,fee:999,payment_status:'Pending'};
+        const successBox = $('#regSuccess');
+        showSuccess(successBox, `<strong>Registration saved successfully!</strong><br>Registration ID: <strong>${id}</strong><br>Amount: ₹999<br><br>${buildRegistrationSlip(regRecord)}`);
+        $('#printSlipBtn')?.addEventListener('click', printRegistrationSlip);
         regForm.reset();
       } catch(err){ showDbError('Registration', err); }
       finally{ setLoading(btn,false); }
@@ -331,7 +401,34 @@
         $$('[data-edit-leader]',lTb).forEach(btn=>btn.addEventListener('click',()=>{ const p=leaders.find(x=>x.id===btn.dataset.editLeader); if(!p) return; $('#personId').value=p.id; $('#personName').value=p.name||''; $('#personType').value=p.type||'Selector'; $('#personDesignation').value=p.designation||''; $('#personBio').value=p.bio||''; showSuccess($('#leadershipSuccess'), '<strong>Edit mode:</strong> Details change karke Save / Update Profile par click karein.'); document.querySelector('.admin-tab-panel.active')?.scrollIntoView({behavior:'smooth',block:'start'}); }));
         $$('[data-delete-leader]',lTb).forEach(btn=>btn.addEventListener('click',async()=>{ if(!confirm('Delete this profile?')) return; await deleteRow('leadership_panel',btn.dataset.deleteLeader); renderDashboard(); })); }
 
-      const regTb=$('#regTable tbody'); if(regTb){ $('#emptyRegs').style.display=regs.length?'none':'block'; regTb.innerHTML=regs.map(r=>`<tr><td>${esc(r.id)}</td><td>${esc(r.name||'')}</td><td>${esc(r.mobile||'')}</td><td>${esc(r.city||'')}</td><td>${esc(r.dob||'')}</td><td>${esc(r.age||'')}</td><td>${esc(r.role||'')}</td><td>${esc(r.age_group||'')}</td><td>${esc(r.assigned_category||'Pending until trials & auction')}</td><td>${r.photo_url?`<a href="${esc(r.photo_url)}" target="_blank">View</a>`:''}</td><td>${r.proof_url?`<a href="${esc(r.proof_url)}" target="_blank">View</a>`:''}</td><td>₹${esc(r.fee||'999')}</td><td>${esc(r.created_at||'')}</td></tr>`).join(''); }
+      const regTb=$('#regTable tbody');
+      if(regTb){
+        const search=$('#regSearch'), ageFilter=$('#regAgeFilter'), roleFilter=$('#regRoleFilter');
+        const filteredRegs = () => {
+          const q=(search?.value||'').toLowerCase().trim();
+          const ageVal=ageFilter?.value||'all';
+          const roleVal=roleFilter?.value||'all';
+          return regs.filter(r=>{
+            const hay=[r.id,r.name,r.mobile,r.city,r.role,r.age_group,r.assigned_category].join(' ').toLowerCase();
+            const matchQ=!q || hay.includes(q);
+            const matchAge=ageVal==='all' || r.age_group===ageVal;
+            const matchRole=roleVal==='all' || r.role===roleVal;
+            return matchQ && matchAge && matchRole;
+          });
+        };
+        const drawRegs = () => {
+          const list=filteredRegs();
+          $('#emptyRegs').style.display=list.length?'none':'block';
+          regTb.innerHTML=list.map(r=>`<tr><td>${esc(r.id)}</td><td>${esc(r.name||'')}</td><td>${esc(r.mobile||'')}</td><td>${esc(r.city||'')}</td><td>${esc(r.dob||'')}</td><td>${esc(r.age||'')}</td><td>${esc(r.role||'')}</td><td>${esc(r.age_group||'')}</td><td>${esc(r.payment_status||'Pending')}</td><td>${esc(r.assigned_category||'Pending until trials & auction')}</td><td>${r.photo_url?`<a href="${esc(r.photo_url)}" target="_blank">View</a>`:''}</td><td>${r.proof_url?`<a href="${esc(r.proof_url)}" target="_blank">View</a>`:''}</td><td>₹${esc(r.fee||'999')}</td><td>${esc(formatDateSafe(r.created_at)||'')}</td></tr>`).join('');
+        };
+        [search,ageFilter,roleFilter].forEach(el=>el?.addEventListener('input',drawRegs));
+        [ageFilter,roleFilter].forEach(el=>el?.addEventListener('change',drawRegs));
+        $('#exportAllRegs')?.addEventListener('click',()=>downloadCsv('tmpcl-all-registrations.csv', regs));
+        $('#exportU19Regs')?.addEventListener('click',()=>downloadCsv('tmpcl-u19-registrations.csv', regs.filter(r=>r.age_group==='U19')));
+        $('#exportOpenRegs')?.addEventListener('click',()=>downloadCsv('tmpcl-open-registrations.csv', regs.filter(r=>r.age_group==='Open')));
+        $('#exportFilteredRegs')?.addEventListener('click',()=>downloadCsv('tmpcl-filtered-registrations.csv', filteredRegs()));
+        drawRegs();
+      }
       const msgTb=$('#msgTable tbody'); if(msgTb){ $('#emptyMsgs').style.display=msgs.length?'none':'block'; msgTb.innerHTML=msgs.map(m=>`<tr><td>${esc(m.name||'')}</td><td>${esc(m.mobile||'')}</td><td>${esc(m.email||'')}</td><td>${esc(m.enquiry_type||'General Support')}</td><td>${esc(m.message||'')}</td><td>${esc(m.created_at||'')}</td></tr>`).join(''); }
       const pEnqTb=$('#partnerEnquiriesTable tbody'); if(pEnqTb){ $('#emptyPartnerEnquiries').style.display=partnerEnq.length?'none':'block'; pEnqTb.innerHTML=partnerEnq.map(m=>`<tr><td>${esc(m.name||'')}</td><td>${esc(m.brand||'')}</td><td>${esc(m.category||'')}</td><td>${esc(m.mobile||'')}</td><td>${esc(m.email||'')}</td><td>${esc(m.message||'')}</td><td>${esc(m.created_at||'')}</td></tr>`).join(''); }
     } catch(err){ showDbError('Dashboard load',err); }
