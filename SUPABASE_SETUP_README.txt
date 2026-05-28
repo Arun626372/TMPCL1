@@ -20,3 +20,7 @@ BRAND AMBASSADOR SQL NOTE:
 - The latest `supabase-schema.sql` now includes two safe placeholder brand ambassador records.
 - If you already ran the older schema, run `supabase-brand-ambassador-update.sql` once in Supabase SQL Editor.
 - No data will be deleted; the SQL uses `create table if not exists` and `on conflict do nothing`.
+
+
+CLEAN BASELINE NOTE:
+This package uses a clean consolidated styles.css. Old visual patch layers have been removed. Use supabase-schema.sql for full database setup.
