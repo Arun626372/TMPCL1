@@ -264,9 +264,13 @@ values
   ('team-gwalior', 'Gwalior Royals', 'Gwalior', 'Captain Coming Soon', 'Player Auction Pending')
 on conflict (id) do nothing;
 
+-- Default leadership, selection panel and brand ambassador profiles.
+-- These are safe placeholder records. TMPCL Team Dashboard se edit/delete kiye ja sakte hain.
 insert into public.leadership_panel (id, name, type, designation, bio)
 values
   ('leader-founder', 'Founder Name', 'Founder & League Owner', 'Founder & League Owner, TMPCL', 'TMPCL ka mission Madhya Pradesh ke tennis ball cricket talent ko professional trials, player auction aur league platform ke through bada stage dena hai.'),
+  ('leader-brand-ambassador-1', 'Brand Ambassador 1', 'Brand Ambassador', 'Brand Ambassador, TMPCL', 'TMPCL ke official brand face ke roop me Madhya Pradesh ke tennis ball cricket talent mission ko support karenge.'),
+  ('leader-brand-ambassador-2', 'Brand Ambassador 2', 'Brand Ambassador', 'Brand Ambassador, TMPCL', 'TMPCL ki energy, sportsmanship aur player recognition mission ko represent karenge.'),
   ('leader-head-selector', 'Head Selector Name', 'Head Selector', 'Head Selector, TMPCL Selection Committee', 'Trials me performance, fitness, game awareness aur potential ke basis par player evaluation aur category grading manage karenge.'),
   ('leader-selector-1', 'Selector Name', 'Selector', 'Selector, TMPCL Selection Committee', 'Player shortlisting, category grading aur player auction pool preparation me support karenge.')
 on conflict (id) do nothing;
