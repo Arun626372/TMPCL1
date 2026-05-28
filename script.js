@@ -94,3 +94,50 @@
     $('#logoutBtn')?.addEventListener('click',()=>{ sessionStorage.removeItem('tmpclTeamAccess'); location.href='admin-login.html'; });
   }
 })();
+
+// Leadership, Founder and Selection Panel controls
+(function(){
+  const $=(s,r=document)=>r.querySelector(s);
+  const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+  const get=k=>{try{return JSON.parse(localStorage.getItem(k)||'[]')}catch(e){return []}};
+  const set=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+  function initials(name,fallback='TM'){return (name||fallback).split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase()||fallback}
+  function readFile(input){return new Promise(resolve=>{if(!input||!input.files||!input.files[0]) return resolve(''); const r=new FileReader(); r.onload=()=>resolve(r.result); r.readAsDataURL(input.files[0]);});}
+  const defaults=[
+    {id:'leader-founder',name:'Founder Name',type:'Founder & League Owner',designation:'Founder & League Owner, TMPCL',bio:'TMPCL ka mission Madhya Pradesh ke tennis ball cricket talent ko professional trials, player auction aur league platform ke through bada stage dena hai.',photo:''},
+    {id:'leader-head-selector',name:'Head Selector Name',type:'Head Selector',designation:'Head Selector, TMPCL Selection Committee',bio:'Trials me performance, fitness, game awareness aur potential ke basis par player evaluation aur category grading manage karenge.',photo:''},
+    {id:'leader-selector-1',name:'Selector Name',type:'Selector',designation:'Selector, TMPCL Selection Committee',bio:'Player shortlisting, category grading aur player auction pool preparation me support karenge.',photo:''}
+  ];
+  function getLeadership(){
+    if(localStorage.getItem('tmpclLeadership')===null) set('tmpclLeadership',defaults);
+    return get('tmpclLeadership');
+  }
+  function leaderCard(p){
+    const photo=p.photo?`<img src="${p.photo}" alt="${p.name}">`:`<span>${initials(p.name)}</span>`;
+    return `<article class="leader-card"><div class="leader-photo">${photo}</div><div class="leader-copy"><small>${p.type||'TMPCL Leadership'}</small><h3>${p.name||'Name Coming Soon'}</h3><div class="designation">${p.designation||p.type||'TMPCL Team'}</div><p>${p.bio||'Profile details will be updated by TMPCL Team.'}</p></div></article>`;
+  }
+  function renderPublicLeadership(){
+    const leaders=getLeadership();
+    const founder=leaders.find(x=>(x.type||'').includes('Founder')) || leaders[0];
+    const selectors=leaders.filter(x=>/(Selector|Coach|Advisor)/i.test(x.type||''));
+    const home=$('#homeFounderCard'); if(home && founder) home.innerHTML=leaderCard(founder);
+    const about=$('#aboutLeadershipGrid'); if(about){ about.innerHTML=leaders.filter(x=>(x.type||'').includes('Founder')).map(leaderCard).join('') || (founder?leaderCard(founder):''); }
+    const sel=$('#selectionPanelGrid'), empty=$('#selectionPanelEmpty');
+    if(sel){ sel.innerHTML=selectors.map(leaderCard).join(''); if(empty) empty.style.display=selectors.length?'none':'block'; }
+  }
+  renderPublicLeadership();
+
+  function renderLeadershipAdmin(){
+    const tb=$('#leadershipAdminTable tbody'); if(!tb) return;
+    const items=getLeadership(); const empty=$('#emptyLeadershipAdmin'); if(empty) empty.style.display=items.length?'none':'block';
+    tb.innerHTML=items.map(p=>{const photo=p.photo?`<img src="${p.photo}" alt="${p.name}">`:`<span>${initials(p.name)}</span>`; return `<tr><td><div class="leader-thumb">${photo}</div></td><td>${p.name||''}</td><td>${p.type||''}</td><td>${p.designation||''}</td><td>${p.bio||''}</td><td><div class="admin-table-actions"><button class="mini-btn" data-edit-leader="${p.id}">Edit</button><button class="mini-btn danger" data-delete-leader="${p.id}">Delete</button></div></td></tr>`;}).join('');
+    $$('[data-edit-leader]',tb).forEach(btn=>btn.addEventListener('click',()=>{const p=getLeadership().find(x=>x.id===btn.dataset.editLeader); if(!p) return; $('#personId').value=p.id; $('#personName').value=p.name||''; $('#personType').value=p.type||'Selector'; $('#personDesignation').value=p.designation||''; $('#personBio').value=p.bio||''; const s=$('#leadershipSuccess'); if(s){s.style.display='block'; s.innerHTML='<strong>Edit mode:</strong> Details change karke Save / Update Profile par click karein. Existing photo tab tak rahegi jab tak new photo upload nahi karte.';} window.scrollTo({top:0,behavior:'smooth'}); }));
+    $$('[data-delete-leader]',tb).forEach(btn=>btn.addEventListener('click',()=>{ if(!confirm('Delete this profile?')) return; set('tmpclLeadership',getLeadership().filter(x=>x.id!==btn.dataset.deleteLeader)); renderLeadershipAdmin(); renderPublicLeadership(); }));
+  }
+  const form=$('#leadershipForm');
+  if(form){
+    form.addEventListener('submit',async e=>{e.preventDefault(); const fd=new FormData(form); const id=fd.get('personId')||('leader-'+Date.now()); const items=getLeadership(); const existing=items.find(x=>x.id===id); const photo=await readFile($('#personPhoto')); const obj={id,name:fd.get('personName'),type:fd.get('personType'),designation:fd.get('personDesignation')||fd.get('personType'),bio:fd.get('personBio')||'',photo:photo||(existing&&existing.photo)||''}; const next=items.filter(x=>x.id!==id); next.unshift(obj); set('tmpclLeadership',next); const s=$('#leadershipSuccess'); if(s){s.style.display='block'; s.innerHTML='<strong>Profile saved successfully.</strong> Public pages par update show hoga.';} form.reset(); $('#personId').value=''; renderLeadershipAdmin(); renderPublicLeadership();});
+    $('#leadershipFormReset')?.addEventListener('click',()=>{form.reset(); $('#personId').value=''; const s=$('#leadershipSuccess'); if(s) s.style.display='none';});
+    renderLeadershipAdmin();
+  }
+})();

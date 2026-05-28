@@ -2,6 +2,22 @@
 <div class="stat-grid"><article class="card"><small>Total Registrations</small><div id="statRegistrations" class="stat-value">0</div></article><article class="card"><small>Total Teams</small><div id="statTeams" class="stat-value">0</div></article><article class="card"><small>Squad Banners</small><div id="statSquadBanners" class="stat-value">0</div></article><article class="card"><small>U19 Players</small><div id="statU19" class="stat-value">0</div></article><article class="card"><small>Gallery Media</small><div id="statGallery" class="stat-value">0</div></article><article class="card"><small>News Posts</small><div id="statNews" class="stat-value">0</div></article><article class="card"><small>Published Partners</small><div id="statPartners" class="stat-value">0</div></article><article class="card"><small>Partner Enquiries</small><div id="statPartnerEnquiries" class="stat-value">0</div></article></div>
 
 
+
+<section class="admin-manage-grid single-admin-manage leadership-admin-section">
+  <article class="card"><h3>Leadership & Selection Panel</h3><p class="muted">Founder/Owner aur selectors ke profile yahan se add/edit/delete kar sakte hain. Public pages par Founder About/Home me aur selectors Categories page par show honge.</p><form id="leadershipForm" class="admin-small-form">
+    <input type="hidden" name="personId" id="personId">
+    <div class="admin-field"><label>Name *</label><input name="personName" id="personName" required placeholder="Person name"></div>
+    <div class="admin-field"><label>Role Type</label><select name="personType" id="personType"><option>Founder & League Owner</option><option>Head Selector</option><option>Selector</option><option>Coach / Advisor</option></select></div>
+    <div class="admin-field"><label>Designation</label><input name="personDesignation" id="personDesignation" placeholder="Founder & League Owner, TMPCL"></div>
+    <div class="admin-field"><label>Short Bio / Message</label><textarea name="personBio" id="personBio" placeholder="Short message, experience or responsibility"></textarea></div>
+    <div class="admin-field"><label>Photo</label><input name="personPhoto" id="personPhoto" type="file" accept="image/*"><small class="muted">Photo optional hai. Photo nahi hoga to clean initials placeholder show hoga.</small></div>
+    <button class="btn" type="submit">Save / Update Profile</button>
+    <button class="btn ghost" type="button" id="leadershipFormReset">Clear Form</button>
+    <div id="leadershipSuccess" class="success"></div>
+  </form></article>
+</section>
+
+<article class="card" style="margin-top:18px"><h3>Leadership & Selection Panel List</h3><div style="overflow:auto"><table id="leadershipAdminTable" class="table"><thead><tr><th>Photo</th><th>Name</th><th>Role Type</th><th>Designation</th><th>Bio / Message</th><th>Actions</th></tr></thead><tbody></tbody></table></div><p id="emptyLeadershipAdmin" class="muted">No leadership profiles yet.</p></article>
 <section class="admin-manage-grid single-admin-manage">
   <article class="card"><h3>Manage Partners</h3><p class="muted">Yahan se TMPCL Team partner logos publish karegi. Public Partners page par sirf published partners show honge.</p><form id="partnerManageForm" class="admin-small-form">
     <input type="hidden" name="partnerId" id="partnerId">
