@@ -1,4 +1,17 @@
 (function(){
+  const SUPABASE_URL = 'https://ybfrnvkikhtlouocobnk.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_sAoJrKNHTQGsmhbu5oOapw_DgpJf-A3';
+  const STORAGE_BUCKETS = {
+    playerPhoto: 'player-photos',
+    idProof: 'id-proofs',
+    teamLogo: 'team-logos',
+    squadBanner: 'squad-banners',
+    gallery: 'gallery-media',
+    partnerLogo: 'partner-logos',
+    leadershipPhoto: 'leadership-photos',
+    newsImage: 'news-images'
+  };
+
   const $ = (s, r=document) => r.querySelector(s);
   const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
   const page = document.body.dataset.page || '';
@@ -6,138 +19,267 @@
   const hamb = $('.hamb'), links = $('.links');
   if(hamb && links) hamb.addEventListener('click', () => links.classList.toggle('open'));
 
-  const get = k => { try { return JSON.parse(localStorage.getItem(k) || '[]'); } catch(e){ return []; } };
-  const set = (k,v) => localStorage.setItem(k, JSON.stringify(v));
+  const esc = (v='') => String(v ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
   const fmt = () => new Date().toLocaleString('en-IN');
   const makeId = p => p + '-' + Date.now().toString().slice(-7);
   const ageFromDob = dob => { if(!dob) return 0; const b=new Date(dob), t=new Date(); let a=t.getFullYear()-b.getFullYear(); const m=t.getMonth()-b.getMonth(); if(m<0 || (m===0 && t.getDate()<b.getDate())) a--; return a; };
-  function readFileAsDataURL(input){ return new Promise(resolve=>{ if(!input || !input.files || !input.files[0]) return resolve(''); const r=new FileReader(); r.onload=()=>resolve(r.result); r.readAsDataURL(input.files[0]); }); }
-  function initials(name, fallback='TM'){ return (name||fallback).split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase() || fallback; }
+  const initials = (name, fallback='TM') => (name||fallback).split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase() || fallback;
 
-  const sampleTeams = [
-    {id:'team-bhopal', name:'Bhopal Strikers', city:'Bhopal', owner:'Captain Coming Soon', status:'Player Auction Pending', logo:'', squadBanner:''},
-    {id:'team-indore', name:'Indore Warriors', city:'Indore', owner:'Captain Coming Soon', status:'Player Auction Pending', logo:'', squadBanner:''},
-    {id:'team-gwalior', name:'Gwalior Royals', city:'Gwalior', owner:'Captain Coming Soon', status:'Player Auction Pending', logo:'', squadBanner:''}
-  ];
-  function getTeams(){ const teams=get('tmpclTeams'); return teams.length ? teams : sampleTeams; }
-  const defaultNews = [{id:'news-opening-ceremony-01-jun', tag:'Opening Ceremony', title:'TMPCL Opening Ceremony on 01 June', summary:'TMPCL ki grand opening ceremony 01 June ko hogi. League updates, team presentation aur event moments yahin publish honge.', date:'2026-06-01', image:''}];
-  function getNewsItems(){ if(localStorage.getItem('tmpclNews')===null) set('tmpclNews', defaultNews); return get('tmpclNews'); }
-  const getPartners = () => get('tmpclPartners');
+  async function api(path, options={}){
+    const res = await fetch(`${SUPABASE_URL}${path}`, {
+      ...options,
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        ...(options.body instanceof FormData ? {} : {'Content-Type':'application/json'}),
+        ...(options.headers || {})
+      }
+    });
+    if(!res.ok){
+      let text = await res.text().catch(()=>res.statusText);
+      throw new Error(text || res.statusText);
+    }
+    if(res.status === 204) return null;
+    return res.json().catch(()=>null);
+  }
+
+  async function selectRows(table, query='select=*'){
+    const sep = query ? '?' : '';
+    return await api(`/rest/v1/${table}${sep}${query}`) || [];
+  }
+  async function insertRow(table, row){
+    const result = await api(`/rest/v1/${table}`, {method:'POST', headers:{Prefer:'return=representation'}, body:JSON.stringify(row)});
+    return Array.isArray(result) ? result[0] : result;
+  }
+  async function updateRow(table, id, row){
+    const result = await api(`/rest/v1/${table}?id=eq.${encodeURIComponent(id)}`, {method:'PATCH', headers:{Prefer:'return=representation'}, body:JSON.stringify(row)});
+    return Array.isArray(result) ? result[0] : result;
+  }
+  async function deleteRow(table, id){
+    return await api(`/rest/v1/${table}?id=eq.${encodeURIComponent(id)}`, {method:'DELETE'});
+  }
+  async function saveRow(table, row){
+    const id = row.id;
+    if(!id) throw new Error('Missing row ID');
+    const exists = await selectRows(table, `select=id&id=eq.${encodeURIComponent(id)}&limit=1`).catch(()=>[]);
+    return exists.length ? updateRow(table, id, row) : insertRow(table, row);
+  }
+  async function uploadFile(bucket, input, prefix){
+    if(!input || !input.files || !input.files[0]) return '';
+    const file = input.files[0];
+    const safe = file.name.replace(/[^a-z0-9.\-_]/gi,'-').toLowerCase();
+    const path = `${prefix}/${Date.now()}-${safe}`;
+    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/${bucket}/${path}`, {
+      method:'POST',
+      headers:{apikey:SUPABASE_ANON_KEY, Authorization:`Bearer ${SUPABASE_ANON_KEY}`, 'x-upsert':'true', 'Content-Type':file.type || 'application/octet-stream'},
+      body:file
+    });
+    if(!res.ok){
+      const text = await res.text().catch(()=>res.statusText);
+      throw new Error(text || 'File upload failed');
+    }
+    return `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${path}`;
+  }
+
+  function showSuccess(el, html){ if(el){ el.style.display='block'; el.innerHTML=html; } }
+  function setLoading(btn, isLoading, text='Saving...'){
+    if(!btn) return;
+    if(isLoading){ btn.dataset.oldText = btn.innerHTML; btn.innerHTML = text; btn.disabled = true; }
+    else { btn.innerHTML = btn.dataset.oldText || btn.innerHTML; btn.disabled = false; }
+  }
+  function showDbError(where, err){
+    console.error(`TMPCL ${where}:`, err);
+    const msg = (err && err.message) ? err.message : String(err);
+    alert(`Database error in ${where}. Pehle supabase-schema.sql ko Supabase SQL Editor me run karein.\n\n${msg.slice(0,240)}`);
+  }
 
   function openSquadBanner(team){
     $('#squadBannerModal')?.remove();
     const modal=document.createElement('div');
     modal.id='squadBannerModal'; modal.className='squad-banner-modal';
-    modal.innerHTML=`<div class="squad-modal-backdrop" data-close-squad="1"></div><div class="squad-modal-card"><button class="squad-modal-close" data-close-squad="1" type="button">×</button><div class="squad-modal-head"><div><small>Official Squad Banner</small><h3>${team.name}</h3><p>${team.city||''} · ${team.status||'Player Auction Pending'}</p></div></div>${team.squadBanner?`<img class="squad-banner-img" src="${team.squadBanner}" alt="${team.name} squad banner">`:`<div class="squad-banner-placeholder"><div class="team-logo-box big"><span>${initials(team.name)}</span></div><h3>Squad Banner Coming Soon</h3><p>Player Auction complete hone ke baad TMPCL Team se squad banner/poster upload karne par yahan show hoga.</p></div>`}<div class="squad-modal-actions"><button class="btn ghost" data-close-squad="1" type="button">Close</button>${team.squadBanner?`<a class="btn" href="${team.squadBanner}" target="_blank" rel="noopener">View Full Size</a>`:''}</div></div>`;
+    const logo = team.logo_url || team.logo || '';
+    const banner = team.squad_banner_url || team.squadBanner || '';
+    modal.innerHTML=`<div class="squad-modal-backdrop" data-close-squad="1"></div><div class="squad-modal-card"><button class="squad-modal-close" data-close-squad="1" type="button">×</button><div class="squad-modal-head"><div>${logo?`<img src="${esc(logo)}" style="width:58px;height:58px;object-fit:cover;border-radius:14px;margin-bottom:10px">`:''}<small>Official Squad Banner</small><h3>${esc(team.name)}</h3><p>${esc(team.city||'')} · ${esc(team.status||'Player Auction Pending')}</p></div></div>${banner?`<img class="squad-banner-img" src="${esc(banner)}" alt="${esc(team.name)} squad banner">`:`<div class="squad-banner-placeholder"><div class="team-logo-box big"><span>${initials(team.name)}</span></div><h3>Squad Banner Coming Soon</h3><p>Player Auction complete hone ke baad TMPCL Team se squad banner/poster upload karne par yahan show hoga.</p></div>`}<div class="squad-modal-actions"><button class="btn ghost" data-close-squad="1" type="button">Close</button>${banner?`<a class="btn" href="${esc(banner)}" target="_blank" rel="noopener">View Full Size</a>`:''}</div></div>`;
     document.body.appendChild(modal);
     modal.querySelectorAll('[data-close-squad]').forEach(el=>el.addEventListener('click',()=>modal.remove()));
   }
 
-  function renderPublicTeams(){
+  async function renderPublicTeams(){
     const grid=$('#teamsGrid'); if(!grid) return;
-    const teams=getTeams();
-    grid.innerHTML=teams.map(team=>{ const logo=team.logo?`<img src="${team.logo}" alt="${team.name} logo">`:`<span>${initials(team.name)}</span>`; return `<article class="team-card" data-team-id="${team.id}"><div class="team-card-head"><div class="team-logo-box">${logo}</div><div><h3>${team.name}</h3><div class="team-city">${team.city||''}</div><span class="team-status">${team.status||'Player Auction Pending'}</span></div></div><div class="team-meta-row"><div class="team-meta"><strong>18</strong><span>Total Squad</span></div><div class="team-meta"><strong>A-5</strong><span>Category A</span></div><div class="team-meta"><strong>D-3</strong><span>Only U19</span></div></div><button class="btn ghost team-toggle" type="button">View Squad</button></article>`; }).join('');
-    $$('.team-card', grid).forEach(card=>card.addEventListener('click',()=>{ const team=getTeams().find(t=>t.id===card.dataset.teamId); if(team) openSquadBanner(team); }));
+    try{
+      const teams = await selectRows('teams','select=*&order=created_at.asc');
+      grid.innerHTML = teams.map(team=>{
+        const logo=team.logo_url?`<img src="${esc(team.logo_url)}" alt="${esc(team.name)} logo">`:`<span>${initials(team.name)}</span>`;
+        return `<article class="team-card" data-team-id="${esc(team.id)}"><div class="team-card-head"><div class="team-logo-box">${logo}</div><div><h3>${esc(team.name)}</h3><div class="team-city">${esc(team.city||'')}</div><span class="team-status">${esc(team.status||'Player Auction Pending')}</span></div></div><div class="team-meta-row"><div class="team-meta"><strong>18</strong><span>Total Squad</span></div><div class="team-meta"><strong>A-5</strong><span>Category A</span></div><div class="team-meta"><strong>D-3</strong><span>Only U19</span></div></div><button class="btn ghost team-toggle" type="button">View Squad</button></article>`;
+      }).join('') || `<article class="card"><h3>Teams Coming Soon</h3><p class="muted">TMPCL Team se teams publish hone ke baad yahan show hongi.</p></article>`;
+      $$('.team-card', grid).forEach(card=>card.addEventListener('click',()=>{ const team=teams.find(t=>t.id===card.dataset.teamId); if(team) openSquadBanner(team); }));
+    } catch(err){ console.error(err); }
   }
-  renderPublicTeams();
 
-  function renderPublicPartners(){
+  async function renderPublicPartners(){
     const grid=$('#publishedPartnersGrid'); if(!grid) return;
-    const published=getPartners().filter(p=>(p.status||'Published')==='Published');
-    const empty=$('#partnersEmpty'); if(empty) empty.style.display=published.length?'none':'block';
-    grid.innerHTML=published.map(p=>{ const logo=p.logo?`<img src="${p.logo}" alt="${p.name} logo">`:`<span>${initials(p.name,'TP')}</span>`; const link=p.link?`<a href="${p.link}" target="_blank" rel="noopener" class="mini-btn">Visit Link</a>`:''; return `<article class="partner-public-card"><div class="partner-public-logo">${logo}</div><div><span class="tag">${p.category||'Partner'}</span><h3>${p.name}</h3><p>${p.description||'Official TMPCL partner.'}</p>${link}</div></article>`; }).join('');
+    try{
+      const published = await selectRows('partners', 'select=*&status=eq.Published&order=created_at.desc');
+      const empty=$('#partnersEmpty'); if(empty) empty.style.display=published.length?'none':'block';
+      grid.innerHTML=published.map(p=>{ const logo=p.logo_url?`<img src="${esc(p.logo_url)}" alt="${esc(p.name)} logo">`:`<span>${initials(p.name,'TP')}</span>`; const link=p.link?`<a href="${esc(p.link)}" target="_blank" rel="noopener" class="mini-btn">Visit Link</a>`:''; return `<article class="partner-public-card"><div class="partner-public-logo">${logo}</div><div><span class="tag">${esc(p.category||'Partner')}</span><h3>${esc(p.name)}</h3><p>${esc(p.description||'Official TMPCL partner.')}</p>${link}</div></article>`; }).join('');
+    } catch(err){ console.error(err); }
   }
-  renderPublicPartners();
 
-  const regFee=$('#regFee'), regTotal=$('#regTotal'); if(regFee) regFee.textContent='₹999'; if(regTotal) regTotal.textContent='₹999';
-  const regForm=$('#registrationForm');
-  if(regForm){ regForm.addEventListener('submit', e=>{ e.preventDefault(); const data=Object.fromEntries(new FormData(regForm).entries()); const age=ageFromDob(data.dob); const photo=regForm.querySelector('input[name="photo"]'); const aadhaar=regForm.querySelector('input[name="aadhaar"]'); if(!data.dob){ alert('Date of Birth mandatory hai.'); return; } if(!photo || !photo.files.length){ alert('Player photo upload mandatory hai.'); return; } if(!aadhaar || !aadhaar.files.length){ alert('Aadhaar Card / Age Proof upload mandatory hai.'); return; } if(data.ageGroup==='U19' && age>19){ alert('U19 age group ke liye Date of Birth ke hisab se age 19 ya usse kam honi chahiye.'); return; } const entry={...data,id:makeId('TMPCL'),date:fmt(),fee:999,age,assignedCategory:'Pending until trials & auction',photoFile:photo.files[0].name,aadhaarFile:aadhaar.files[0].name}; const regs=get('tmpclRegs'); regs.unshift(entry); set('tmpclRegs',regs); const success=$('#regSuccess'); if(success){ success.style.display='block'; success.innerHTML=`<strong>Registration successful!</strong><br>Registration ID: <strong>${entry.id}</strong><br>Amount: ₹999`; } regForm.reset(); }); }
+  async function renderPublicNews(){
+    const newsList=$('#newsList'); if(!newsList) return;
+    try{
+      const posts = await selectRows('news_updates','select=*&order=date.desc,created_at.desc');
+      const empty=$('#newsEmpty'); if(empty) empty.style.display=posts.length?'none':'block';
+      newsList.innerHTML=posts.map(p=>{ const img=p.image_url?`<div class="thumb news-thumb-img" style="background-image:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.55)),url('${esc(p.image_url)}')"></div>`:`<div class="thumb"></div>`; const date=p.date?`<small class="muted">${esc(p.date)}</small>`:''; return `<article class="card news-card">${img}<div><span class="tag">${esc(p.tag||'Update')}</span><h3>${esc(p.title)}</h3>${date}<p>${esc(p.summary||'')}</p></div></article>`; }).join('');
+    } catch(err){ console.error(err); }
+  }
 
-  const contactForm=$('#contactForm');
-  if(contactForm){ contactForm.addEventListener('submit', e=>{ e.preventDefault(); const data=Object.fromEntries(new FormData(contactForm).entries()); const msgs=get('tmpclMessages'); msgs.unshift({...data,date:fmt()}); set('tmpclMessages',msgs); const s=$('#contactSuccess'); if(s){ s.style.display='block'; s.innerHTML='<strong>Message sent successfully.</strong> TMPCL Team will contact you soon.'; } contactForm.reset(); }); }
-
-  const partnerForm=$('#partnerForm');
-  if(partnerForm){ partnerForm.addEventListener('submit', e=>{ e.preventDefault(); const data=Object.fromEntries(new FormData(partnerForm).entries()); const all=get('tmpclPartnerMessages'); all.unshift({...data,date:fmt()}); set('tmpclPartnerMessages',all); const s=$('#partnerSuccess'); if(s){ s.style.display='block'; s.innerHTML='<strong>Partnership enquiry submitted.</strong> TMPCL Team will contact you soon.'; } partnerForm.reset(); }); }
-
-  const newsList=$('#newsList');
-  if(newsList){ const empty=$('#newsEmpty'); const posts=getNewsItems(); if(empty) empty.style.display=posts.length?'none':'block'; newsList.innerHTML=posts.map(p=>{ const img=p.image?`<div class="thumb news-thumb-img" style="background-image:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.55)),url('${p.image}')"></div>`:`<div class="thumb"></div>`; const date=p.date?`<small class="muted">${p.date}</small>`:''; return `<article class="card news-card">${img}<div><span class="tag">${p.tag||'Update'}</span><h3>${p.title}</h3>${date}<p>${p.summary||''}</p></div></article>`; }).join(''); }
-
-  const galleryGrid=$('#galleryGrid');
-  if(galleryGrid){ const empty=$('#galleryEmpty'), modal=$('#galleryModal'), title=$('#galleryModalTitle'), visual=modal?modal.querySelector('.gallery-modal-visual'):null, desc=modal?modal.querySelector('p'):null; const allItems=get('tmpclGallery'); function card(item){ const bg=item.image?`style="background-image:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.76)),url('${item.image}')"`:''; const play=item.type==='videos'||item.url?'<div class="play">▶</div>':''; const date=item.date?`<p>${item.date}</p>`:'<p>TMPCL published media</p>'; return `<article class="card media-card" data-id="${item.id}" data-type="${item.category}" ${bg}>${play}<div class="label"><span class="tag">${item.category}</span><h3>${item.title}</h3>${date}</div></article>`; } function render(filter='all'){ const items=allItems.filter(item=>filter==='all'||item.category===filter||(filter==='videos'&&item.type==='videos')); galleryGrid.innerHTML=items.map(card).join(''); if(empty) empty.style.display=allItems.length?'none':'block'; $$('.media-card',galleryGrid).forEach(c=>c.addEventListener('click',()=>{ const item=allItems.find(g=>g.id===c.dataset.id); if(!item||!modal) return; if(title) title.textContent=item.title||'TMPCL Media'; if(visual){ visual.innerHTML=item.type==='videos'||item.url?'<div class="play modal-play">▶</div>':''; visual.style.backgroundImage=item.image?`linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.55)),url('${item.image}')`:''; visual.style.backgroundSize='cover'; visual.style.backgroundPosition='center'; } if(desc) desc.innerHTML=item.url?`<a class="btn" href="${item.url}" target="_blank" rel="noopener">Open Video / Link →</a>`:'Published TMPCL media preview.'; modal.classList.add('open'); })); } $$('.filter').forEach(btn=>btn.addEventListener('click',()=>{ $$('.filter').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); render(btn.dataset.filter); })); $$('.gallery-modal-close,[data-gallery-close]').forEach(btn=>btn.addEventListener('click',()=>modal&&modal.classList.remove('open'))); render(); }
-
-  const teamLoginForm=$('#adminLoginForm');
-  if(teamLoginForm){ teamLoginForm.addEventListener('submit', e=>{ e.preventDefault(); const data=Object.fromEntries(new FormData(teamLoginForm).entries()); if(data.username==='team' && data.password==='tmpcl123'){ sessionStorage.setItem('tmpclTeamAccess','1'); location.href='admin-dashboard.html'; } else { const er=$('#adminLoginError'); if(er){ er.style.display='block'; er.textContent='Invalid login. Use team / tmpcl123'; } } }); }
-
-  if($('#regTable')){
-    if(sessionStorage.getItem('tmpclTeamAccess')!=='1'){ location.href='admin-login.html'; return; }
-    function renderDashboard(){
-      const regs=get('tmpclRegs'), msgs=get('tmpclMessages'), teams=getTeams(), galleryItems=get('tmpclGallery'), newsItems=getNewsItems(), partnerItems=getPartners(), partnerEnquiries=get('tmpclPartnerMessages');
-      $('#statRegistrations').textContent=regs.length; $('#statTeams')&&($('#statTeams').textContent=teams.length); $('#statSquadBanners')&&($('#statSquadBanners').textContent=teams.filter(t=>!!t.squadBanner).length); $('#statU19')&&($('#statU19').textContent=regs.filter(r=>r.ageGroup==='U19'||Number(r.age)<=19).length); $('#statGallery')&&($('#statGallery').textContent=galleryItems.length); $('#statNews')&&($('#statNews').textContent=newsItems.length); $('#statPartners')&&($('#statPartners').textContent=partnerItems.filter(p=>(p.status||'Published')==='Published').length); $('#statPartnerEnquiries')&&($('#statPartnerEnquiries').textContent=partnerEnquiries.length); $('#statContactEnquiries')&&($('#statContactEnquiries').textContent=msgs.length);
-      const pb=$('#partnersAdminTable tbody'); if(pb){ $('#emptyPartnersAdmin').style.display=partnerItems.length?'none':'block'; pb.innerHTML=partnerItems.map(item=>{ const preview=item.logo?`<img src="${item.logo}" style="width:60px;height:42px;border-radius:10px;object-fit:contain;background:#fff;padding:4px">`:`<span class="badge muted-badge">${initials(item.name,'TP')}</span>`; const link=item.link?`<a class="mini-btn" href="${item.link}" target="_blank" rel="noopener">Open</a>`:`<span class="muted">—</span>`; return `<tr><td>${preview}</td><td>${item.name}</td><td>${item.category||''}</td><td>${item.status||'Published'}</td><td>${link}</td><td>${item.description||''}</td><td><div class="admin-table-actions"><button class="mini-btn" data-edit-partner="${item.id}">Edit</button><button class="mini-btn danger" data-delete-partner="${item.id}">Delete</button></div></td></tr>`; }).join(''); $$('[data-edit-partner]',pb).forEach(btn=>btn.addEventListener('click',()=>{ const item=partnerItems.find(p=>p.id===btn.dataset.editPartner); if(!item) return; $('#partnerId').value=item.id; $('#partnerName').value=item.name||''; $('#partnerCategory').value=item.category||'Title Sponsor'; $('#partnerLink').value=item.link||''; $('#partnerDescription').value=item.description||''; $('#partnerStatus').value=item.status||'Published'; const s=$('#partnerManageSuccess'); if(s){s.style.display='block'; s.innerHTML='<strong>Edit mode:</strong> Change fields and click Publish / Update Partner. Existing logo will remain unless you upload a new one.';} window.scrollTo({top:0,behavior:'smooth'}); })); $$('[data-delete-partner]',pb).forEach(btn=>btn.addEventListener('click',()=>{ if(!confirm('Delete this partner?')) return; set('tmpclPartners', partnerItems.filter(p=>p.id!==btn.dataset.deletePartner)); renderDashboard(); })); }
-      const pe=$('#partnerEnquiriesTable tbody'); if(pe){ $('#emptyPartnerEnquiries').style.display=partnerEnquiries.length?'none':'block'; pe.innerHTML=partnerEnquiries.map(m=>`<tr><td>${m.name||''}</td><td>${m.brand||''}</td><td>${m.category||''}</td><td>${m.mobile||''}</td><td>${m.email||''}</td><td>${m.message||''}</td><td>${m.date||''}</td></tr>`).join(''); }
-      const tb=$('#adminTeamsTable tbody'); if(tb){ $('#emptyTeams').style.display=teams.length?'none':'block'; tb.innerHTML=teams.map(t=>{ const logo=t.logo?`<img src="${t.logo}" style="width:42px;height:42px;border-radius:12px;object-fit:cover">`:`<strong>${initials(t.name)}</strong>`; const banner=t.squadBanner?`<span class="badge ok">Uploaded</span>`:`<span class="badge muted-badge">Not Added</span>`; return `<tr><td>${logo}</td><td>${t.name}</td><td>${t.city||''}</td><td>${t.owner||''}</td><td>${t.status||''}</td><td>${banner}</td><td><div class="admin-table-actions"><button class="mini-btn" data-edit-team="${t.id}">Edit</button><button class="mini-btn" data-preview-team="${t.id}">Preview</button><button class="mini-btn danger" data-delete-team="${t.id}">Delete</button></div></td></tr>`; }).join(''); $$('[data-edit-team]',tb).forEach(btn=>btn.addEventListener('click',()=>{ const team=teams.find(t=>t.id===btn.dataset.editTeam); if(!team) return; $('#teamId').value=team.id; $('#teamName').value=team.name; $('#teamCity').value=team.city||''; $('#teamOwner').value=team.owner||''; $('#teamStatus').value=team.status||'Player Auction Pending'; const s=$('#teamSuccess'); if(s){s.style.display='block'; s.innerHTML='<strong>Edit mode:</strong> Change fields and click Save / Update Team. Existing logo/banner will remain unless you upload new files.';} window.scrollTo({top:0,behavior:'smooth'}); })); $$('[data-preview-team]',tb).forEach(btn=>btn.addEventListener('click',()=>{ const team=teams.find(t=>t.id===btn.dataset.previewTeam); if(team) openSquadBanner(team); })); $$('[data-delete-team]',tb).forEach(btn=>btn.addEventListener('click',()=>{ if(!confirm('Delete this team?')) return; set('tmpclTeams',teams.filter(t=>t.id!==btn.dataset.deleteTeam)); renderDashboard(); })); }
-      const gb=$('#galleryAdminTable tbody'); if(gb){ $('#emptyGalleryAdmin').style.display=galleryItems.length?'none':'block'; gb.innerHTML=galleryItems.map(item=>{ const preview=item.image?`<img src="${item.image}" style="width:60px;height:42px;border-radius:10px;object-fit:cover">`:`<span class="badge muted-badge">No Image</span>`; const link=item.url?`<a class="mini-btn" href="${item.url}" target="_blank" rel="noopener">Open</a>`:`<span class="muted">—</span>`; return `<tr><td>${preview}</td><td>${item.title}</td><td>${item.type}</td><td>${item.category}</td><td>${item.date||''}</td><td>${link}</td><td><div class="admin-table-actions"><button class="mini-btn" data-edit-media="${item.id}">Edit</button><button class="mini-btn danger" data-delete-media="${item.id}">Delete</button></div></td></tr>`; }).join(''); $$('[data-edit-media]',gb).forEach(btn=>btn.addEventListener('click',()=>{ const item=galleryItems.find(g=>g.id===btn.dataset.editMedia); if(!item) return; $('#mediaId').value=item.id; $('#mediaTitle').value=item.title||''; $('#mediaType').value=item.type||'photos'; $('#mediaCategory').value=item.category||'events'; $('#mediaDate').value=item.date||''; $('#mediaUrl').value=item.url||''; const s=$('#gallerySuccess'); if(s){s.style.display='block'; s.innerHTML='<strong>Edit mode:</strong> Change fields and click Publish / Update Media. Existing image will remain unless you upload a new one.';} window.scrollTo({top:0,behavior:'smooth'}); })); $$('[data-delete-media]',gb).forEach(btn=>btn.addEventListener('click',()=>{ if(!confirm('Delete this gallery media?')) return; set('tmpclGallery',galleryItems.filter(g=>g.id!==btn.dataset.deleteMedia)); renderDashboard(); })); }
-      const nb=$('#newsAdminTable tbody'); if(nb){ $('#emptyNewsAdmin').style.display=newsItems.length?'none':'block'; nb.innerHTML=newsItems.map(item=>{ const preview=item.image?`<img src="${item.image}" style="width:60px;height:42px;border-radius:10px;object-fit:cover">`:`<span class="badge muted-badge">No Image</span>`; return `<tr><td>${preview}</td><td>${item.title}</td><td>${item.tag||''}</td><td>${item.date||''}</td><td>${item.summary||''}</td><td><div class="admin-table-actions"><button class="mini-btn" data-edit-news="${item.id}">Edit</button><button class="mini-btn danger" data-delete-news="${item.id}">Delete</button></div></td></tr>`; }).join(''); $$('[data-edit-news]',nb).forEach(btn=>btn.addEventListener('click',()=>{ const item=newsItems.find(n=>n.id===btn.dataset.editNews); if(!item) return; $('#newsId').value=item.id; $('#newsTitle').value=item.title||''; $('#newsTag').value=item.tag||'Announcement'; $('#newsDate').value=item.date||''; $('#newsSummary').value=item.summary||''; const s=$('#newsSuccess'); if(s){s.style.display='block'; s.innerHTML='<strong>Edit mode:</strong> Change fields and click Publish / Update News. Existing image will remain unless you upload a new one.';} window.scrollTo({top:0,behavior:'smooth'}); })); $$('[data-delete-news]',nb).forEach(btn=>btn.addEventListener('click',()=>{ if(!confirm('Delete this news update?')) return; set('tmpclNews',newsItems.filter(n=>n.id!==btn.dataset.deleteNews)); renderDashboard(); })); }
-      const rb=$('#regTable tbody'); if(rb){ $('#emptyRegs').style.display=regs.length?'none':'block'; rb.innerHTML=regs.map(r=>`<tr><td>${r.id}</td><td>${r.name||''}</td><td>${r.mobile||''}</td><td>${r.city||''}</td><td>${r.dob||''}</td><td>${r.age||''}</td><td>${r.role||''}</td><td>${r.ageGroup||''}</td><td>${r.assignedCategory||'Pending until trials & auction'}</td><td>${r.photoFile||''}</td><td>${r.aadhaarFile||''}</td><td>₹${r.fee||''}</td><td>${r.date||''}</td></tr>`).join(''); }
-      const mb=$('#msgTable tbody'); if(mb){ $('#emptyMsgs').style.display=msgs.length?'none':'block'; mb.innerHTML=msgs.map(m=>`<tr><td>${m.name||''}</td><td>${m.mobile||''}</td><td>${m.email||''}</td><td>${m.enquiryType||m.subject||'General Support'}</td><td>${m.message||''}</td><td>${m.date||''}</td></tr>`).join(''); }
+  async function renderPublicGallery(){
+    const galleryGrid=$('#galleryGrid'); if(!galleryGrid) return;
+    const empty=$('#galleryEmpty'), modal=$('#galleryModal'), title=$('#galleryModalTitle'), visual=modal?modal.querySelector('.gallery-modal-visual'):null, desc=modal?modal.querySelector('p'):null;
+    let allItems=[];
+    try{ allItems = await selectRows('gallery_media','select=*&order=created_at.desc'); }catch(err){ console.error(err); }
+    function card(item){ const bg=item.image_url?`style="background-image:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.76)),url('${esc(item.image_url)}')"`:''; const play=item.type==='videos'||item.url?'<div class="play">▶</div>':''; const date=item.date?`<p>${esc(item.date)}</p>`:'<p>TMPCL published media</p>'; return `<article class="card media-card" data-id="${esc(item.id)}" data-type="${esc(item.category)}" ${bg}>${play}<div class="label"><span class="tag">${esc(item.category)}</span><h3>${esc(item.title)}</h3>${date}</div></article>`; }
+    function render(filter='all'){
+      const items=allItems.filter(item=>filter==='all'||item.category===filter||(filter==='videos'&&item.type==='videos'));
+      galleryGrid.innerHTML=items.map(card).join('');
+      if(empty) empty.style.display=allItems.length?'none':'block';
+      $$('.media-card',galleryGrid).forEach(c=>c.addEventListener('click',()=>{ const item=allItems.find(g=>g.id===c.dataset.id); if(!item||!modal) return; if(title) title.textContent=item.title||'TMPCL Media'; if(visual){ visual.innerHTML=item.type==='videos'||item.url?'<div class="play modal-play">▶</div>':''; visual.style.backgroundImage=item.image_url?`linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.55)),url('${item.image_url}')`:''; } if(desc) desc.textContent=item.url?`Video/Reel Link: ${item.url}`:'TMPCL published gallery media.'; modal.classList.add('open'); }));
     }
+    render();
+    $$('.filter-btn').forEach(btn=>btn.addEventListener('click',()=>{ $$('.filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); render(btn.dataset.filter); }));
+    $$('[data-close-gallery]').forEach(x=>x.addEventListener('click',()=>modal?.classList.remove('open')));
+  }
+
+  async function renderPublicLeadership(){
+    const home=$('#homeFounderCard'), about=$('#aboutLeadershipGrid'), sel=$('#selectionPanelGrid'), empty=$('#selectionPanelEmpty');
+    if(!home && !about && !sel) return;
+    try{
+      const leaders = await selectRows('leadership_panel','select=*&order=created_at.asc');
+      const founder = leaders.find(x=>(x.type||'').includes('Founder')) || leaders[0];
+      const selectors = leaders.filter(x=>/(Selector|Coach|Advisor)/i.test(x.type||''));
+      const card = p => { const photo=p.photo_url?`<img src="${esc(p.photo_url)}" alt="${esc(p.name)}">`:`<span>${initials(p.name)}</span>`; return `<article class="leader-card"><div class="leader-photo">${photo}</div><div class="leader-copy"><small>${esc(p.type||'TMPCL Leadership')}</small><h3>${esc(p.name||'Name Coming Soon')}</h3><div class="designation">${esc(p.designation||p.type||'TMPCL Team')}</div><p>${esc(p.bio||'Profile details will be updated by TMPCL Team.')}</p></div></article>`; };
+      if(home && founder) home.innerHTML = card(founder);
+      if(about) about.innerHTML = leaders.filter(x=>(x.type||'').includes('Founder')).map(card).join('') || (founder?card(founder):'');
+      if(sel){ sel.innerHTML = selectors.map(card).join(''); if(empty) empty.style.display=selectors.length?'none':'block'; }
+    } catch(err){ console.error(err); }
+  }
+
+  function setupRegistration(){
+    const regFee=$('#regFee'), regTotal=$('#regTotal'); if(regFee) regFee.textContent='₹999'; if(regTotal) regTotal.textContent='₹999';
+    const dob=$('#dobInput'), ageGroup=$('#ageGroupSelect');
+    if(dob && ageGroup){ dob.addEventListener('change',()=>{ const age=ageFromDob(dob.value); ageGroup.value = age && age<=19 ? 'U19' : 'Open'; }); }
+    const regForm=$('#registrationForm');
+    if(!regForm) return;
+    regForm.addEventListener('submit', async e=>{
+      e.preventDefault();
+      const btn=regForm.querySelector('button[type="submit"]'); setLoading(btn,true,'Saving...');
+      try{
+        const data=Object.fromEntries(new FormData(regForm).entries());
+        const age=ageFromDob(data.dob); const photoInput=regForm.querySelector('input[name="photo"]'); const proofInput=regForm.querySelector('input[name="aadhaar"]');
+        if(!data.dob) throw new Error('Date of Birth mandatory hai.');
+        if(!photoInput || !photoInput.files.length) throw new Error('Player photo upload mandatory hai.');
+        if(!proofInput || !proofInput.files.length) throw new Error('Aadhaar Card / Age Proof upload mandatory hai.');
+        if(data.ageGroup==='U19' && age>19) throw new Error('U19 age group ke liye age 19 ya usse kam honi chahiye.');
+        const id=makeId('TMPCL');
+        const photoUrl=await uploadFile(STORAGE_BUCKETS.playerPhoto, photoInput, id);
+        const proofUrl=await uploadFile(STORAGE_BUCKETS.idProof, proofInput, id);
+        await insertRow('players',{id,name:data.name,mobile:data.mobile,city:data.city,dob:data.dob,age,age_group:data.ageGroup,role:data.role,batting:data.batting,bowling:data.bowling,experience:data.experience,email:data.email||'',photo_url:photoUrl,proof_url:proofUrl,fee:999,assigned_category:'Pending until trials & auction',payment_status:'Pending'});
+        showSuccess($('#regSuccess'), `<strong>Registration saved successfully!</strong><br>Registration ID: <strong>${id}</strong><br>Amount: ₹999`);
+        regForm.reset();
+      } catch(err){ showDbError('Registration', err); }
+      finally{ setLoading(btn,false); }
+    });
+  }
+
+  function setupContact(){
+    const contactForm=$('#contactForm');
+    if(contactForm){ contactForm.addEventListener('submit', async e=>{ e.preventDefault(); const btn=contactForm.querySelector('button[type="submit"]'); setLoading(btn,true); try{ const d=Object.fromEntries(new FormData(contactForm).entries()); await insertRow('contact_enquiries',{name:d.name,mobile:d.mobile,email:d.email||'',enquiry_type:d.enquiryType||'General Support',message:d.message||''}); showSuccess($('#contactSuccess'), '<strong>Message sent successfully.</strong> TMPCL Team will contact you soon.'); contactForm.reset(); } catch(err){ showDbError('Contact enquiry',err); } finally{ setLoading(btn,false); } }); }
+    const partnerForm=$('#partnerForm');
+    if(partnerForm){ partnerForm.addEventListener('submit', async e=>{ e.preventDefault(); const btn=partnerForm.querySelector('button[type="submit"]'); setLoading(btn,true); try{ const d=Object.fromEntries(new FormData(partnerForm).entries()); await insertRow('partner_enquiries',{name:d.name||d.partnerName||'',brand:d.brand||d.company||d.companyName||'',category:d.category||d.partnerCategory||d.partnershipCategory||'',mobile:d.mobile||d.phone||'',email:d.email||'',message:d.message||''}); showSuccess($('#partnerSuccess'), '<strong>Partnership enquiry submitted.</strong> TMPCL Team will contact you soon.'); partnerForm.reset(); } catch(err){ showDbError('Partnership enquiry',err); } finally{ setLoading(btn,false); } }); }
+  }
+
+  async function dashboardData(){
+    const [regs,teams,gallery,news,partners,partnerEnq,msgs,leaders] = await Promise.all([
+      selectRows('players','select=*&order=created_at.desc'),
+      selectRows('teams','select=*&order=created_at.asc'),
+      selectRows('gallery_media','select=*&order=created_at.desc'),
+      selectRows('news_updates','select=*&order=created_at.desc'),
+      selectRows('partners','select=*&order=created_at.desc'),
+      selectRows('partner_enquiries','select=*&order=created_at.desc'),
+      selectRows('contact_enquiries','select=*&order=created_at.desc'),
+      selectRows('leadership_panel','select=*&order=created_at.asc')
+    ]);
+    return {regs,teams,gallery,news,partners,partnerEnq,msgs,leaders};
+  }
+
+  async function renderDashboard(){
+    if(page !== 'dashboard') return;
+    try{
+      const {regs,teams,gallery,news,partners,partnerEnq,msgs,leaders} = await dashboardData();
+      const setText=(id,v)=>{ const el=$(id); if(el) el.textContent=v; };
+      setText('#statRegistrations', regs.length); setText('#statTeams', teams.length); setText('#statSquadBanners', teams.filter(t=>t.squad_banner_url).length); setText('#statU19', regs.filter(r=>r.age_group==='U19').length); setText('#statGallery', gallery.length); setText('#statNews', news.length); setText('#statPartners', partners.filter(p=>p.status==='Published').length); setText('#statPartnerEnquiries', partnerEnq.length); setText('#statContactEnquiries', msgs.length);
+
+      const teamTb=$('#adminTeamsTable tbody'); if(teamTb){ $('#emptyTeams').style.display=teams.length?'none':'block'; teamTb.innerHTML=teams.map(t=>{ const logo=t.logo_url?`<img src="${esc(t.logo_url)}" style="width:42px;height:42px;border-radius:12px;object-fit:cover">`:`<strong>${initials(t.name)}</strong>`; const banner=t.squad_banner_url?`<span class="badge ok">Uploaded</span>`:`<span class="badge muted-badge">Not Added</span>`; return `<tr><td>${logo}</td><td>${esc(t.name)}</td><td>${esc(t.city||'')}</td><td>${esc(t.owner||'')}</td><td>${esc(t.status||'')}</td><td>${banner}</td><td><div class="admin-table-actions"><button class="mini-btn" data-edit-team="${esc(t.id)}">Edit</button><button class="mini-btn" data-preview-team="${esc(t.id)}">Preview</button><button class="mini-btn danger" data-delete-team="${esc(t.id)}">Delete</button></div></td></tr>`; }).join('');
+        $$('[data-edit-team]',teamTb).forEach(btn=>btn.addEventListener('click',()=>{ const t=teams.find(x=>x.id===btn.dataset.editTeam); if(!t) return; $('#teamId').value=t.id; $('#teamName').value=t.name; $('#teamCity').value=t.city||''; $('#teamOwner').value=t.owner||''; $('#teamStatus').value=t.status||'Player Auction Pending'; showSuccess($('#teamSuccess'), '<strong>Edit mode:</strong> Change fields and click Save / Update Team. Existing files remain unless new files are uploaded.'); window.scrollTo({top:0,behavior:'smooth'}); }));
+        $$('[data-preview-team]',teamTb).forEach(btn=>btn.addEventListener('click',()=>{ const t=teams.find(x=>x.id===btn.dataset.previewTeam); if(t) openSquadBanner(t); }));
+        $$('[data-delete-team]',teamTb).forEach(btn=>btn.addEventListener('click',async()=>{ if(!confirm('Delete this team?')) return; await deleteRow('teams',btn.dataset.deleteTeam); renderDashboard(); })); }
+
+      const pTb=$('#partnersAdminTable tbody'); if(pTb){ $('#emptyPartnersAdmin').style.display=partners.length?'none':'block'; pTb.innerHTML=partners.map(p=>{ const logo=p.logo_url?`<img src="${esc(p.logo_url)}" style="width:44px;height:44px;border-radius:12px;object-fit:cover">`:`<strong>${initials(p.name,'TP')}</strong>`; return `<tr><td>${logo}</td><td>${esc(p.name)}</td><td>${esc(p.category||'')}</td><td>${esc(p.status||'')}</td><td>${p.link?`<a href="${esc(p.link)}" target="_blank">Open</a>`:''}</td><td>${esc(p.description||'')}</td><td><div class="admin-table-actions"><button class="mini-btn" data-edit-partner="${esc(p.id)}">Edit</button><button class="mini-btn danger" data-delete-partner="${esc(p.id)}">Delete</button></div></td></tr>`; }).join('');
+        $$('[data-edit-partner]',pTb).forEach(btn=>btn.addEventListener('click',()=>{ const p=partners.find(x=>x.id===btn.dataset.editPartner); if(!p) return; $('#partnerId').value=p.id; $('#partnerName').value=p.name; $('#partnerCategory').value=p.category||'Title Sponsor'; $('#partnerLink').value=p.link||''; $('#partnerDescription').value=p.description||''; $('#partnerStatus').value=p.status||'Published'; showSuccess($('#partnerManageSuccess'), '<strong>Edit mode:</strong> Change fields and click Publish / Update Partner.'); window.scrollTo({top:0,behavior:'smooth'}); }));
+        $$('[data-delete-partner]',pTb).forEach(btn=>btn.addEventListener('click',async()=>{ if(!confirm('Delete this partner?')) return; await deleteRow('partners',btn.dataset.deletePartner); renderDashboard(); })); }
+
+      const galleryTb=$('#galleryAdminTable tbody'); if(galleryTb){ $('#emptyGalleryAdmin').style.display=gallery.length?'none':'block'; galleryTb.innerHTML=gallery.map(g=>{ const img=g.image_url?`<img src="${esc(g.image_url)}" style="width:58px;height:42px;border-radius:8px;object-fit:cover">`:''; return `<tr><td>${img}</td><td>${esc(g.title)}</td><td>${esc(g.type||'')}</td><td>${esc(g.category||'')}</td><td>${esc(g.date||'')}</td><td>${g.url?`<a href="${esc(g.url)}" target="_blank">Open</a>`:''}</td><td><div class="admin-table-actions"><button class="mini-btn" data-edit-gallery="${esc(g.id)}">Edit</button><button class="mini-btn danger" data-delete-gallery="${esc(g.id)}">Delete</button></div></td></tr>`; }).join('');
+        $$('[data-edit-gallery]',galleryTb).forEach(btn=>btn.addEventListener('click',()=>{ const g=gallery.find(x=>x.id===btn.dataset.editGallery); if(!g) return; $('#mediaId').value=g.id; $('#mediaTitle').value=g.title; $('#mediaType').value=g.type||'photos'; $('#mediaCategory').value=g.category||'events'; $('#mediaDate').value=g.date||''; $('#mediaUrl').value=g.url||''; showSuccess($('#gallerySuccess'), '<strong>Edit mode:</strong> Update fields and save. Existing thumbnail remains unless new image is uploaded.'); window.scrollTo({top:0,behavior:'smooth'}); }));
+        $$('[data-delete-gallery]',galleryTb).forEach(btn=>btn.addEventListener('click',async()=>{ if(!confirm('Delete this media?')) return; await deleteRow('gallery_media',btn.dataset.deleteGallery); renderDashboard(); })); }
+
+      const newsTb=$('#newsAdminTable tbody'); if(newsTb){ $('#emptyNewsAdmin').style.display=news.length?'none':'block'; newsTb.innerHTML=news.map(n=>{ const img=n.image_url?`<img src="${esc(n.image_url)}" style="width:58px;height:42px;border-radius:8px;object-fit:cover">`:''; return `<tr><td>${img}</td><td>${esc(n.title)}</td><td>${esc(n.tag||'')}</td><td>${esc(n.date||'')}</td><td>${esc(n.summary||'')}</td><td><div class="admin-table-actions"><button class="mini-btn" data-edit-news="${esc(n.id)}">Edit</button><button class="mini-btn danger" data-delete-news="${esc(n.id)}">Delete</button></div></td></tr>`; }).join('');
+        $$('[data-edit-news]',newsTb).forEach(btn=>btn.addEventListener('click',()=>{ const n=news.find(x=>x.id===btn.dataset.editNews); if(!n) return; $('#newsId').value=n.id; $('#newsTitle').value=n.title; $('#newsTag').value=n.tag||'Announcement'; $('#newsDate').value=n.date||''; $('#newsSummary').value=n.summary||''; showSuccess($('#newsSuccess'), '<strong>Edit mode:</strong> Update fields and save.'); window.scrollTo({top:0,behavior:'smooth'}); }));
+        $$('[data-delete-news]',newsTb).forEach(btn=>btn.addEventListener('click',async()=>{ if(!confirm('Delete this news?')) return; await deleteRow('news_updates',btn.dataset.deleteNews); renderDashboard(); })); }
+
+      const lTb=$('#leadershipAdminTable tbody'); if(lTb){ $('#emptyLeadershipAdmin').style.display=leaders.length?'none':'block'; lTb.innerHTML=leaders.map(p=>{const photo=p.photo_url?`<img src="${esc(p.photo_url)}" alt="${esc(p.name)}">`:`<span>${initials(p.name)}</span>`; return `<tr><td><div class="leader-thumb">${photo}</div></td><td>${esc(p.name||'')}</td><td>${esc(p.type||'')}</td><td>${esc(p.designation||'')}</td><td>${esc(p.bio||'')}</td><td><div class="admin-table-actions"><button class="mini-btn" data-edit-leader="${esc(p.id)}">Edit</button><button class="mini-btn danger" data-delete-leader="${esc(p.id)}">Delete</button></div></td></tr>`;}).join('');
+        $$('[data-edit-leader]',lTb).forEach(btn=>btn.addEventListener('click',()=>{ const p=leaders.find(x=>x.id===btn.dataset.editLeader); if(!p) return; $('#personId').value=p.id; $('#personName').value=p.name||''; $('#personType').value=p.type||'Selector'; $('#personDesignation').value=p.designation||''; $('#personBio').value=p.bio||''; showSuccess($('#leadershipSuccess'), '<strong>Edit mode:</strong> Details change karke Save / Update Profile par click karein.'); window.scrollTo({top:0,behavior:'smooth'}); }));
+        $$('[data-delete-leader]',lTb).forEach(btn=>btn.addEventListener('click',async()=>{ if(!confirm('Delete this profile?')) return; await deleteRow('leadership_panel',btn.dataset.deleteLeader); renderDashboard(); })); }
+
+      const regTb=$('#regTable tbody'); if(regTb){ $('#emptyRegs').style.display=regs.length?'none':'block'; regTb.innerHTML=regs.map(r=>`<tr><td>${esc(r.id)}</td><td>${esc(r.name||'')}</td><td>${esc(r.mobile||'')}</td><td>${esc(r.city||'')}</td><td>${esc(r.dob||'')}</td><td>${esc(r.age||'')}</td><td>${esc(r.role||'')}</td><td>${esc(r.age_group||'')}</td><td>${esc(r.assigned_category||'Pending until trials & auction')}</td><td>${r.photo_url?`<a href="${esc(r.photo_url)}" target="_blank">View</a>`:''}</td><td>${r.proof_url?`<a href="${esc(r.proof_url)}" target="_blank">View</a>`:''}</td><td>₹${esc(r.fee||'999')}</td><td>${esc(r.created_at||'')}</td></tr>`).join(''); }
+      const msgTb=$('#msgTable tbody'); if(msgTb){ $('#emptyMsgs').style.display=msgs.length?'none':'block'; msgTb.innerHTML=msgs.map(m=>`<tr><td>${esc(m.name||'')}</td><td>${esc(m.mobile||'')}</td><td>${esc(m.email||'')}</td><td>${esc(m.enquiry_type||'General Support')}</td><td>${esc(m.message||'')}</td><td>${esc(m.created_at||'')}</td></tr>`).join(''); }
+      const pEnqTb=$('#partnerEnquiriesTable tbody'); if(pEnqTb){ $('#emptyPartnerEnquiries').style.display=partnerEnq.length?'none':'block'; pEnqTb.innerHTML=partnerEnq.map(m=>`<tr><td>${esc(m.name||'')}</td><td>${esc(m.brand||'')}</td><td>${esc(m.category||'')}</td><td>${esc(m.mobile||'')}</td><td>${esc(m.email||'')}</td><td>${esc(m.message||'')}</td><td>${esc(m.created_at||'')}</td></tr>`).join(''); }
+    } catch(err){ showDbError('Dashboard load',err); }
+  }
+
+  function setupDashboardForms(){
+    if(page !== 'dashboard') return;
+    const teamForm=$('#teamForm');
+    if(teamForm){ teamForm.addEventListener('submit', async e=>{ e.preventDefault(); const btn=teamForm.querySelector('button[type="submit"]'); setLoading(btn,true); try{ const fd=new FormData(teamForm); const id=fd.get('teamId')||('team-'+Date.now()); const old=(await selectRows('teams',`select=*&id=eq.${encodeURIComponent(id)}&limit=1`))[0]||{}; const logo=await uploadFile(STORAGE_BUCKETS.teamLogo,$('#teamLogo'),id) || old.logo_url || ''; const banner=await uploadFile(STORAGE_BUCKETS.squadBanner,$('#squadBanner'),id) || old.squad_banner_url || ''; await saveRow('teams',{id,name:fd.get('teamName'),city:fd.get('teamCity'),owner:fd.get('teamOwner')||'',status:fd.get('teamStatus')||'Player Auction Pending',logo_url:logo,squad_banner_url:banner}); showSuccess($('#teamSuccess'), '<strong>Team saved successfully.</strong> Public Teams page par update show hoga.'); teamForm.reset(); $('#teamId').value=''; renderDashboard(); } catch(err){ showDbError('Team save',err); } finally{ setLoading(btn,false); } }); $('#teamFormReset')?.addEventListener('click',()=>{teamForm.reset(); $('#teamId').value=''; $('#teamSuccess').style.display='none';}); }
 
     const partnerManageForm=$('#partnerManageForm');
-    if(partnerManageForm){ partnerManageForm.addEventListener('submit', async e=>{ e.preventDefault(); const fd=new FormData(partnerManageForm); const partnerId=fd.get('partnerId')||('partner-'+Date.now()); const items=getPartners(); const existing=items.find(p=>p.id===partnerId); const logoData=await readFileAsDataURL($('#partnerLogo')); const partner={id:partnerId,name:fd.get('partnerName'),category:fd.get('partnerCategory')||'Partner',link:fd.get('partnerLink')||'',description:fd.get('partnerDescription')||'',status:fd.get('partnerStatus')||'Published',logo:logoData||(existing&&existing.logo)||''}; const updated=items.filter(p=>p.id!==partnerId); updated.unshift(partner); set('tmpclPartners',updated); const s=$('#partnerManageSuccess'); if(s){s.style.display='block'; s.innerHTML='<strong>Partner saved successfully.</strong> Published partners public Partners page par show honge.';} partnerManageForm.reset(); $('#partnerId').value=''; renderDashboard(); }); $('#partnerFormReset')?.addEventListener('click',()=>{ partnerManageForm.reset(); $('#partnerId').value=''; const s=$('#partnerManageSuccess'); if(s) s.style.display='none'; }); }
-    const teamForm=$('#teamForm');
-    if(teamForm){ teamForm.addEventListener('submit', async e=>{ e.preventDefault(); const fd=new FormData(teamForm); const teamId=fd.get('teamId')||('team-'+Date.now()); const teams=get('tmpclTeams').length?get('tmpclTeams'):getTeams(); const existing=teams.find(t=>t.id===teamId); const logoData=await readFileAsDataURL($('#teamLogo')); const bannerData=await readFileAsDataURL($('#squadBanner')); const obj={id:teamId,name:fd.get('teamName'),city:fd.get('teamCity'),owner:fd.get('teamOwner')||'',status:fd.get('teamStatus')||'Player Auction Pending',logo:logoData||(existing&&existing.logo)||'',squadBanner:bannerData||(existing&&existing.squadBanner)||''}; const updated=teams.filter(t=>t.id!==teamId); updated.unshift(obj); set('tmpclTeams',updated); const s=$('#teamSuccess'); if(s){s.style.display='block'; s.innerHTML='<strong>Team saved successfully.</strong> Public Teams page par update show hoga.';} teamForm.reset(); $('#teamId').value=''; renderDashboard(); }); $('#teamFormReset')?.addEventListener('click',()=>{ teamForm.reset(); $('#teamId').value=''; const s=$('#teamSuccess'); if(s) s.style.display='none'; }); }
+    if(partnerManageForm){ partnerManageForm.addEventListener('submit', async e=>{ e.preventDefault(); const btn=partnerManageForm.querySelector('button[type="submit"]'); setLoading(btn,true); try{ const fd=new FormData(partnerManageForm); const id=fd.get('partnerId')||('partner-'+Date.now()); const old=(await selectRows('partners',`select=*&id=eq.${encodeURIComponent(id)}&limit=1`))[0]||{}; const logo=await uploadFile(STORAGE_BUCKETS.partnerLogo,$('#partnerLogo'),id) || old.logo_url || ''; await saveRow('partners',{id,name:fd.get('partnerName'),category:fd.get('partnerCategory')||'Partner',link:fd.get('partnerLink')||'',description:fd.get('partnerDescription')||'',status:fd.get('partnerStatus')||'Published',logo_url:logo}); showSuccess($('#partnerManageSuccess'), '<strong>Partner saved successfully.</strong>'); partnerManageForm.reset(); $('#partnerId').value=''; renderDashboard(); } catch(err){ showDbError('Partner save',err); } finally{ setLoading(btn,false); } }); $('#partnerFormReset')?.addEventListener('click',()=>{partnerManageForm.reset(); $('#partnerId').value=''; $('#partnerManageSuccess').style.display='none';}); }
+
     const galleryForm=$('#galleryForm');
-    if(galleryForm){ galleryForm.addEventListener('submit', async e=>{ e.preventDefault(); const fd=new FormData(galleryForm); const mediaId=fd.get('mediaId')||('media-'+Date.now()); const items=get('tmpclGallery'); const existing=items.find(g=>g.id===mediaId); const imageData=await readFileAsDataURL($('#mediaImage')); const media={id:mediaId,title:fd.get('mediaTitle'),type:fd.get('mediaType')||'photos',category:fd.get('mediaCategory')||'events',date:fd.get('mediaDate')||'',url:fd.get('mediaUrl')||'',image:imageData||(existing&&existing.image)||''}; const updated=items.filter(g=>g.id!==mediaId); updated.unshift(media); set('tmpclGallery',updated); const s=$('#gallerySuccess'); if(s){s.style.display='block'; s.innerHTML='<strong>Gallery media published.</strong> Public Gallery page par card show hoga.';} galleryForm.reset(); $('#mediaId').value=''; renderDashboard(); }); $('#galleryFormReset')?.addEventListener('click',()=>{ galleryForm.reset(); $('#mediaId').value=''; const s=$('#gallerySuccess'); if(s) s.style.display='none'; }); }
+    if(galleryForm){ galleryForm.addEventListener('submit', async e=>{ e.preventDefault(); const btn=galleryForm.querySelector('button[type="submit"]'); setLoading(btn,true); try{ const fd=new FormData(galleryForm); const id=fd.get('mediaId')||('media-'+Date.now()); const old=(await selectRows('gallery_media',`select=*&id=eq.${encodeURIComponent(id)}&limit=1`))[0]||{}; const image=await uploadFile(STORAGE_BUCKETS.gallery,$('#mediaImage'),id) || old.image_url || ''; await saveRow('gallery_media',{id,title:fd.get('mediaTitle'),type:fd.get('mediaType')||'photos',category:fd.get('mediaCategory')||'events',date:fd.get('mediaDate')||null,url:fd.get('mediaUrl')||'',image_url:image}); showSuccess($('#gallerySuccess'), '<strong>Gallery media published.</strong>'); galleryForm.reset(); $('#mediaId').value=''; renderDashboard(); } catch(err){ showDbError('Gallery save',err); } finally{ setLoading(btn,false); } }); $('#galleryFormReset')?.addEventListener('click',()=>{galleryForm.reset(); $('#mediaId').value=''; $('#gallerySuccess').style.display='none';}); }
+
     const newsForm=$('#newsForm');
-    if(newsForm){ newsForm.addEventListener('submit', async e=>{ e.preventDefault(); const fd=new FormData(newsForm); const newsId=fd.get('newsId')||('news-'+Date.now()); const items=getNewsItems(); const existing=items.find(n=>n.id===newsId); const imageData=await readFileAsDataURL($('#newsImage')); const news={id:newsId,title:fd.get('newsTitle'),tag:fd.get('newsTag')||'Announcement',date:fd.get('newsDate')||'',summary:fd.get('newsSummary')||'',image:imageData||(existing&&existing.image)||''}; const updated=items.filter(n=>n.id!==newsId); updated.unshift(news); set('tmpclNews',updated); const s=$('#newsSuccess'); if(s){s.style.display='block'; s.innerHTML='<strong>News published.</strong> Public News page par card show hoga.';} newsForm.reset(); $('#newsId').value=''; renderDashboard(); }); $('#newsFormReset')?.addEventListener('click',()=>{ newsForm.reset(); $('#newsId').value=''; const s=$('#newsSuccess'); if(s) s.style.display='none'; }); }
-    renderDashboard();
+    if(newsForm){ newsForm.addEventListener('submit', async e=>{ e.preventDefault(); const btn=newsForm.querySelector('button[type="submit"]'); setLoading(btn,true); try{ const fd=new FormData(newsForm); const id=fd.get('newsId')||('news-'+Date.now()); const old=(await selectRows('news_updates',`select=*&id=eq.${encodeURIComponent(id)}&limit=1`))[0]||{}; const image=await uploadFile(STORAGE_BUCKETS.newsImage,$('#newsImage'),id) || old.image_url || ''; await saveRow('news_updates',{id,title:fd.get('newsTitle'),tag:fd.get('newsTag')||'Announcement',date:fd.get('newsDate')||null,summary:fd.get('newsSummary')||'',image_url:image}); showSuccess($('#newsSuccess'), '<strong>News published.</strong>'); newsForm.reset(); $('#newsId').value=''; renderDashboard(); } catch(err){ showDbError('News save',err); } finally{ setLoading(btn,false); } }); $('#newsFormReset')?.addEventListener('click',()=>{newsForm.reset(); $('#newsId').value=''; $('#newsSuccess').style.display='none';}); }
+
+    const leadershipForm=$('#leadershipForm');
+    if(leadershipForm){ leadershipForm.addEventListener('submit', async e=>{ e.preventDefault(); const btn=leadershipForm.querySelector('button[type="submit"]'); setLoading(btn,true); try{ const fd=new FormData(leadershipForm); const id=fd.get('personId')||('leader-'+Date.now()); const old=(await selectRows('leadership_panel',`select=*&id=eq.${encodeURIComponent(id)}&limit=1`))[0]||{}; const photo=await uploadFile(STORAGE_BUCKETS.leadershipPhoto,$('#personPhoto'),id) || old.photo_url || ''; await saveRow('leadership_panel',{id,name:fd.get('personName'),type:fd.get('personType')||'Selector',designation:fd.get('personDesignation')||fd.get('personType'),bio:fd.get('personBio')||'',photo_url:photo}); showSuccess($('#leadershipSuccess'), '<strong>Profile saved successfully.</strong>'); leadershipForm.reset(); $('#personId').value=''; renderDashboard(); } catch(err){ showDbError('Leadership save',err); } finally{ setLoading(btn,false); } }); $('#leadershipFormReset')?.addEventListener('click',()=>{leadershipForm.reset(); $('#personId').value=''; $('#leadershipSuccess').style.display='none';}); }
+  }
+
+  // login remains local/session-only for current static version
+  const loginForm=$('#adminLoginForm');
+  if(loginForm){ loginForm.addEventListener('submit',e=>{ e.preventDefault(); const d=Object.fromEntries(new FormData(loginForm).entries()); if((d.username==='team' && d.password==='tmpcl123') || (d.username==='admin' && d.password==='admin123')){ sessionStorage.setItem('tmpclTeamAccess','1'); location.href='admin-dashboard.html'; } else { const s=$('#adminLoginError'); if(s){s.style.display='block'; s.textContent='Invalid login. Use team / tmpcl123';} } }); }
+  if(page==='dashboard'){
+    if(sessionStorage.getItem('tmpclTeamAccess')!=='1'){ location.href='admin-login.html'; return; }
     $('#logoutBtn')?.addEventListener('click',()=>{ sessionStorage.removeItem('tmpclTeamAccess'); location.href='admin-login.html'; });
   }
-})();
 
-// Leadership, Founder and Selection Panel controls
-(function(){
-  const $=(s,r=document)=>r.querySelector(s);
-  const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
-  const get=k=>{try{return JSON.parse(localStorage.getItem(k)||'[]')}catch(e){return []}};
-  const set=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
-  function initials(name,fallback='TM'){return (name||fallback).split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase()||fallback}
-  function readFile(input){return new Promise(resolve=>{if(!input||!input.files||!input.files[0]) return resolve(''); const r=new FileReader(); r.onload=()=>resolve(r.result); r.readAsDataURL(input.files[0]);});}
-  const defaults=[
-    {id:'leader-founder',name:'Founder Name',type:'Founder & League Owner',designation:'Founder & League Owner, TMPCL',bio:'TMPCL ka mission Madhya Pradesh ke tennis ball cricket talent ko professional trials, player auction aur league platform ke through bada stage dena hai.',photo:''},
-    {id:'leader-head-selector',name:'Head Selector Name',type:'Head Selector',designation:'Head Selector, TMPCL Selection Committee',bio:'Trials me performance, fitness, game awareness aur potential ke basis par player evaluation aur category grading manage karenge.',photo:''},
-    {id:'leader-selector-1',name:'Selector Name',type:'Selector',designation:'Selector, TMPCL Selection Committee',bio:'Player shortlisting, category grading aur player auction pool preparation me support karenge.',photo:''}
-  ];
-  function getLeadership(){
-    if(localStorage.getItem('tmpclLeadership')===null) set('tmpclLeadership',defaults);
-    return get('tmpclLeadership');
-  }
-  function leaderCard(p){
-    const photo=p.photo?`<img src="${p.photo}" alt="${p.name}">`:`<span>${initials(p.name)}</span>`;
-    return `<article class="leader-card"><div class="leader-photo">${photo}</div><div class="leader-copy"><small>${p.type||'TMPCL Leadership'}</small><h3>${p.name||'Name Coming Soon'}</h3><div class="designation">${p.designation||p.type||'TMPCL Team'}</div><p>${p.bio||'Profile details will be updated by TMPCL Team.'}</p></div></article>`;
-  }
-  function renderPublicLeadership(){
-    const leaders=getLeadership();
-    const founder=leaders.find(x=>(x.type||'').includes('Founder')) || leaders[0];
-    const selectors=leaders.filter(x=>/(Selector|Coach|Advisor)/i.test(x.type||''));
-    const home=$('#homeFounderCard'); if(home && founder) home.innerHTML=leaderCard(founder);
-    const about=$('#aboutLeadershipGrid'); if(about){ about.innerHTML=leaders.filter(x=>(x.type||'').includes('Founder')).map(leaderCard).join('') || (founder?leaderCard(founder):''); }
-    const sel=$('#selectionPanelGrid'), empty=$('#selectionPanelEmpty');
-    if(sel){ sel.innerHTML=selectors.map(leaderCard).join(''); if(empty) empty.style.display=selectors.length?'none':'block'; }
-  }
+  setupRegistration();
+  setupContact();
+  setupDashboardForms();
+  renderPublicTeams();
+  renderPublicPartners();
+  renderPublicNews();
+  renderPublicGallery();
   renderPublicLeadership();
-
-  function renderLeadershipAdmin(){
-    const tb=$('#leadershipAdminTable tbody'); if(!tb) return;
-    const items=getLeadership(); const empty=$('#emptyLeadershipAdmin'); if(empty) empty.style.display=items.length?'none':'block';
-    tb.innerHTML=items.map(p=>{const photo=p.photo?`<img src="${p.photo}" alt="${p.name}">`:`<span>${initials(p.name)}</span>`; return `<tr><td><div class="leader-thumb">${photo}</div></td><td>${p.name||''}</td><td>${p.type||''}</td><td>${p.designation||''}</td><td>${p.bio||''}</td><td><div class="admin-table-actions"><button class="mini-btn" data-edit-leader="${p.id}">Edit</button><button class="mini-btn danger" data-delete-leader="${p.id}">Delete</button></div></td></tr>`;}).join('');
-    $$('[data-edit-leader]',tb).forEach(btn=>btn.addEventListener('click',()=>{const p=getLeadership().find(x=>x.id===btn.dataset.editLeader); if(!p) return; $('#personId').value=p.id; $('#personName').value=p.name||''; $('#personType').value=p.type||'Selector'; $('#personDesignation').value=p.designation||''; $('#personBio').value=p.bio||''; const s=$('#leadershipSuccess'); if(s){s.style.display='block'; s.innerHTML='<strong>Edit mode:</strong> Details change karke Save / Update Profile par click karein. Existing photo tab tak rahegi jab tak new photo upload nahi karte.';} window.scrollTo({top:0,behavior:'smooth'}); }));
-    $$('[data-delete-leader]',tb).forEach(btn=>btn.addEventListener('click',()=>{ if(!confirm('Delete this profile?')) return; set('tmpclLeadership',getLeadership().filter(x=>x.id!==btn.dataset.deleteLeader)); renderLeadershipAdmin(); renderPublicLeadership(); }));
-  }
-  const form=$('#leadershipForm');
-  if(form){
-    form.addEventListener('submit',async e=>{e.preventDefault(); const fd=new FormData(form); const id=fd.get('personId')||('leader-'+Date.now()); const items=getLeadership(); const existing=items.find(x=>x.id===id); const photo=await readFile($('#personPhoto')); const obj={id,name:fd.get('personName'),type:fd.get('personType'),designation:fd.get('personDesignation')||fd.get('personType'),bio:fd.get('personBio')||'',photo:photo||(existing&&existing.photo)||''}; const next=items.filter(x=>x.id!==id); next.unshift(obj); set('tmpclLeadership',next); const s=$('#leadershipSuccess'); if(s){s.style.display='block'; s.innerHTML='<strong>Profile saved successfully.</strong> Public pages par update show hoga.';} form.reset(); $('#personId').value=''; renderLeadershipAdmin(); renderPublicLeadership();});
-    $('#leadershipFormReset')?.addEventListener('click',()=>{form.reset(); $('#personId').value=''; const s=$('#leadershipSuccess'); if(s) s.style.display='none';});
-    renderLeadershipAdmin();
-  }
+  renderDashboard();
 })();
