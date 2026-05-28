@@ -201,26 +201,6 @@
     } catch(err){ console.error(err); }
   }
 
-
-  async function renderHomePreviews(){
-    const newsEl=$('#homeNewsPreview'), galleryEl=$('#homeGalleryPreview'), partnersEl=$('#homePartnersPreview');
-    if(!newsEl && !galleryEl && !partnersEl) return;
-    try{
-      if(newsEl){
-        const posts = await selectRows('news_updates','select=*&order=date.desc,created_at.desc&limit=1');
-        newsEl.textContent = posts[0]?.title || 'Updates will appear here soon';
-      }
-      if(galleryEl){
-        const media = await selectRows('gallery_media','select=*&order=created_at.desc&limit=1');
-        galleryEl.textContent = media[0]?.title || 'Media will appear here soon';
-      }
-      if(partnersEl){
-        const partners = await selectRows('partners','select=*&status=eq.Published&order=created_at.desc&limit=1');
-        partnersEl.textContent = partners[0]?.name || 'Partners will appear here soon';
-      }
-    } catch(err){ console.error(err); }
-  }
-
   async function renderPublicGallery(){
     const galleryGrid=$('#galleryGrid'); if(!galleryGrid) return;
     const empty=$('#galleryEmpty'), modal=$('#galleryModal'), title=$('#galleryModalTitle'), visual=modal?modal.querySelector('.gallery-modal-visual'):null, desc=modal?modal.querySelector('p'):null;
@@ -463,6 +443,5 @@
   renderPublicNews();
   renderPublicGallery();
   renderPublicLeadership();
-  renderHomePreviews();
   renderDashboard();
 })();
