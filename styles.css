@@ -905,3 +905,265 @@ body:not([data-page="home"]) .hero-visual,body:not([data-page="home"]) .hero-pla
   .profile-view-hint{font-size:11px!important;margin-top:10px!important}
   .profile-modal-media{min-height:300px;padding:10px}
 }
+
+/* Premium compact profile cards final update: Founder / Selectors / Brand Ambassadors */
+.leadership-public-grid,
+.selector-grid,
+.ambassador-grid{
+  gap:18px!important;
+}
+.leader-card,
+.ambassador-card{
+  position:relative!important;
+  display:grid!important;
+  grid-template-columns:150px minmax(0,1fr)!important;
+  align-items:center!important;
+  gap:18px!important;
+  padding:18px!important;
+  min-height:188px!important;
+  border-radius:28px!important;
+  background:linear-gradient(135deg,rgba(12,33,48,.96),rgba(3,10,18,.98))!important;
+  border:1px solid rgba(141,255,57,.22)!important;
+  box-shadow:0 22px 58px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.04)!important;
+  overflow:hidden!important;
+  cursor:pointer!important;
+}
+.leader-card:before,
+.ambassador-card:before{
+  content:""!important;
+  position:absolute!important;
+  inset:0!important;
+  background:radial-gradient(circle at 12% 20%,rgba(141,255,57,.14),transparent 34%),radial-gradient(circle at 95% 12%,rgba(255,211,90,.11),transparent 32%)!important;
+  pointer-events:none!important;
+}
+.leader-card:hover,
+.ambassador-card:hover{
+  transform:translateY(-3px)!important;
+  border-color:rgba(255,211,90,.38)!important;
+  box-shadow:0 28px 70px rgba(0,0,0,.46),0 0 0 1px rgba(255,211,90,.08) inset!important;
+}
+.leader-photo,
+.selector-grid .leader-photo,
+.ambassador-photo.dynamic-ambassador-photo{
+  position:relative!important;
+  z-index:1!important;
+  width:150px!important;
+  min-width:150px!important;
+  height:188px!important;
+  min-height:188px!important;
+  aspect-ratio:auto!important;
+  margin:0!important;
+  padding:8px!important;
+  border-radius:22px!important;
+  overflow:hidden!important;
+  border:1px solid rgba(255,211,90,.24)!important;
+  background:radial-gradient(circle at 50% 14%,rgba(255,211,90,.15),transparent 38%),linear-gradient(180deg,rgba(15,42,60,.98),rgba(3,10,16,.98))!important;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.04),0 14px 34px rgba(0,0,0,.35)!important;
+}
+.leader-photo img,
+.selector-grid .leader-photo img,
+.ambassador-photo.dynamic-ambassador-photo img{
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  object-position:top center!important;
+  padding:0!important;
+  border-radius:16px!important;
+  background:transparent!important;
+}
+.leader-photo span,
+.ambassador-photo.dynamic-ambassador-photo span{
+  position:relative!important;
+  z-index:2!important;
+  width:70px!important;
+  height:70px!important;
+  display:grid!important;
+  place-items:center!important;
+  margin:auto!important;
+  border-radius:50%!important;
+  background:#061018!important;
+  color:var(--green)!important;
+  font-size:28px!important;
+  font-weight:1000!important;
+  border:2px solid rgba(141,255,57,.42)!important;
+}
+.leader-copy,
+.ambassador-copy{
+  position:relative!important;
+  z-index:1!important;
+  min-width:0!important;
+}
+.leader-copy small,
+.ambassador-copy small{
+  display:inline-flex!important;
+  width:max-content!important;
+  max-width:100%!important;
+  padding:7px 11px!important;
+  border-radius:999px!important;
+  background:rgba(141,255,57,.10)!important;
+  border:1px solid rgba(141,255,57,.24)!important;
+  color:var(--green)!important;
+  font-size:10.5px!important;
+  line-height:1!important;
+  font-weight:1000!important;
+  text-transform:uppercase!important;
+  letter-spacing:.35px!important;
+}
+.leader-copy h3,
+.ambassador-copy h3{
+  margin:12px 0 6px!important;
+  font-size:clamp(24px,2.4vw,34px)!important;
+  line-height:1.02!important;
+  letter-spacing:-.7px!important;
+  text-transform:uppercase!important;
+  color:#fff!important;
+}
+.leader-copy .designation,
+.ambassador-copy .designation{
+  margin:0 0 8px!important;
+  color:var(--gold)!important;
+  font-size:15px!important;
+  line-height:1.3!important;
+  font-weight:950!important;
+}
+.leader-copy p,
+.ambassador-copy p{
+  display:-webkit-box!important;
+  -webkit-line-clamp:2!important;
+  -webkit-box-orient:vertical!important;
+  overflow:hidden!important;
+  margin:0!important;
+  color:var(--muted)!important;
+  font-size:14px!important;
+  line-height:1.55!important;
+}
+.ambassador-tags{
+  margin-top:12px!important;
+}
+.ambassador-tags span{
+  padding:7px 9px!important;
+  font-size:10.5px!important;
+}
+.profile-view-hint{
+  margin-top:12px!important;
+  padding:8px 12px!important;
+  width:max-content!important;
+  border-radius:999px!important;
+  background:rgba(255,211,90,.10)!important;
+  border:1px solid rgba(255,211,90,.20)!important;
+  color:var(--gold)!important;
+  font-size:11px!important;
+  font-weight:1000!important;
+  letter-spacing:.3px!important;
+  text-transform:uppercase!important;
+}
+.profile-view-hint:before{content:'↗'!important;font-size:12px!important}
+.leadership-public-grid.single-leader .leader-card{
+  grid-template-columns:190px minmax(0,1fr)!important;
+  min-height:226px!important;
+  padding:22px!important;
+}
+.leadership-public-grid.single-leader .leader-photo{
+  width:190px!important;
+  min-width:190px!important;
+  height:238px!important;
+  min-height:238px!important;
+}
+.selector-grid .leader-card{
+  grid-template-columns:1fr!important;
+  align-items:start!important;
+}
+.selector-grid .leader-photo{
+  width:100%!important;
+  min-width:0!important;
+  height:230px!important;
+  min-height:230px!important;
+}
+.selector-grid .leader-copy h3{font-size:27px!important}
+.profile-modal-media img{
+  object-fit:contain!important;
+  object-position:top center!important;
+  border-radius:18px!important;
+}
+@media(max-width:960px){
+  .leader-card,
+  .selector-grid .leader-card,
+  .ambassador-card,
+  .leadership-public-grid.single-leader .leader-card{
+    grid-template-columns:128px minmax(0,1fr)!important;
+    min-height:164px!important;
+    gap:14px!important;
+    padding:16px!important;
+    border-radius:24px!important;
+  }
+  .leader-photo,
+  .selector-grid .leader-photo,
+  .ambassador-photo.dynamic-ambassador-photo,
+  .leadership-public-grid.single-leader .leader-photo{
+    width:128px!important;
+    min-width:128px!important;
+    height:160px!important;
+    min-height:160px!important;
+    padding:7px!important;
+    border-radius:20px!important;
+  }
+  .leader-photo img,
+  .selector-grid .leader-photo img,
+  .ambassador-photo.dynamic-ambassador-photo img{
+    object-fit:cover!important;
+    object-position:top center!important;
+    border-radius:14px!important;
+  }
+  .leader-copy h3,
+  .selector-grid .leader-copy h3,
+  .ambassador-copy h3{
+    font-size:23px!important;
+    margin:9px 0 5px!important;
+  }
+  .leader-copy p,
+  .ambassador-copy p{
+    font-size:13px!important;
+    -webkit-line-clamp:2!important;
+  }
+  .ambassador-tags{display:none!important}
+  .profile-view-hint{font-size:10px!important;padding:7px 10px!important;margin-top:9px!important}
+}
+@media(max-width:560px){
+  .leader-card,
+  .selector-grid .leader-card,
+  .ambassador-card,
+  .leadership-public-grid.single-leader .leader-card{
+    grid-template-columns:112px minmax(0,1fr)!important;
+    gap:12px!important;
+    padding:14px!important;
+    min-height:146px!important;
+  }
+  .leader-photo,
+  .selector-grid .leader-photo,
+  .ambassador-photo.dynamic-ambassador-photo,
+  .leadership-public-grid.single-leader .leader-photo{
+    width:112px!important;
+    min-width:112px!important;
+    height:140px!important;
+    min-height:140px!important;
+  }
+  .leader-copy small,
+  .ambassador-copy small{
+    font-size:9.5px!important;
+    padding:6px 8px!important;
+    max-width:100%!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    white-space:nowrap!important;
+  }
+  .leader-copy h3,
+  .selector-grid .leader-copy h3,
+  .ambassador-copy h3{
+    font-size:19px!important;
+    letter-spacing:-.3px!important;
+  }
+  .leader-copy .designation,
+  .ambassador-copy .designation{
+    font-size:13px!important;
+  }
+}
