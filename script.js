@@ -25,6 +25,73 @@
   const ageFromDob = dob => { if(!dob) return 0; const b=new Date(dob), t=new Date(); let a=t.getFullYear()-b.getFullYear(); const m=t.getMonth()-b.getMonth(); if(m<0 || (m===0 && t.getDate()<b.getDate())) a--; return a; };
   const initials = (name, fallback='TM') => (name||fallback).split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase() || fallback;
 
+
+  function ensureProfileModal(){
+    let modal = $('#profileModal');
+    if(modal) return modal;
+    modal = document.createElement('div');
+    modal.id = 'profileModal';
+    modal.className = 'profile-modal';
+    modal.innerHTML = `
+      <div class="profile-modal-backdrop" data-close-profile></div>
+      <div class="profile-modal-panel" role="dialog" aria-modal="true" aria-label="TMPCL Profile Preview">
+        <button class="profile-modal-close" type="button" aria-label="Close" data-close-profile>×</button>
+        <div class="profile-modal-media"><img alt="TMPCL profile" id="profileModalImage" src=""/></div>
+        <div class="profile-modal-copy">
+          <small id="profileModalType">TMPCL Profile</small>
+          <h3 id="profileModalName">Profile Name</h3>
+          <div class="designation" id="profileModalDesignation">TMPCL Team</div>
+          <p id="profileModalBio">Profile details will appear here.</p>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+    $$('[data-close-profile]', modal).forEach(el=>el.addEventListener('click',()=>modal.classList.remove('open')));
+    modal.addEventListener('click', e=>{ if(e.target === modal) modal.classList.remove('open'); });
+    document.addEventListener('keydown', e=>{ if(e.key === 'Escape') modal.classList.remove('open'); });
+    return modal;
+  }
+
+  function openProfileModal(data={}){
+    const modal = ensureProfileModal();
+    const img = $('#profileModalImage', modal);
+    const type = $('#profileModalType', modal);
+    const name = $('#profileModalName', modal);
+    const designation = $('#profileModalDesignation', modal);
+    const bio = $('#profileModalBio', modal);
+    if(type) type.textContent = data.type || 'TMPCL Profile';
+    if(name) name.textContent = data.name || 'TMPCL Profile';
+    if(designation) designation.textContent = data.designation || data.type || 'TMPCL Team';
+    if(bio) bio.textContent = data.bio || 'Profile details updated by TMPCL Team.';
+    if(img){
+      if(data.photo){
+        img.src = data.photo;
+        img.alt = (data.name || 'TMPCL Profile') + ' photo';
+        img.style.display = 'block';
+      }else{
+        img.removeAttribute('src');
+        img.alt = 'TMPCL Profile';
+        img.style.display = 'none';
+      }
+    }
+    modal.classList.add('open');
+  }
+
+  function bindProfileCards(scope){
+    if(!scope) return;
+    $$('[data-profile-card]', scope).forEach(card=>{
+      card.addEventListener('click', e=>{
+        if(e.target.closest('a,button,input,select,textarea')) return;
+        openProfileModal({
+          photo: card.dataset.photo || '',
+          type: card.dataset.type || 'TMPCL Profile',
+          name: card.dataset.name || 'TMPCL Profile',
+          designation: card.dataset.designation || card.dataset.type || 'TMPCL Team',
+          bio: card.dataset.bio || 'Profile details updated by TMPCL Team.'
+        });
+      });
+    });
+  }
+
   async function api(path, options={}){
     const res = await fetch(`${SUPABASE_URL}${path}`, {
       ...options,
@@ -159,12 +226,12 @@
       const founder = leaders.find(x=>(x.type||'').includes('Founder')) || leaders.find(x=>!/(Ambassador|Selector|Coach|Advisor)/i.test(x.type||'')) || leaders[0];
       const ambassadors = leaders.filter(x=>/Ambassador/i.test(x.type||''));
       const selectors = leaders.filter(x=>/(Selector|Coach|Advisor)/i.test(x.type||''));
-      const card = p => { const photo=p.photo_url?`<img src="${esc(p.photo_url)}" alt="${esc(p.name)}">`:`<span>${initials(p.name)}</span>`; return `<article class="leader-card"><div class="leader-photo">${photo}</div><div class="leader-copy"><small>${esc(p.type||'TMPCL Leadership')}</small><h3>${esc(p.name||'Name Coming Soon')}</h3><div class="designation">${esc(p.designation||p.type||'TMPCL Team')}</div><p>${esc(p.bio||'Profile details will be updated by TMPCL Team.')}</p></div></article>`; };
-      const ambassadorCard = (p,i) => { const photo=p.photo_url?`<img src="${esc(p.photo_url)}" alt="${esc(p.name)}">`:`<span>BA</span>`; return `<article class="ambassador-card ${i%2?'featured':''}"><div class="ambassador-photo dynamic-ambassador-photo">${photo}</div><div class="ambassador-copy"><small>${esc(p.designation||'Brand Ambassador, TMPCL')}</small><h3>${esc(p.name||'Brand Ambassador')}</h3><p>${esc(p.bio||'Supporting TMPCL mission to promote tennis ball cricket talent across Madhya Pradesh.')}</p><div class="ambassador-tags"><span>Official Face</span><span>TMPCL</span><span>Talent Support</span></div></div></article>`; };
-      if(home && founder) home.innerHTML = card(founder);
-      if(about) about.innerHTML = leaders.filter(x=>(x.type||'').includes('Founder')).map(card).join('') || (founder?card(founder):'');
-      if(amb){ amb.innerHTML = ambassadors.length ? ambassadors.slice(0,2).map(ambassadorCard).join('') : `<article class="card empty-state"><h3>Brand Ambassadors Coming Soon</h3><p class="muted">TMPCL Team Dashboard se brand ambassador profiles add karne ke baad yahan show honge.</p></article>`; }
-      if(sel){ sel.innerHTML = selectors.map(card).join(''); if(empty) empty.style.display=selectors.length?'none':'block'; }
+      const card = p => { const photo=p.photo_url?`<img src="${esc(p.photo_url)}" alt="${esc(p.name)}">`:`<span>${initials(p.name)}</span>`; return `<article class="leader-card auto-profile-card" data-profile-card="true" data-photo="${esc(p.photo_url||'')}" data-type="${esc(p.type||'TMPCL Leadership')}" data-name="${esc(p.name||'Name Coming Soon')}" data-designation="${esc(p.designation||p.type||'TMPCL Team')}" data-bio="${esc(p.bio||'Profile details will be updated by TMPCL Team.')}" title="Tap to view full profile"><div class="leader-photo">${photo}</div><div class="leader-copy"><small>${esc(p.type||'TMPCL Leadership')}</small><h3>${esc(p.name||'Name Coming Soon')}</h3><div class="designation">${esc(p.designation||p.type||'TMPCL Team')}</div><p>${esc(p.bio||'Profile details will be updated by TMPCL Team.')}</p><span class="profile-view-hint">Tap to view full photo</span></div></article>`; };
+      const ambassadorCard = (p,i) => { const photo=p.photo_url?`<img src="${esc(p.photo_url)}" alt="${esc(p.name)}">`:`<span>BA</span>`; return `<article class="ambassador-card ${i%2?'featured':''} auto-profile-card" data-profile-card="true" data-photo="${esc(p.photo_url||'')}" data-type="${esc(p.type||'Brand Ambassador')}" data-name="${esc(p.name||'Brand Ambassador')}" data-designation="${esc(p.designation||'Brand Ambassador, TMPCL')}" data-bio="${esc(p.bio||'Supporting TMPCL mission to promote tennis ball cricket talent across Madhya Pradesh.')}" title="Tap to view full profile"><div class="ambassador-photo dynamic-ambassador-photo">${photo}</div><div class="ambassador-copy"><small>${esc(p.designation||'Brand Ambassador, TMPCL')}</small><h3>${esc(p.name||'Brand Ambassador')}</h3><p>${esc(p.bio||'Supporting TMPCL mission to promote tennis ball cricket talent across Madhya Pradesh.')}</p><div class="ambassador-tags"><span>Official Face</span><span>TMPCL</span><span>Talent Support</span></div><span class="profile-view-hint">Tap to view full photo</span></div></article>`; };
+      if(home && founder) { home.innerHTML = card(founder); bindProfileCards(home); }
+      if(about) { about.innerHTML = leaders.filter(x=>(x.type||'').includes('Founder')).map(card).join('') || (founder?card(founder):''); bindProfileCards(about); }
+      if(amb){ amb.innerHTML = ambassadors.length ? ambassadors.slice(0,2).map(ambassadorCard).join('') : `<article class="card empty-state"><h3>Brand Ambassadors Coming Soon</h3><p class="muted">TMPCL Team Dashboard se brand ambassador profiles add karne ke baad yahan show honge.</p></article>`; bindProfileCards(amb); }
+      if(sel){ sel.innerHTML = selectors.map(card).join(''); if(empty) empty.style.display=selectors.length?'none':'block'; bindProfileCards(sel); }
     } catch(err){ console.error(err); }
   }
 
