@@ -265,6 +265,78 @@
     if(leadershipForm){ leadershipForm.addEventListener('submit', async e=>{ e.preventDefault(); const btn=leadershipForm.querySelector('button[type="submit"]'); setLoading(btn,true); try{ const fd=new FormData(leadershipForm); const id=fd.get('personId')||('leader-'+Date.now()); const old=(await selectRows('leadership_panel',`select=*&id=eq.${encodeURIComponent(id)}&limit=1`))[0]||{}; const photo=await uploadFile(STORAGE_BUCKETS.leadershipPhoto,$('#personPhoto'),id) || old.photo_url || ''; await saveRow('leadership_panel',{id,name:fd.get('personName'),type:fd.get('personType')||'Selector',designation:fd.get('personDesignation')||fd.get('personType'),bio:fd.get('personBio')||'',photo_url:photo}); showSuccess($('#leadershipSuccess'), '<strong>Profile saved successfully.</strong>'); leadershipForm.reset(); $('#personId').value=''; renderDashboard(); } catch(err){ showDbError('Leadership save',err); } finally{ setLoading(btn,false); } }); $('#leadershipFormReset')?.addEventListener('click',()=>{leadershipForm.reset(); $('#personId').value=''; $('#leadershipSuccess').style.display='none';}); }
   }
 
+
+  const DEFAULT_SITE_SETTINGS = {
+    id: 'main',
+    footer_phone: '+91 70000 12345',
+    footer_whatsapp: '917000012345',
+    footer_email: 'info@tmpcl.com',
+    footer_location: 'Bhopal, Madhya Pradesh',
+    footer_social_text: 'Instagram · YouTube · Facebook'
+  };
+
+  async function getSiteSettings(){
+    try{
+      const rows = await selectRows('site_settings', 'select=*&id=eq.main&limit=1');
+      return {...DEFAULT_SITE_SETTINGS, ...(rows[0] || {})};
+    } catch(err){
+      console.warn('Site settings not loaded. Run updated supabase-schema.sql if needed.', err);
+      return DEFAULT_SITE_SETTINGS;
+    }
+  }
+
+  function applySiteSettings(settings){
+    $$('[data-setting="footer_phone"]').forEach(el => el.textContent = settings.footer_phone || DEFAULT_SITE_SETTINGS.footer_phone);
+    $$('[data-setting="footer_email"]').forEach(el => el.textContent = settings.footer_email || DEFAULT_SITE_SETTINGS.footer_email);
+    $$('[data-setting="footer_location"]').forEach(el => el.textContent = settings.footer_location || DEFAULT_SITE_SETTINGS.footer_location);
+    $$('[data-setting="footer_social_text"]').forEach(el => el.textContent = settings.footer_social_text || DEFAULT_SITE_SETTINGS.footer_social_text);
+    if(settings.footer_whatsapp){
+      $$('a[href*="wa.me"], .mobile-cta a:last-child').forEach(a => {
+        a.href = `https://wa.me/${String(settings.footer_whatsapp).replace(/\D/g,'')}`;
+        a.target = '_blank';
+        a.rel = 'noopener';
+      });
+    }
+  }
+
+  async function initSiteSettings(){
+    const settings = await getSiteSettings();
+    applySiteSettings(settings);
+    const form = $('#siteSettingsForm');
+    if(form){
+      $('#footerPhone').value = settings.footer_phone || '';
+      $('#footerWhatsapp').value = settings.footer_whatsapp || '';
+      $('#footerEmail').value = settings.footer_email || '';
+      $('#footerLocation').value = settings.footer_location || '';
+      $('#footerSocialText').value = settings.footer_social_text || '';
+    }
+  }
+
+  function setupSiteSettingsForm(){
+    const form = $('#siteSettingsForm');
+    if(!form) return;
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      const btn = form.querySelector('button[type="submit"]');
+      setLoading(btn, true, 'Saving...');
+      try{
+        const fd = new FormData(form);
+        const row = {
+          id: 'main',
+          footer_phone: fd.get('footerPhone') || DEFAULT_SITE_SETTINGS.footer_phone,
+          footer_whatsapp: fd.get('footerWhatsapp') || DEFAULT_SITE_SETTINGS.footer_whatsapp,
+          footer_email: fd.get('footerEmail') || DEFAULT_SITE_SETTINGS.footer_email,
+          footer_location: fd.get('footerLocation') || DEFAULT_SITE_SETTINGS.footer_location,
+          footer_social_text: fd.get('footerSocialText') || DEFAULT_SITE_SETTINGS.footer_social_text
+        };
+        await saveRow('site_settings', row);
+        applySiteSettings(row);
+        showSuccess($('#settingsSuccess'), '<strong>Footer settings saved.</strong> Public website footer me update show hoga.');
+      } catch(err){ showDbError('Footer settings save', err); }
+      finally{ setLoading(btn, false); }
+    });
+  }
+
   // login remains local/session-only for current static version
   const loginForm=$('#adminLoginForm');
   if(loginForm){ loginForm.addEventListener('submit',e=>{ e.preventDefault(); const d=Object.fromEntries(new FormData(loginForm).entries()); if((d.username==='team' && d.password==='tmpcl123') || (d.username==='admin' && d.password==='admin123')){ sessionStorage.setItem('tmpclTeamAccess','1'); location.href='admin-dashboard.html'; } else { const s=$('#adminLoginError'); if(s){s.style.display='block'; s.textContent='Invalid login. Use team / tmpcl123';} } }); }
@@ -276,6 +348,8 @@
   setupRegistration();
   setupContact();
   setupDashboardForms();
+  setupSiteSettingsForm();
+  initSiteSettings();
   renderPublicTeams();
   renderPublicPartners();
   renderPublicNews();

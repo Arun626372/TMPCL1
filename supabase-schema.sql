@@ -199,6 +199,34 @@ do $$ begin
   create policy "TMPCL public delete leadership" on public.leadership_panel for delete to anon using (true);
 exception when duplicate_object then null; end $$;
 
+
+-- Website footer/contact settings
+create table if not exists public.site_settings (
+  id text primary key default 'main',
+  footer_phone text default '+91 70000 12345',
+  footer_whatsapp text default '917000012345',
+  footer_email text default 'info@tmpcl.com',
+  footer_location text default 'Bhopal, Madhya Pradesh',
+  footer_social_text text default 'Instagram · YouTube · Facebook',
+  updated_at timestamptz default now()
+);
+
+alter table public.site_settings enable row level security;
+
+do $$ begin
+  create policy "TMPCL public select site settings" on public.site_settings for select to anon using (true);
+exception when duplicate_object then null; end $$;
+do $$ begin
+  create policy "TMPCL public insert site settings" on public.site_settings for insert to anon with check (true);
+exception when duplicate_object then null; end $$;
+do $$ begin
+  create policy "TMPCL public update site settings" on public.site_settings for update to anon using (true) with check (true);
+exception when duplicate_object then null; end $$;
+
+insert into public.site_settings (id, footer_phone, footer_whatsapp, footer_email, footer_location, footer_social_text)
+values ('main', '+91 70000 12345', '917000012345', 'info@tmpcl.com', 'Bhopal, Madhya Pradesh', 'Instagram · YouTube · Facebook')
+on conflict (id) do nothing;
+
 -- Public storage buckets
 insert into storage.buckets (id, name, public) values
   ('player-photos', 'player-photos', true),

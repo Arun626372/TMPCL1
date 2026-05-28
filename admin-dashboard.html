@@ -1,7 +1,17 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TMPCL | TMPCL Team Dashboard</title><link rel="stylesheet" href="styles.css"></head><body data-page="dashboard"><header class="topbar"><div class="wrap nav"><a class="brand" href="index.html"><img src="tmpcl-logo.png"></a><button id="logoutBtn" class="btn ghost">Logout</button></div></header><main class="dash-shell"><div class="wrap"><div class="dash-top"><div><span class="eyebrow">TMPCL Dashboard</span><h1>TMPCL Team Dashboard</h1><p class="muted">Manage registrations, teams, squad banners, gallery media, news, partners and contact messages.</p></div><a class="btn" href="index.html">View Website</a></div>
 <div class="stat-grid"><article class="card"><small>Total Registrations</small><div id="statRegistrations" class="stat-value">0</div></article><article class="card"><small>Total Teams</small><div id="statTeams" class="stat-value">0</div></article><article class="card"><small>Squad Banners</small><div id="statSquadBanners" class="stat-value">0</div></article><article class="card"><small>U19 Players</small><div id="statU19" class="stat-value">0</div></article><article class="card"><small>Gallery Media</small><div id="statGallery" class="stat-value">0</div></article><article class="card"><small>News Posts</small><div id="statNews" class="stat-value">0</div></article><article class="card"><small>Published Partners</small><div id="statPartners" class="stat-value">0</div></article><article class="card"><small>Partner Enquiries</small><div id="statPartnerEnquiries" class="stat-value">0</div></article><article class="card"><small>Contact Enquiries</small><div id="statContactEnquiries" class="stat-value">0</div></article></div>
 
-
+<section class="admin-manage-grid single-admin-manage settings-admin-section">
+  <article class="card"><h3>Website Footer & Contact Settings</h3><p class="muted">Yahan se footer ka phone, WhatsApp, email, location aur social text change hoga. Save karne ke baad public website ke footer me update show hoga.</p><form id="siteSettingsForm" class="admin-small-form">
+    <div class="admin-field"><label>Footer Phone Number</label><input name="footerPhone" id="footerPhone" placeholder="+91 70000 12345"></div>
+    <div class="admin-field"><label>WhatsApp Number</label><input name="footerWhatsapp" id="footerWhatsapp" placeholder="917000012345"><small class="muted">Country code ke saath number likhein, jaise 917000012345.</small></div>
+    <div class="admin-field"><label>Email</label><input name="footerEmail" id="footerEmail" type="email" placeholder="info@tmpcl.com"></div>
+    <div class="admin-field"><label>Location / Address</label><input name="footerLocation" id="footerLocation" placeholder="Bhopal, Madhya Pradesh"></div>
+    <div class="admin-field"><label>Social Text</label><input name="footerSocialText" id="footerSocialText" placeholder="Instagram · YouTube · Facebook"></div>
+    <button class="btn" type="submit">Save Footer Settings</button>
+    <div id="settingsSuccess" class="success"></div>
+  </form></article>
+</section>
 
 <section class="admin-manage-grid single-admin-manage leadership-admin-section">
   <article class="card"><h3>Leadership & Selection Panel</h3><p class="muted">Founder/Owner aur selectors ke profile yahan se add/edit/delete kar sakte hain. Public pages par Founder About/Home me aur selectors Categories page par show honge.</p><form id="leadershipForm" class="admin-small-form">
