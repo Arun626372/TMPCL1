@@ -631,3 +631,62 @@ body:not([data-page="home"]) .hero-visual,body:not([data-page="home"]) .hero-pla
     min-height:300px!important;
   }
 }
+
+/* Final mobile image frame fix for Founder / Selection Panel / Brand Ambassador
+   Mobile me photo cut nahi hogi: full portrait image visible rahegi. */
+.leader-photo,
+.ambassador-photo.dynamic-ambassador-photo{
+  overflow:hidden!important;
+  background:linear-gradient(180deg,rgba(13,35,50,.98),rgba(3,10,16,.98))!important;
+}
+.leader-photo img,
+.ambassador-photo.dynamic-ambassador-photo img{
+  width:100%!important;
+  height:100%!important;
+  object-fit:contain!important;
+  object-position:center top!important;
+  padding:8px!important;
+  display:block!important;
+  box-sizing:border-box!important;
+}
+@media(max-width:960px){
+  .leader-card,
+  .ambassador-card{
+    grid-template-columns:1fr!important;
+    gap:16px!important;
+  }
+  .leader-photo,
+  .selector-grid .leader-photo,
+  .ambassador-photo.dynamic-ambassador-photo{
+    width:100%!important;
+    height:auto!important;
+    min-height:0!important;
+    aspect-ratio:9/16!important;
+    max-height:none!important;
+  }
+  .leader-photo img,
+  .ambassador-photo.dynamic-ambassador-photo img{
+    padding:8px!important;
+    object-fit:contain!important;
+    object-position:center top!important;
+  }
+}
+@media(max-width:560px){
+  .leader-card,
+  .ambassador-card{
+    padding:18px!important;
+    border-radius:28px!important;
+  }
+  .leader-photo,
+  .selector-grid .leader-photo,
+  .ambassador-photo.dynamic-ambassador-photo{
+    aspect-ratio:9/16!important;
+    height:auto!important;
+    min-height:0!important;
+    border-radius:22px!important;
+  }
+  .leader-photo img,
+  .ambassador-photo.dynamic-ambassador-photo img{
+    padding:6px!important;
+  }
+}
