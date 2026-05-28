@@ -563,3 +563,71 @@ body:not([data-page="home"]) .hero-visual,body:not([data-page="home"]) .hero-pla
 .dynamic-ambassador-photo img{position:relative;z-index:2;width:100%;height:100%;object-fit:cover;border-radius:inherit}
 .dynamic-ambassador-photo span{position:relative;z-index:2}
 #homeAmbassadorGrid .empty-state{grid-column:1/-1;text-align:center;padding:34px}
+
+/* Leadership / founder / selector / brand ambassador image fit fix
+   Images must show full frame without cropping on desktop and mobile. */
+.leader-photo,
+.ambassador-photo.dynamic-ambassador-photo,
+.leader-thumb{
+  background:linear-gradient(180deg,rgba(16,44,62,.96),rgba(4,12,18,.98))!important;
+}
+.leader-photo img,
+.ambassador-photo.dynamic-ambassador-photo img,
+.leader-thumb img{
+  object-fit:contain!important;
+  object-position:center center!important;
+  width:100%!important;
+  height:100%!important;
+  padding:10px!important;
+  background:radial-gradient(circle at 50% 35%,rgba(255,211,90,.12),transparent 48%),rgba(3,10,16,.45)!important;
+  border-radius:inherit!important;
+}
+.leader-photo span,
+.ambassador-photo.dynamic-ambassador-photo span{
+  display:grid!important;
+  place-items:center!important;
+}
+.ambassador-photo.dynamic-ambassador-photo{
+  height:310px!important;
+  min-height:310px!important;
+  padding:0!important;
+}
+.leader-photo{
+  height:250px!important;
+  min-height:250px!important;
+}
+.selector-grid .leader-photo{
+  height:260px!important;
+  min-height:260px!important;
+}
+.leader-thumb{
+  width:62px!important;
+  height:62px!important;
+}
+.leader-thumb img{padding:4px!important}
+@media(max-width:960px){
+  .ambassador-photo.dynamic-ambassador-photo{
+    height:320px!important;
+    min-height:320px!important;
+  }
+  .leader-photo,
+  .selector-grid .leader-photo{
+    height:320px!important;
+    min-height:320px!important;
+  }
+  .leader-photo img,
+  .ambassador-photo.dynamic-ambassador-photo img{
+    padding:12px!important;
+  }
+}
+@media(max-width:560px){
+  .ambassador-photo.dynamic-ambassador-photo{
+    height:300px!important;
+    min-height:300px!important;
+  }
+  .leader-photo,
+  .selector-grid .leader-photo{
+    height:300px!important;
+    min-height:300px!important;
+  }
+}
