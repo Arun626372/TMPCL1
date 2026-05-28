@@ -152,15 +152,18 @@
   }
 
   async function renderPublicLeadership(){
-    const home=$('#homeFounderCard'), about=$('#aboutLeadershipGrid'), sel=$('#selectionPanelGrid'), empty=$('#selectionPanelEmpty');
-    if(!home && !about && !sel) return;
+    const home=$('#homeFounderCard'), about=$('#aboutLeadershipGrid'), sel=$('#selectionPanelGrid'), empty=$('#selectionPanelEmpty'), amb=$('#homeAmbassadorGrid');
+    if(!home && !about && !sel && !amb) return;
     try{
       const leaders = await selectRows('leadership_panel','select=*&order=created_at.asc');
-      const founder = leaders.find(x=>(x.type||'').includes('Founder')) || leaders[0];
+      const founder = leaders.find(x=>(x.type||'').includes('Founder')) || leaders.find(x=>!/(Ambassador|Selector|Coach|Advisor)/i.test(x.type||'')) || leaders[0];
+      const ambassadors = leaders.filter(x=>/Ambassador/i.test(x.type||''));
       const selectors = leaders.filter(x=>/(Selector|Coach|Advisor)/i.test(x.type||''));
       const card = p => { const photo=p.photo_url?`<img src="${esc(p.photo_url)}" alt="${esc(p.name)}">`:`<span>${initials(p.name)}</span>`; return `<article class="leader-card"><div class="leader-photo">${photo}</div><div class="leader-copy"><small>${esc(p.type||'TMPCL Leadership')}</small><h3>${esc(p.name||'Name Coming Soon')}</h3><div class="designation">${esc(p.designation||p.type||'TMPCL Team')}</div><p>${esc(p.bio||'Profile details will be updated by TMPCL Team.')}</p></div></article>`; };
+      const ambassadorCard = (p,i) => { const photo=p.photo_url?`<img src="${esc(p.photo_url)}" alt="${esc(p.name)}">`:`<span>BA</span>`; return `<article class="ambassador-card ${i%2?'featured':''}"><div class="ambassador-photo dynamic-ambassador-photo">${photo}</div><div class="ambassador-copy"><small>${esc(p.designation||'Brand Ambassador, TMPCL')}</small><h3>${esc(p.name||'Brand Ambassador')}</h3><p>${esc(p.bio||'Supporting TMPCL mission to promote tennis ball cricket talent across Madhya Pradesh.')}</p><div class="ambassador-tags"><span>Official Face</span><span>TMPCL</span><span>Talent Support</span></div></div></article>`; };
       if(home && founder) home.innerHTML = card(founder);
       if(about) about.innerHTML = leaders.filter(x=>(x.type||'').includes('Founder')).map(card).join('') || (founder?card(founder):'');
+      if(amb){ amb.innerHTML = ambassadors.length ? ambassadors.slice(0,2).map(ambassadorCard).join('') : `<article class="card empty-state"><h3>Brand Ambassadors Coming Soon</h3><p class="muted">TMPCL Team Dashboard se brand ambassador profiles add karne ke baad yahan show honge.</p></article>`; }
       if(sel){ sel.innerHTML = selectors.map(card).join(''); if(empty) empty.style.display=selectors.length?'none':'block'; }
     } catch(err){ console.error(err); }
   }
