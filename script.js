@@ -338,6 +338,8 @@
       if(!dob || !ageGroup) return;
       const age=ageFromDob(dob.value);
       ageGroup.value = dob.value ? (age<=19 ? 'U19' : 'Open') : '';
+      ageGroup.setAttribute('readonly','readonly');
+      ageGroup.setAttribute('aria-readonly','true');
     }
 
     function updateRoleFields(){
@@ -361,6 +363,7 @@
       }
     }
 
+    dob?.addEventListener('input',updateAgeGroup);
     dob?.addEventListener('change',updateAgeGroup);
     roleSelect?.addEventListener('change',updateRoleFields);
     updateAgeGroup();
@@ -393,7 +396,7 @@
           theme: { color: '#8dff39' },
           handler: function(response){ resolve(response); },
           modal: {
-            ondismiss: function(){ reject(new Error('Payment window close ho gaya. Registration pending hai; payment complete karne ke baad confirmation slip milegi.')); }
+            ondismiss: function(){ reject(new Error('Payment window close ho gaya. Payment complete karne ke baad hi registration confirm hogi.')); }
           }
         };
         const checkout = new Razorpay(options);
@@ -408,14 +411,23 @@
     if(!regForm) return;
     regForm.addEventListener('submit', async e=>{
       e.preventDefault();
-      const btn=regForm.querySelector('button[type="submit"]'); setLoading(btn,true,'Preparing Payment...');
+      const btn=regForm.querySelector('button[type="submit"]');
+      setLoading(btn,true,'Opening Razorpay...');
       try{
         updateAgeGroup();
         updateRoleFields();
+
         const data=Object.fromEntries(new FormData(regForm).entries());
+        if(battingSelect?.disabled) data.batting = 'Not Applicable';
+        if(bowlingSelect?.disabled) data.bowling = 'Not Applicable';
+
         const age=ageFromDob(data.dob);
         const photoInput=regForm.querySelector('input[name="photo"]');
         const proofInput=regForm.querySelector('input[name="aadhaar"]');
+
+        if(!data.name) throw new Error('Full Name mandatory hai.');
+        if(!data.mobile) throw new Error('Mobile Number mandatory hai.');
+        if(!data.city) throw new Error('City / District mandatory hai.');
         if(!data.dob) throw new Error('Date of Birth mandatory hai.');
         if(!data.ageGroup) throw new Error('Age Group DOB se auto select nahi hua. DOB dobara select karein.');
         if(!data.role) throw new Error('Playing Role select karein.');
@@ -424,9 +436,7 @@
         if(data.ageGroup==='U19' && age>19) throw new Error('U19 age group ke liye age 19 ya usse kam honi chahiye.');
 
         const id=makeId('TMPCL');
-        const photoUrl=await uploadFile(STORAGE_BUCKETS.playerPhoto, photoInput, id);
-        const proofUrl=await uploadFile(STORAGE_BUCKETS.idProof, proofInput, id);
-        const baseRecord={
+        const pendingRecord={
           id,
           name:data.name,
           mobile:data.mobile,
@@ -439,31 +449,30 @@
           bowling:data.bowling || 'Not Applicable',
           experience:data.experience,
           email:data.email||'',
-          photo_url:photoUrl,
-          proof_url:proofUrl,
           fee:REGISTRATION_FEE,
           payment_amount:REGISTRATION_FEE,
           payment_currency:'INR',
           assigned_category:'Pending until trials & auction',
-          payment_status:'Pending'
+          payment_status:'Payment Pending'
         };
 
-        const savedReg = await insertRow('players', baseRecord);
-        const regRecord = savedReg || baseRecord;
+        // Razorpay is opened before Supabase save/upload so user sees payment first.
+        const paymentResponse = await openRazorpayCheckout(pendingRecord);
 
-        setLoading(btn,true,'Opening Razorpay...');
-        const paymentResponse = await openRazorpayCheckout(regRecord);
-
-        setLoading(btn,true,'Confirming Registration...');
+        setLoading(btn,true,'Saving Registration...');
+        const photoUrl=await uploadFile(STORAGE_BUCKETS.playerPhoto, photoInput, id);
+        const proofUrl=await uploadFile(STORAGE_BUCKETS.idProof, proofInput, id);
         const paidRecord = {
-          ...regRecord,
+          ...pendingRecord,
+          photo_url:photoUrl,
+          proof_url:proofUrl,
           payment_status:'Paid',
           razorpay_payment_id:paymentResponse.razorpay_payment_id || '',
-          payment_amount:REGISTRATION_FEE,
-          payment_currency:'INR',
+          razorpay_order_id:paymentResponse.razorpay_order_id || '',
           paid_at:new Date().toISOString()
         };
-        await updateRow('players', id, paidRecord).catch(()=>null);
+
+        await insertRow('players', paidRecord);
 
         const successBox = $('#regSuccess');
         showSuccess(successBox, `<strong>Payment successful. Registration confirmed!</strong><br>Registration ID: <strong>${id}</strong><br>Payment ID: <strong>${esc(paymentResponse.razorpay_payment_id || '')}</strong><br>Amount: ₹${REGISTRATION_FEE}<br><br>${buildRegistrationSlip(paidRecord)}`);
