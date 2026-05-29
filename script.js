@@ -539,8 +539,9 @@
     if(page !== 'dashboard') return;
     try{
       const {regs,teams,gallery,news,partners,partnerEnq,msgs,leaders} = await dashboardData();
+      const paidRegs = regs.filter(r => String(r.payment_status || '').toLowerCase() === 'paid');
       const setText=(id,v)=>{ const el=$(id); if(el) el.textContent=v; };
-      setText('#statRegistrations', regs.length); setText('#statTeams', teams.length); setText('#statSquadBanners', teams.filter(t=>t.squad_banner_url).length); setText('#statU19', regs.filter(r=>r.age_group==='U19').length); setText('#statGallery', gallery.length); setText('#statNews', news.length); setText('#statPartners', partners.filter(p=>p.status==='Published').length); setText('#statPartnerEnquiries', partnerEnq.length); setText('#statContactEnquiries', msgs.length);
+      setText('#statRegistrations', paidRegs.length); setText('#statTeams', teams.length); setText('#statSquadBanners', teams.filter(t=>t.squad_banner_url).length); setText('#statU19', paidRegs.filter(r=>r.age_group==='U19').length); setText('#statGallery', gallery.length); setText('#statNews', news.length); setText('#statPartners', partners.filter(p=>p.status==='Published').length); setText('#statPartnerEnquiries', partnerEnq.length); setText('#statContactEnquiries', msgs.length);
 
       const teamTb=$('#adminTeamsTable tbody'); if(teamTb){ $('#emptyTeams').style.display=teams.length?'none':'block'; teamTb.innerHTML=teams.map(t=>{ const logo=t.logo_url?`<img src="${esc(t.logo_url)}" style="width:42px;height:42px;border-radius:12px;object-fit:cover">`:`<strong>${initials(t.name)}</strong>`; const banner=t.squad_banner_url?`<span class="badge ok">Uploaded</span>`:`<span class="badge muted-badge">Not Added</span>`; return `<tr><td>${logo}</td><td>${esc(t.name)}</td><td>${esc(t.city||'')}</td><td>${esc(t.owner||'')}</td><td>${esc(t.status||'')}</td><td>${banner}</td><td><div class="admin-table-actions"><button class="mini-btn" data-edit-team="${esc(t.id)}">Edit</button><button class="mini-btn" data-preview-team="${esc(t.id)}">Preview</button><button class="mini-btn danger" data-delete-team="${esc(t.id)}">Delete</button></div></td></tr>`; }).join('');
         $$('[data-edit-team]',teamTb).forEach(btn=>btn.addEventListener('click',()=>{ const t=teams.find(x=>x.id===btn.dataset.editTeam); if(!t) return; $('#teamId').value=t.id; $('#teamName').value=t.name; $('#teamCity').value=t.city||''; $('#teamOwner').value=t.owner||''; $('#teamStatus').value=t.status||'Player Auction Pending'; showSuccess($('#teamSuccess'), '<strong>Edit mode:</strong> Change fields and click Save / Update Team. Existing files remain unless new files are uploaded.'); document.querySelector('.admin-tab-panel.active')?.scrollIntoView({behavior:'smooth',block:'start'}); }));
@@ -570,7 +571,7 @@
           const q=(search?.value||'').toLowerCase().trim();
           const ageVal=ageFilter?.value||'all';
           const roleVal=roleFilter?.value||'all';
-          return regs.filter(r=>{
+          return paidRegs.filter(r=>{
             const hay=[r.id,r.name,r.mobile,r.city,r.role,r.age_group,r.assigned_category].join(' ').toLowerCase();
             const matchQ=!q || hay.includes(q);
             const matchAge=ageVal==='all' || r.age_group===ageVal;
@@ -585,9 +586,9 @@
         };
         [search,ageFilter,roleFilter].forEach(el=>el?.addEventListener('input',drawRegs));
         [ageFilter,roleFilter].forEach(el=>el?.addEventListener('change',drawRegs));
-        $('#exportAllRegs')?.addEventListener('click',()=>downloadCsv('tmpcl-all-registrations.csv', regs));
-        $('#exportU19Regs')?.addEventListener('click',()=>downloadCsv('tmpcl-u19-registrations.csv', regs.filter(r=>r.age_group==='U19')));
-        $('#exportOpenRegs')?.addEventListener('click',()=>downloadCsv('tmpcl-open-registrations.csv', regs.filter(r=>r.age_group==='Open')));
+        $('#exportAllRegs')?.addEventListener('click',()=>downloadCsv('tmpcl-paid-registrations.csv', paidRegs));
+        $('#exportU19Regs')?.addEventListener('click',()=>downloadCsv('tmpcl-paid-u19-registrations.csv', paidRegs.filter(r=>r.age_group==='U19')));
+        $('#exportOpenRegs')?.addEventListener('click',()=>downloadCsv('tmpcl-paid-open-registrations.csv', paidRegs.filter(r=>r.age_group==='Open')));
         $('#exportFilteredRegs')?.addEventListener('click',()=>downloadCsv('tmpcl-filtered-registrations.csv', filteredRegs()));
         drawRegs();
       }
