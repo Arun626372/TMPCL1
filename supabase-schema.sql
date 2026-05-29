@@ -19,6 +19,24 @@ create table if not exists public.players (
   fee integer default 999,
   assigned_category text default 'Pending until trials & auction',
   payment_status text default 'Pending',
+  razorpay_payment_id text,
+  razorpay_order_id text,
+  payment_amount integer default 999,
+  payment_currency text default 'INR',
+  paid_at timestamptz,
+  created_at timestamptz default now()
+ );
+
+create table if not exists public.payments (
+  id text primary key,
+  player_id text,
+  razorpay_payment_id text,
+  razorpay_order_id text,
+  amount integer,
+  currency text default 'INR',
+  status text,
+  event text,
+  payload jsonb,
   created_at timestamptz default now()
 );
 
@@ -274,3 +292,29 @@ values
   ('leader-head-selector', 'Head Selector Name', 'Head Selector', 'Head Selector, TMPCL Selection Committee', 'Trials me performance, fitness, game awareness aur potential ke basis par player evaluation aur category grading manage karenge.'),
   ('leader-selector-1', 'Selector Name', 'Selector', 'Selector, TMPCL Selection Committee', 'Player shortlisting, category grading aur player auction pool preparation me support karenge.')
 on conflict (id) do nothing;
+
+
+-- Payment/webhook safe update. Run even if players table already exists.
+alter table public.players add column if not exists razorpay_payment_id text;
+alter table public.players add column if not exists razorpay_order_id text;
+alter table public.players add column if not exists payment_amount integer default 999;
+alter table public.players add column if not exists payment_currency text default 'INR';
+alter table public.players add column if not exists paid_at timestamptz;
+
+create table if not exists public.payments (
+  id text primary key,
+  player_id text,
+  razorpay_payment_id text,
+  razorpay_order_id text,
+  amount integer,
+  currency text default 'INR',
+  status text,
+  event text,
+  payload jsonb,
+  created_at timestamptz default now()
+);
+alter table public.payments enable row level security;
+do $$ begin
+  create policy "TMPCL public select payments" on public.payments for select to anon using (true);
+exception when duplicate_object then null; end $$;
+-- Writes to payments should happen from Edge Function using SERVICE_ROLE_KEY.
