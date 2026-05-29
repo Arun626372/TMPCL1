@@ -30,16 +30,16 @@
 <div class="wrap form-layout">
 <form class="card" id="registrationForm">
 <h3>Player Registration Form</h3>
-<p class="muted">Fill your details carefully. Category trial evaluation ke baad assign hogi; final team selection Player Auction ke through hoga.</p>
+<p class="muted">Fill your details carefully. Pehle Razorpay payment open hoga; payment successful hone ke baad hi registration confirmation slip show hogi.</p>
 <div class="field-grid">
 <div class="field"><label>Full Name *</label><input name="name" placeholder="Enter your full name" required=""/></div>
 <div class="field"><label>Mobile Number *</label><input name="mobile" pattern="[0-9]{10}" placeholder="10-digit mobile number" required=""/></div>
 <div class="field"><label>City / District *</label><input name="city" placeholder="Enter city / district" required=""/></div>
 <div class="field"><label>Date of Birth *</label><input id="dobInput" name="dob" required="" type="date"/></div>
-<div class="field"><label>Age Group *</label><select id="ageGroupSelect" name="ageGroup" required=""><option value="">Select age group</option><option value="U19">U19</option><option value="Open">Open</option></select></div>
+<div class="field"><label>Age Group *</label><input id="ageGroupSelect" name="ageGroup" readonly required placeholder="DOB डालते ही auto select होगा"/></div>
 <div class="field"><label>Playing Role *</label><select id="roleSelect" name="role" required=""><option value="">Select Role</option><option>Batsman</option><option>Bowler</option><option>Wicket Keeper</option><option>All-Rounder</option></select></div>
-<div class="field"><label>Batting Style</label><select name="batting"><option>Right Hand</option><option>Left Hand</option><option>Not Applicable</option></select></div>
-<div class="field"><label>Bowling Style</label><select name="bowling"><option>Right Arm Fast</option><option>Right Arm Medium</option><option>Left Arm Fast</option><option>Spin</option><option>Not Applicable</option></select></div>
+<div class="field" id="battingStyleField"><label>Batting Style</label><select id="battingStyleSelect" name="batting"><option>Right Hand</option><option>Left Hand</option><option>Not Applicable</option></select></div>
+<div class="field" id="bowlingStyleField"><label>Bowling Style</label><select id="bowlingStyleSelect" name="bowling"><option>Right Arm Fast</option><option>Right Arm Medium</option><option>Left Arm Fast</option><option>Spin</option><option>Not Applicable</option></select></div>
 <div class="field"><label>Experience</label><select name="experience"><option>Beginner</option><option>Local Tournament</option><option>District Level</option><option>State Level</option></select></div>
 <div class="field"><label>Email</label><input name="email" placeholder="Enter email" type="email"/></div>
 </div>

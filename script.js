@@ -1,6 +1,8 @@
 (function(){
   const SUPABASE_URL = 'https://ybfrnvkikhtlouocobnk.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_sAoJrKNHTQGsmhbu5oOapw_DgpJf-A3';
+  const RAZORPAY_KEY_ID = 'rzp_test_Sv9Mn3kH8zSD55';
+  const REGISTRATION_FEE = 999;
   const STORAGE_BUCKETS = {
     playerPhoto: 'player-photos',
     idProof: 'id-proofs',
@@ -323,31 +325,155 @@
   }
 
   function setupRegistration(){
-    const regFee=$('#regFee'), regTotal=$('#regTotal'); if(regFee) regFee.textContent='₹999'; if(regTotal) regTotal.textContent='₹999';
+    const regFee=$('#regFee'), regTotal=$('#regTotal');
+    if(regFee) regFee.textContent='₹' + REGISTRATION_FEE;
+    if(regTotal) regTotal.textContent='₹' + REGISTRATION_FEE;
+
     const dob=$('#dobInput'), ageGroup=$('#ageGroupSelect');
-    if(dob && ageGroup){ dob.addEventListener('change',()=>{ const age=ageFromDob(dob.value); ageGroup.value = age && age<=19 ? 'U19' : 'Open'; }); }
+    const roleSelect=$('#roleSelect');
+    const battingField=$('#battingStyleField'), bowlingField=$('#bowlingStyleField');
+    const battingSelect=$('#battingStyleSelect'), bowlingSelect=$('#bowlingStyleSelect');
+
+    function updateAgeGroup(){
+      if(!dob || !ageGroup) return;
+      const age=ageFromDob(dob.value);
+      ageGroup.value = dob.value ? (age<=19 ? 'U19' : 'Open') : '';
+    }
+
+    function updateRoleFields(){
+      const role = roleSelect?.value || '';
+      if(!battingField || !bowlingField) return;
+
+      battingField.classList.remove('field-hidden');
+      bowlingField.classList.remove('field-hidden');
+      if(battingSelect) battingSelect.disabled = false;
+      if(bowlingSelect) bowlingSelect.disabled = false;
+
+      if(role === 'Batsman' || role === 'Wicket Keeper'){
+        bowlingField.classList.add('field-hidden');
+        if(bowlingSelect){ bowlingSelect.value = 'Not Applicable'; bowlingSelect.disabled = true; }
+      } else if(role === 'Bowler'){
+        battingField.classList.add('field-hidden');
+        if(battingSelect){ battingSelect.value = 'Not Applicable'; battingSelect.disabled = true; }
+      } else if(role === 'All-Rounder'){
+        if(battingSelect && battingSelect.value === 'Not Applicable') battingSelect.value = 'Right Hand';
+        if(bowlingSelect && bowlingSelect.value === 'Not Applicable') bowlingSelect.value = 'Right Arm Medium';
+      }
+    }
+
+    dob?.addEventListener('change',updateAgeGroup);
+    roleSelect?.addEventListener('change',updateRoleFields);
+    updateAgeGroup();
+    updateRoleFields();
+
+    function openRazorpayCheckout(regRecord){
+      return new Promise((resolve,reject)=>{
+        if(!window.Razorpay){
+          reject(new Error('Razorpay checkout load nahi hua. Internet connection check karke dobara try karein.'));
+          return;
+        }
+        const options = {
+          key: RAZORPAY_KEY_ID,
+          amount: REGISTRATION_FEE * 100,
+          currency: 'INR',
+          name: 'TMPCL',
+          description: 'Player Trial Registration Fee',
+          image: 'tmpcl-logo.png',
+          notes: {
+            player_id: regRecord.id,
+            registration_id: regRecord.id,
+            player_name: regRecord.name || '',
+            mobile: regRecord.mobile || ''
+          },
+          prefill: {
+            name: regRecord.name || '',
+            contact: regRecord.mobile || '',
+            email: regRecord.email || ''
+          },
+          theme: { color: '#8dff39' },
+          handler: function(response){ resolve(response); },
+          modal: {
+            ondismiss: function(){ reject(new Error('Payment window close ho gaya. Registration pending hai; payment complete karne ke baad confirmation slip milegi.')); }
+          }
+        };
+        const checkout = new Razorpay(options);
+        checkout.on('payment.failed', function(response){
+          reject(new Error(response?.error?.description || 'Payment failed. Please try again.'));
+        });
+        checkout.open();
+      });
+    }
+
     const regForm=$('#registrationForm');
     if(!regForm) return;
     regForm.addEventListener('submit', async e=>{
       e.preventDefault();
-      const btn=regForm.querySelector('button[type="submit"]'); setLoading(btn,true,'Saving...');
+      const btn=regForm.querySelector('button[type="submit"]'); setLoading(btn,true,'Preparing Payment...');
       try{
+        updateAgeGroup();
+        updateRoleFields();
         const data=Object.fromEntries(new FormData(regForm).entries());
-        const age=ageFromDob(data.dob); const photoInput=regForm.querySelector('input[name="photo"]'); const proofInput=regForm.querySelector('input[name="aadhaar"]');
+        const age=ageFromDob(data.dob);
+        const photoInput=regForm.querySelector('input[name="photo"]');
+        const proofInput=regForm.querySelector('input[name="aadhaar"]');
         if(!data.dob) throw new Error('Date of Birth mandatory hai.');
+        if(!data.ageGroup) throw new Error('Age Group DOB se auto select nahi hua. DOB dobara select karein.');
+        if(!data.role) throw new Error('Playing Role select karein.');
         if(!photoInput || !photoInput.files.length) throw new Error('Player photo upload mandatory hai.');
         if(!proofInput || !proofInput.files.length) throw new Error('Aadhaar Card / Age Proof upload mandatory hai.');
         if(data.ageGroup==='U19' && age>19) throw new Error('U19 age group ke liye age 19 ya usse kam honi chahiye.');
+
         const id=makeId('TMPCL');
         const photoUrl=await uploadFile(STORAGE_BUCKETS.playerPhoto, photoInput, id);
         const proofUrl=await uploadFile(STORAGE_BUCKETS.idProof, proofInput, id);
-        const savedReg = await insertRow('players',{id,name:data.name,mobile:data.mobile,city:data.city,dob:data.dob,age,age_group:data.ageGroup,role:data.role,batting:data.batting,bowling:data.bowling,experience:data.experience,email:data.email||'',photo_url:photoUrl,proof_url:proofUrl,fee:999,assigned_category:'Pending until trials & auction',payment_status:'Pending'});
-        const regRecord = savedReg || {id,name:data.name,mobile:data.mobile,city:data.city,dob:data.dob,age,age_group:data.ageGroup,role:data.role,fee:999,payment_status:'Pending'};
+        const baseRecord={
+          id,
+          name:data.name,
+          mobile:data.mobile,
+          city:data.city,
+          dob:data.dob,
+          age,
+          age_group:data.ageGroup,
+          role:data.role,
+          batting:data.batting || 'Not Applicable',
+          bowling:data.bowling || 'Not Applicable',
+          experience:data.experience,
+          email:data.email||'',
+          photo_url:photoUrl,
+          proof_url:proofUrl,
+          fee:REGISTRATION_FEE,
+          payment_amount:REGISTRATION_FEE,
+          payment_currency:'INR',
+          assigned_category:'Pending until trials & auction',
+          payment_status:'Pending'
+        };
+
+        const savedReg = await insertRow('players', baseRecord);
+        const regRecord = savedReg || baseRecord;
+
+        setLoading(btn,true,'Opening Razorpay...');
+        const paymentResponse = await openRazorpayCheckout(regRecord);
+
+        setLoading(btn,true,'Confirming Registration...');
+        const paidRecord = {
+          ...regRecord,
+          payment_status:'Paid',
+          razorpay_payment_id:paymentResponse.razorpay_payment_id || '',
+          payment_amount:REGISTRATION_FEE,
+          payment_currency:'INR',
+          paid_at:new Date().toISOString()
+        };
+        await updateRow('players', id, paidRecord).catch(()=>null);
+
         const successBox = $('#regSuccess');
-        showSuccess(successBox, `<strong>Registration saved successfully!</strong><br>Registration ID: <strong>${id}</strong><br>Amount: ₹999<br><br>${buildRegistrationSlip(regRecord)}`);
+        showSuccess(successBox, `<strong>Payment successful. Registration confirmed!</strong><br>Registration ID: <strong>${id}</strong><br>Payment ID: <strong>${esc(paymentResponse.razorpay_payment_id || '')}</strong><br>Amount: ₹${REGISTRATION_FEE}<br><br>${buildRegistrationSlip(paidRecord)}`);
         $('#printSlipBtn')?.addEventListener('click', printRegistrationSlip);
         regForm.reset();
-      } catch(err){ showDbError('Registration', err); }
+        updateAgeGroup();
+        updateRoleFields();
+      } catch(err){
+        showDbError('Registration / Payment', err);
+      }
       finally{ setLoading(btn,false); }
     });
   }

@@ -1751,3 +1751,15 @@ body[data-page="home"] .home-final-hero .actions{margin-top:24px!important}
 .registration-tools input:focus,.registration-tools select:focus{border-color:rgba(141,255,57,.55);box-shadow:0 0 0 4px rgba(141,255,57,.08)}
 @media(max-width:1180px){.registration-tools{grid-template-columns:1fr 1fr}.registration-tools .mini-btn{width:100%}}
 @media(max-width:650px){.slip-head{align-items:flex-start}.slip-head img{width:62px;height:62px}.slip-grid{grid-template-columns:1fr}.registration-tools{grid-template-columns:1fr}.slip-head h3{font-size:22px}}
+
+
+/* Registration payment and smart form behaviour */
+.field-hidden{display:none!important}
+#ageGroupSelect[readonly]{
+  background:rgba(141,255,57,.08)!important;
+  border-color:rgba(141,255,57,.30)!important;
+  color:#dfffc9!important;
+  font-weight:900;
+  cursor:not-allowed;
+}
+#regSuccess .registration-slip-card{margin-top:16px;text-align:left}
