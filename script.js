@@ -385,6 +385,23 @@
           reject(new Error('Razorpay checkout load nahi hua. Internet connection check karke dobara try karein.'));
           return;
         }
+
+        // Razorpay mobile checkout kabhi-kabhi payment success ke baad bhi modal close/dismiss
+        // event fire kar deta hai. Is guard se success ke baad generic Razorpay error popup avoid hota hai.
+        let settled = false;
+        let checkout = null;
+        const safeResolve = (response) => {
+          if(settled) return;
+          settled = true;
+          try { checkout?.close?.(); } catch(_e) {}
+          resolve(response);
+        };
+        const safeReject = (error) => {
+          if(settled) return;
+          settled = true;
+          reject(error);
+        };
+
         const options = {
           key: RAZORPAY_KEY_ID,
           amount: REGISTRATION_FEE * 100,
@@ -404,14 +421,20 @@
             email: regRecord.email || ''
           },
           theme: { color: '#8dff39' },
-          handler: function(response){ resolve(response); },
+          handler: function(response){
+            safeResolve(response);
+          },
           modal: {
-            ondismiss: function(){ reject(new Error('Payment window close ho gaya. Payment complete karne ke baad hi registration confirm hogi.')); }
+            confirm_close: true,
+            ondismiss: function(){
+              if(settled) return;
+              safeReject(new Error('Payment window close ho gaya. Payment complete karne ke baad hi registration confirm hogi.'));
+            }
           }
         };
-        const checkout = new Razorpay(options);
+        checkout = new Razorpay(options);
         checkout.on('payment.failed', function(response){
-          reject(new Error(response?.error?.description || 'Payment failed. Please try again.'));
+          safeReject(new Error(response?.error?.description || 'Payment failed. Please try again.'));
         });
         checkout.open();
       });
