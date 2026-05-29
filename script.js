@@ -1,4 +1,14 @@
 (function(){
+  // TMPCL: remove old browser/local prototype data from earlier versions.
+  // Current website reads/writes real data from Supabase only.
+  try {
+    const oldKeys = [
+      'tmpclRegistrations','tmpclMessages','tmpclTeams','tmpclGallery','tmpclNews','tmpclPartners','tmpclLeadership','tmpclSettings','tmpclAdmin','lastTmpclRegistrationId'
+    ];
+    oldKeys.forEach(k => localStorage.removeItem(k));
+    Object.keys(localStorage).forEach(k => { if (/^tmpcl/i.test(k)) localStorage.removeItem(k); });
+    // Session storage is used only for TMPCL Team login/tab UI, not public data.
+  } catch (e) {}
   const SUPABASE_URL = 'https://ybfrnvkikhtlouocobnk.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_sAoJrKNHTQGsmhbu5oOapw_DgpJf-A3';
   const RAZORPAY_KEY_ID = 'rzp_test_Sv9Mn3kH8zSD55';
