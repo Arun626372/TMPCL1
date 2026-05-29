@@ -446,6 +446,16 @@
         if(data.ageGroup==='U19' && age>19) throw new Error('U19 age group ke liye age 19 ya usse kam honi chahiye.');
 
         const id=makeId('TMPCL');
+
+        // Important flow:
+        // 1) Upload documents + create Pending player record first.
+        // 2) Open Razorpay only after Supabase save succeeds.
+        // 3) On payment success, update the same player row to Paid.
+        // This prevents money being paid when database/file upload has already failed.
+        setLoading(btn,true,'Saving Registration...');
+        const photoUrl=await uploadFile(STORAGE_BUCKETS.playerPhoto, photoInput, id);
+        const proofUrl=await uploadFile(STORAGE_BUCKETS.idProof, proofInput, id);
+
         const pendingRecord={
           id,
           name:data.name,
@@ -459,6 +469,8 @@
           bowling:data.bowling || 'Not Applicable',
           experience:data.experience,
           email:data.email||'',
+          photo_url:photoUrl,
+          proof_url:proofUrl,
           fee:REGISTRATION_FEE,
           payment_amount:REGISTRATION_FEE,
           payment_currency:'INR',
@@ -466,23 +478,28 @@
           payment_status:'Payment Pending'
         };
 
-        // Razorpay is opened before Supabase save/upload so user sees payment first.
+        await insertRow('players', pendingRecord);
+
+        setLoading(btn,true,'Opening Razorpay...');
         const paymentResponse = await openRazorpayCheckout(pendingRecord);
 
-        setLoading(btn,true,'Saving Registration...');
-        const photoUrl=await uploadFile(STORAGE_BUCKETS.playerPhoto, photoInput, id);
-        const proofUrl=await uploadFile(STORAGE_BUCKETS.idProof, proofInput, id);
+        setLoading(btn,true,'Confirming Payment...');
         const paidRecord = {
           ...pendingRecord,
-          photo_url:photoUrl,
-          proof_url:proofUrl,
           payment_status:'Paid',
           razorpay_payment_id:paymentResponse.razorpay_payment_id || '',
           razorpay_order_id:paymentResponse.razorpay_order_id || '',
           paid_at:new Date().toISOString()
         };
 
-        await insertRow('players', paidRecord);
+        await updateRow('players', id, {
+          payment_status:'Paid',
+          razorpay_payment_id:paymentResponse.razorpay_payment_id || '',
+          razorpay_order_id:paymentResponse.razorpay_order_id || '',
+          paid_at:paidRecord.paid_at,
+          payment_amount:REGISTRATION_FEE,
+          payment_currency:'INR'
+        });
 
         const successBox = $('#regSuccess');
         showSuccess(successBox, `<strong>Payment successful. Registration confirmed!</strong><br>Registration ID: <strong>${id}</strong><br>Payment ID: <strong>${esc(paymentResponse.razorpay_payment_id || '')}</strong><br>Amount: ₹${REGISTRATION_FEE}<br><br>${buildRegistrationSlip(paidRecord)}`);
