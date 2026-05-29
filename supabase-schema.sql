@@ -257,12 +257,7 @@ insert into public.news_updates (id, title, tag, date, summary)
 values ('news-opening-ceremony-01-jun', 'TMPCL Opening Ceremony on 01 June', 'Opening Ceremony', '2026-06-01', 'TMPCL ki grand opening ceremony 01 June ko hogi. League updates, team presentation aur event moments yahin publish honge.')
 on conflict (id) do nothing;
 
-insert into public.teams (id, name, city, owner, status)
-values
-  ('team-bhopal', 'Bhopal Strikers', 'Bhopal', 'Captain Coming Soon', 'Player Auction Pending'),
-  ('team-indore', 'Indore Warriors', 'Indore', 'Captain Coming Soon', 'Player Auction Pending'),
-  ('team-gwalior', 'Gwalior Royals', 'Gwalior', 'Captain Coming Soon', 'Player Auction Pending')
-on conflict (id) do nothing;
+-- Default demo teams removed. Add real teams from TMPCL Team Dashboard.
 
 -- Default leadership, selection panel and brand ambassador profiles.
 -- These are safe placeholder records. TMPCL Team Dashboard se edit/delete kiye ja sakte hain.
