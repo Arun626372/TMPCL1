@@ -379,6 +379,16 @@
     updateAgeGroup();
     updateRoleFields();
 
+    function forceCloseRazorpayOverlay(){
+      try{
+        document.querySelectorAll('.razorpay-container, .razorpay-backdrop, iframe[src*="razorpay"]').forEach(el=>{
+          try{ el.remove(); }catch(_e){}
+        });
+        document.body.style.overflow = '';
+        document.documentElement.style.overflow = '';
+      }catch(_e){}
+    }
+
     function openRazorpayCheckout(regRecord){
       return new Promise((resolve,reject)=>{
         if(!window.Razorpay){
@@ -386,18 +396,26 @@
           return;
         }
 
-        // Razorpay mobile checkout kabhi-kabhi payment success ke baad bhi modal close/dismiss
-        // event fire kar deta hai. Is guard se success ke baad generic Razorpay error popup avoid hota hai.
         let settled = false;
+        let paymentSuccess = false;
         let checkout = null;
+
         const safeResolve = (response) => {
           if(settled) return;
+          paymentSuccess = true;
           settled = true;
-          try { checkout?.close?.(); } catch(_e) {}
+
+          // Razorpay mobile webview kabhi-kabhi successful payment ke baad bhi
+          // apna generic "Something went wrong" dialog screen par chhod deta hai.
+          // Payment response milte hi hum checkout overlay ko safely remove kar dete hain.
+          setTimeout(forceCloseRazorpayOverlay, 120);
+          setTimeout(forceCloseRazorpayOverlay, 700);
+
           resolve(response);
         };
+
         const safeReject = (error) => {
-          if(settled) return;
+          if(settled || paymentSuccess) return;
           settled = true;
           reject(error);
         };
@@ -409,6 +427,7 @@
           name: 'TMPCL',
           description: 'Player Trial Registration Fee',
           image: 'tmpcl-logo.png',
+          retry: { enabled: false },
           notes: {
             player_id: regRecord.id,
             registration_id: regRecord.id,
@@ -425,15 +444,18 @@
             safeResolve(response);
           },
           modal: {
-            confirm_close: true,
+            confirm_close: false,
+            escape: false,
             ondismiss: function(){
-              if(settled) return;
+              if(paymentSuccess || settled) return;
               safeReject(new Error('Payment window close ho gaya. Payment complete karne ke baad hi registration confirm hogi.'));
             }
           }
         };
+
         checkout = new Razorpay(options);
         checkout.on('payment.failed', function(response){
+          if(paymentSuccess) return;
           safeReject(new Error(response?.error?.description || 'Payment failed. Please try again.'));
         });
         checkout.open();
