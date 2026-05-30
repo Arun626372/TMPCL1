@@ -11,7 +11,7 @@
   } catch (e) {}
   const SUPABASE_URL = 'https://ybfrnvkikhtlouocobnk.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_sAoJrKNHTQGsmhbu5oOapw_DgpJf-A3';
-  const CASHFREE_MODE = 'sandbox'; // Change to 'production' only after Cashfree live keys + Supabase secrets are ready.
+  const CASHFREE_MODE = 'production'; // Cashfree live mode: Supabase CASHFREE_ENV must also be production.
   const REGISTRATION_FEE = 999;
   const STORAGE_BUCKETS = {
     playerPhoto: 'player-photos',
@@ -568,8 +568,9 @@
               const order = await createCashfreeOrder(reg);
               const paymentSessionId = order.payment_session_id || order.paymentSessionId;
               if(!paymentSessionId) throw new Error('Cashfree payment_session_id missing hai. Edge Function response check karein.');
-              const cashfree = Cashfree({mode: order.mode || CASHFREE_MODE});
-              await cashfree.checkout({paymentSessionId, redirectTarget:'_self'});
+              const cashfreeMode = order.env || order.mode || CASHFREE_MODE;
+              const cashfree = Cashfree({mode: cashfreeMode});
+              await cashfree.checkout({paymentSessionId: String(paymentSessionId), redirectTarget:'_self'});
             }catch(err){
               showDbError('Cashfree Checkout', err);
             }finally{ setLoading(payBtn,false); }
