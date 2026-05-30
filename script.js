@@ -11,7 +11,7 @@
   } catch (e) {}
   const SUPABASE_URL = 'https://ybfrnvkikhtlouocobnk.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_sAoJrKNHTQGsmhbu5oOapw_DgpJf-A3';
-  const RAZORPAY_KEY_ID = 'rzp_test_Sv9Mn3kH8zSD55';
+  const CASHFREE_MODE = 'sandbox'; // Change to 'production' only after Cashfree live keys + Supabase secrets are ready.
   const REGISTRATION_FEE = 999;
   const STORAGE_BUCKETS = {
     playerPhoto: 'player-photos',
@@ -379,87 +379,26 @@
     updateAgeGroup();
     updateRoleFields();
 
-    function forceCloseRazorpayOverlay(){
-      try{
-        document.querySelectorAll('.razorpay-container, .razorpay-backdrop, iframe[src*="razorpay"]').forEach(el=>{
-          try{ el.remove(); }catch(_e){}
-        });
-        document.body.style.overflow = '';
-        document.documentElement.style.overflow = '';
-      }catch(_e){}
-    }
-
-    function openRazorpayCheckout(regRecord){
-      return new Promise((resolve,reject)=>{
-        if(!window.Razorpay){
-          reject(new Error('Razorpay checkout load nahi hua. Internet connection check karke dobara try karein.'));
-          return;
-        }
-
-        let settled = false;
-        let paymentSuccess = false;
-        let checkout = null;
-
-        const safeResolve = (response) => {
-          if(settled) return;
-          paymentSuccess = true;
-          settled = true;
-
-          // Razorpay mobile webview kabhi-kabhi successful payment ke baad bhi
-          // apna generic "Something went wrong" dialog screen par chhod deta hai.
-          // Payment response milte hi hum checkout overlay ko safely remove kar dete hain.
-          setTimeout(forceCloseRazorpayOverlay, 120);
-          setTimeout(forceCloseRazorpayOverlay, 700);
-
-          resolve(response);
-        };
-
-        const safeReject = (error) => {
-          if(settled || paymentSuccess) return;
-          settled = true;
-          reject(error);
-        };
-
-        const options = {
-          key: RAZORPAY_KEY_ID,
-          amount: REGISTRATION_FEE * 100,
-          currency: 'INR',
-          name: 'TMPCL',
-          description: 'Player Trial Registration Fee',
-          image: 'tmpcl-logo.png',
-          retry: { enabled: false },
-          notes: {
-            player_id: regRecord.id,
-            registration_id: regRecord.id,
-            player_name: regRecord.name || '',
-            mobile: regRecord.mobile || ''
-          },
-          prefill: {
-            name: regRecord.name || '',
-            contact: regRecord.mobile || '',
-            email: regRecord.email || ''
-          },
-          theme: { color: '#8dff39' },
-          handler: function(response){
-            safeResolve(response);
-          },
-          modal: {
-            confirm_close: false,
-            escape: false,
-            ondismiss: function(){
-              if(paymentSuccess || settled) return;
-              safeReject(new Error('Payment window close ho gaya. Payment complete karne ke baad hi registration confirm hogi.'));
-            }
-          }
-        };
-
-        checkout = new Razorpay(options);
-        checkout.on('payment.failed', function(response){
-          if(paymentSuccess) return;
-          safeReject(new Error(response?.error?.description || 'Payment failed. Please try again.'));
-        });
-        checkout.open();
+    async function createCashfreeOrder(regRecord){
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/create-cashfree-order`, {
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`
+        },
+        body: JSON.stringify({
+          registration_id: regRecord.id,
+          amount: REGISTRATION_FEE,
+          customer_name: regRecord.name || '',
+          customer_phone: regRecord.mobile || '',
+          customer_email: regRecord.email || '',
+          return_url: `${location.origin}${location.pathname.replace(/[^/]*$/, '')}checkout.html?rid=${encodeURIComponent(regRecord.id)}`
+        })
       });
+      const data = await res.json().catch(()=>({}));
+      if(!res.ok) throw new Error(data.error || data.message || 'Cashfree order create nahi hua. Supabase Edge Function aur Cashfree secrets check karein.');
+      return data;
     }
 
     const regForm=$('#registrationForm');
@@ -467,7 +406,7 @@
     regForm.addEventListener('submit', async e=>{
       e.preventDefault();
       const btn=regForm.querySelector('button[type="submit"]');
-      setLoading(btn,true,'Opening Razorpay...');
+      setLoading(btn,true,'Saving Registration...');
       try{
         updateAgeGroup();
         updateRoleFields();
@@ -493,10 +432,9 @@
         const id=makeId('TMPCL');
 
         // Important flow:
-        // 1) Upload documents + create Pending player record first.
-        // 2) Open Razorpay only after Supabase save succeeds.
-        // 3) On payment success, update the same player row to Paid.
-        // This prevents money being paid when database/file upload has already failed.
+        // 1) Upload documents + create Payment Pending player record first.
+        // 2) Redirect to checkout.html where Cashfree order is created by Supabase Edge Function.
+        // 3) Final Paid status must be updated by webhook/verify backend, not by browser-only code.
         setLoading(btn,true,'Saving Registration...');
         const photoUrl=await uploadFile(STORAGE_BUCKETS.playerPhoto, photoInput, id);
         const proofUrl=await uploadFile(STORAGE_BUCKETS.idProof, proofInput, id);
@@ -525,38 +463,113 @@
 
         await insertRow('players', pendingRecord);
 
-        setLoading(btn,true,'Opening Razorpay...');
-        const paymentResponse = await openRazorpayCheckout(pendingRecord);
-
-        setLoading(btn,true,'Confirming Payment...');
-        const paidRecord = {
-          ...pendingRecord,
-          payment_status:'Paid',
-          razorpay_payment_id:paymentResponse.razorpay_payment_id || '',
-          razorpay_order_id:paymentResponse.razorpay_order_id || '',
-          paid_at:new Date().toISOString()
-        };
-
-        await updateRow('players', id, {
-          payment_status:'Paid',
-          razorpay_payment_id:paymentResponse.razorpay_payment_id || '',
-          razorpay_order_id:paymentResponse.razorpay_order_id || '',
-          paid_at:paidRecord.paid_at,
-          payment_amount:REGISTRATION_FEE,
-          payment_currency:'INR'
-        });
-
         const successBox = $('#regSuccess');
-        showSuccess(successBox, `<strong>Payment successful. Registration confirmed!</strong><br>Registration ID: <strong>${id}</strong><br>Payment ID: <strong>${esc(paymentResponse.razorpay_payment_id || '')}</strong><br>Amount: ₹${REGISTRATION_FEE}<br><br>${buildRegistrationSlip(paidRecord)}`);
-        $('#printSlipBtn')?.addEventListener('click', printRegistrationSlip);
+        showSuccess(successBox, `<strong>Registration saved.</strong><br>Registration ID: <strong>${id}</strong><br>Ab Cashfree checkout par payment complete karein.<br><br><a class="btn" href="checkout.html?rid=${encodeURIComponent(id)}">Proceed to Cashfree Checkout →</a>`);
         regForm.reset();
         updateAgeGroup();
         updateRoleFields();
+        window.location.href = `checkout.html?rid=${encodeURIComponent(id)}`;
       } catch(err){
         showDbError('Registration / Payment', err);
       }
       finally{ setLoading(btn,false); }
     });
+  }
+
+
+  function getQueryParam(name){
+    return new URLSearchParams(location.search).get(name) || '';
+  }
+
+  async function loadPlayerById(id){
+    const rows = await selectRows('players', `select=*&id=eq.${encodeURIComponent(id)}&limit=1`);
+    return rows[0] || null;
+  }
+
+  function renderCheckoutSummary(reg){
+    const box = $('#checkoutSummary');
+    if(!box) return;
+    box.innerHTML = `<div class="checkout-summary-grid">
+      <div><span>Registration ID</span><strong>${esc(reg.id || '')}</strong></div>
+      <div><span>Player Name</span><strong>${esc(reg.name || '')}</strong></div>
+      <div><span>Mobile</span><strong>${esc(reg.mobile || '')}</strong></div>
+      <div><span>City</span><strong>${esc(reg.city || '')}</strong></div>
+      <div><span>Role</span><strong>${esc(reg.role || '')}</strong></div>
+      <div><span>Payment Status</span><strong>${esc(reg.payment_status || 'Payment Pending')}</strong></div>
+      <div><span>Gateway</span><strong>Cashfree</strong></div>
+      <div><span>Total Amount</span><strong>₹${REGISTRATION_FEE}</strong></div>
+    </div>`;
+  }
+
+  async function verifyCashfreePayment(registrationId, orderId){
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/verify-cashfree-payment`, {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`
+      },
+      body: JSON.stringify({registration_id: registrationId, order_id: orderId || ''})
+    });
+    const data = await res.json().catch(()=>({}));
+    if(!res.ok) throw new Error(data.error || data.message || 'Cashfree payment verify nahi hua.');
+    return data;
+  }
+
+  function setupCheckout(){
+    const pageBox = $('#checkoutPage');
+    if(!pageBox) return;
+    const rid = getQueryParam('rid') || getQueryParam('registration_id');
+    const orderId = getQueryParam('order_id') || getQueryParam('cf_order_id');
+    const payBtn = $('#cashfreePayBtn');
+    const statusBox = $('#checkoutStatus');
+    const printBox = $('#checkoutPrintArea');
+
+    async function showStatus(html){ showSuccess(statusBox, html); }
+
+    (async()=>{
+      try{
+        if(!rid) throw new Error('Registration ID missing hai. Pehle registration form submit karein.');
+        let reg = await loadPlayerById(rid);
+        if(!reg) throw new Error('Registration record nahi mila. ID check karein ya TMPCL support se contact karein.');
+        renderCheckoutSummary(reg);
+
+        if(orderId && reg.payment_status !== 'Paid'){
+          await showStatus('Payment status verify ho raha hai...');
+          await verifyCashfreePayment(rid, orderId);
+          reg = await loadPlayerById(rid) || reg;
+          renderCheckoutSummary(reg);
+        }
+
+        if(reg.payment_status === 'Paid'){
+          if(payBtn) payBtn.style.display='none';
+          if(printBox) printBox.innerHTML = buildRegistrationSlip(reg);
+          $('#printSlipBtn')?.addEventListener('click', printRegistrationSlip);
+          await showStatus(`<strong>Payment successful. Registration confirmed!</strong><br>Registration ID: <strong>${esc(reg.id)}</strong><br>Amount: ₹${REGISTRATION_FEE}`);
+          return;
+        }
+
+        if(payBtn){
+          payBtn.disabled = false;
+          payBtn.addEventListener('click', async()=>{
+            setLoading(payBtn,true,'Opening Cashfree...');
+            try{
+              if(!window.Cashfree) throw new Error('Cashfree SDK load nahi hua. Internet connection check karein.');
+              const order = await createCashfreeOrder(reg);
+              const paymentSessionId = order.payment_session_id || order.paymentSessionId;
+              if(!paymentSessionId) throw new Error('Cashfree payment_session_id missing hai. Edge Function response check karein.');
+              const cashfree = Cashfree({mode: order.mode || CASHFREE_MODE});
+              await cashfree.checkout({paymentSessionId, redirectTarget:'_self'});
+            }catch(err){
+              showDbError('Cashfree Checkout', err);
+            }finally{ setLoading(payBtn,false); }
+          });
+        }
+      }catch(err){
+        showDbError('Checkout', err);
+        if(payBtn) payBtn.disabled = true;
+      }
+    })();
   }
 
   function setupContact(){
@@ -758,6 +771,7 @@
   }
 
   setupRegistration();
+  setupCheckout();
   setupContact();
   setupDashboardForms();
   setupDashboardTabs();
