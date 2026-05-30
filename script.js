@@ -236,7 +236,38 @@
   function showDbError(where, err){
     console.error(`TMPCL ${where}:`, err);
     const msg = (err && err.message) ? err.message : String(err);
-    alert(`Database error in ${where}. Pehle supabase-schema.sql ko Supabase SQL Editor me run karein.\n\n${msg.slice(0,240)}`);
+    const lower = msg.toLowerCase();
+    let hint = 'Details check karein.';
+    if(lower.includes('relation') || lower.includes('column') || lower.includes('schema')){
+      hint = 'Database table/column issue lag raha hai. Supabase SQL migration check karein.';
+    }else if(lower.includes('functions/v1') || lower.includes('edge function') || lower.includes('not found') || lower.includes('404')){
+      hint = 'Cashfree Supabase Edge Function deploy nahi hui ya URL/config issue hai.';
+    }else if(lower.includes('cashfree') || lower.includes('payment_session_id')){
+      hint = 'Cashfree keys / Edge Function response check karein.';
+    }
+    alert(`${where} error. ${hint}\n\n${msg.slice(0,300)}`);
+  }
+
+  async function createCashfreeOrder(regRecord){
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/create-cashfree-order`, {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`
+      },
+      body: JSON.stringify({
+        registration_id: regRecord.id,
+        amount: REGISTRATION_FEE,
+        customer_name: regRecord.name || '',
+        customer_phone: regRecord.mobile || '',
+        customer_email: regRecord.email || '',
+        return_url: `${location.origin}${location.pathname.replace(/[^/]*$/, '')}checkout.html?rid=${encodeURIComponent(regRecord.id)}`
+      })
+    });
+    const data = await res.json().catch(()=>({}));
+    if(!res.ok) throw new Error(data.error || data.message || 'Cashfree order create nahi hua. Supabase Edge Function aur Cashfree secrets check karein.');
+    return data;
   }
 
   function openSquadBanner(team){
@@ -379,27 +410,6 @@
     updateAgeGroup();
     updateRoleFields();
 
-    async function createCashfreeOrder(regRecord){
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/create-cashfree-order`, {
-        method:'POST',
-        headers:{
-          'Content-Type':'application/json',
-          apikey: SUPABASE_ANON_KEY,
-          Authorization: `Bearer ${SUPABASE_ANON_KEY}`
-        },
-        body: JSON.stringify({
-          registration_id: regRecord.id,
-          amount: REGISTRATION_FEE,
-          customer_name: regRecord.name || '',
-          customer_phone: regRecord.mobile || '',
-          customer_email: regRecord.email || '',
-          return_url: `${location.origin}${location.pathname.replace(/[^/]*$/, '')}checkout.html?rid=${encodeURIComponent(regRecord.id)}`
-        })
-      });
-      const data = await res.json().catch(()=>({}));
-      if(!res.ok) throw new Error(data.error || data.message || 'Cashfree order create nahi hua. Supabase Edge Function aur Cashfree secrets check karein.');
-      return data;
-    }
 
     const regForm=$('#registrationForm');
     if(!regForm) return;

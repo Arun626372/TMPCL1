@@ -11,7 +11,7 @@ URL: https://ybfrnvkikhtlouocobnk.supabase.co
 
 Important:
 - This static version uses the Supabase anon key in frontend.
-- For final real launch, TMPCL Team login and Cashfree payment verification should stay on secure Supabase Edge Functions/webhook, not in frontend browser code.
+- For final real launch, TMPCL Team login and Razorpay payment verification should be moved to a secure backend or Supabase Auth + server-side verification.
 - Current database policies are open so this version can work on static hosting during testing.
 
 
