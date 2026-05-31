@@ -2147,3 +2147,99 @@ body[data-page="home"] .home-premium-scene-hero::after{
 
 /* ===== CLEAN FINAL SAFETY OVERRIDES ===== */
 body[data-page="home"] .home-premium-scene-hero::after{content:none!important;display:none!important;}
+
+/* ===== FINAL HEADER BRAND LOCKUP + HERO GAP POLISH ===== */
+.brand-lockup{
+  display:flex!important;
+  align-items:center!important;
+  gap:12px!important;
+  min-width:258px!important;
+}
+.brand-lockup img{
+  width:58px!important;
+  height:58px!important;
+  object-fit:contain!important;
+  flex:0 0 auto!important;
+}
+.brand-copy{
+  display:flex!important;
+  flex-direction:column!important;
+  line-height:1.05!important;
+  min-width:0!important;
+}
+.brand-copy b{
+  font-size:25px!important;
+  font-weight:1000!important;
+  letter-spacing:.8px!important;
+  color:var(--gold)!important;
+  text-shadow:0 0 22px rgba(255,211,90,.18)!important;
+}
+.brand-copy small{
+  margin-top:4px!important;
+  font-size:10.5px!important;
+  font-weight:900!important;
+  letter-spacing:.45px!important;
+  color:#d9e6de!important;
+  text-transform:uppercase!important;
+  white-space:nowrap!important;
+  opacity:.9!important;
+}
+.nav{min-height:76px!important;gap:14px!important}
+.links{gap:12px!important;font-size:12.5px!important}
+.nav>.btn{padding:12px 18px!important;white-space:nowrap!important}
+
+/* tighten hero so the 3 stat cards do not leave empty space below */
+body[data-page="home"] .home-premium-scene-hero{
+  min-height:690px!important;
+  padding-bottom:14px!important;
+  background-position:right bottom, center, center, center, right bottom, center!important;
+}
+body[data-page="home"] .hero-stat-grid{
+  margin-top:22px!important;
+}
+body[data-page="home"] .hero-stat-card{
+  min-height:142px!important;
+  padding:18px 14px!important;
+}
+body[data-page="home"] .hero-stat-icon{
+  width:52px!important;
+  height:52px!important;
+  margin-bottom:10px!important;
+}
+body[data-page="home"] .prize-image-showcase{padding-top:16px!important}
+
+@media(max-width:1100px){
+  .brand-lockup{min-width:210px!important;gap:10px!important}
+  .brand-copy b{font-size:22px!important}
+  .brand-copy small{font-size:9.4px!important;max-width:190px!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  .links{gap:9px!important;font-size:11.8px!important}
+}
+@media(max-width:960px){
+  .brand-lockup{min-width:auto!important}
+  .brand-lockup img{width:54px!important;height:54px!important}
+  .brand-copy b{font-size:23px!important}
+  .brand-copy small{font-size:9.2px!important;max-width:230px!important}
+}
+@media(max-width:640px){
+  .nav{min-height:66px!important}
+  .brand-lockup{gap:9px!important;max-width:76vw!important}
+  .brand-lockup img{width:46px!important;height:46px!important}
+  .brand-copy b{font-size:20px!important;line-height:1!important}
+  .brand-copy small{font-size:8.2px!important;max-width:205px!important;letter-spacing:.25px!important;white-space:nowrap!important}
+  body[data-page="home"] .home-premium-scene-hero{
+    min-height:660px!important;
+    padding-bottom:10px!important;
+    background-position:center, center, 70% bottom, center!important;
+    background-size:auto, auto, min(134vw,620px) auto, auto!important;
+  }
+  body[data-page="home"] .hero-stat-grid{margin-top:13px!important;gap:8px!important}
+  body[data-page="home"] .hero-stat-card{min-height:96px!important;padding:10px 7px!important;border-radius:15px!important}
+  body[data-page="home"] .hero-stat-icon{width:34px!important;height:34px!important;font-size:17px!important;margin-bottom:6px!important}
+  body[data-page="home"] .hero-stat-card strong{font-size:15px!important}
+  body[data-page="home"] .hero-stat-card span{font-size:8.8px!important;margin-top:4px!important}
+  body[data-page="home"] .prize-image-showcase{padding-top:10px!important}
+}
+@media(max-width:380px){
+  .brand-copy small{display:none!important}
+  .brand-copy b{font-size:21px!important}
+}
