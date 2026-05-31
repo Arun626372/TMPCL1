@@ -1,0 +1,12 @@
+Sample Supabase Edge Functions are required for live Cashfree integration.
+Ask ChatGPT to generate/deploy these after you provide only NON-SECRET project details.
+Do not paste Client Secret in public chat or frontend code.
+
+Functions expected by script.js:
+POST /functions/v1/create-cashfree-order
+Body: { registration_id, amount, customer_name, customer_phone, customer_email, return_url }
+Response: { payment_session_id, order_id, mode }
+
+POST /functions/v1/verify-cashfree-payment
+Body: { registration_id, order_id }
+Response: { ok: true, payment_status: 'Paid' }
