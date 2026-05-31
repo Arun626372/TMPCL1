@@ -13,6 +13,7 @@
   const SUPABASE_ANON_KEY = 'sb_publishable_sAoJrKNHTQGsmhbu5oOapw_DgpJf-A3';
   const CASHFREE_MODE = 'production'; // Cashfree live mode: Supabase CASHFREE_ENV must also be production.
   const REGISTRATION_FEE = 999;
+  const TMPCL_FIXED_FEE_TEXT = '₹999';
   const STORAGE_BUCKETS = {
     playerPhoto: 'player-photos',
     idProof: 'id-proofs',
@@ -258,7 +259,7 @@
       },
       body: JSON.stringify({
         registration_id: regRecord.id,
-        amount: REGISTRATION_FEE,
+        amount: 999,
         customer_name: regRecord.name || '',
         customer_phone: regRecord.mobile || '',
         customer_email: regRecord.email || '',
@@ -464,8 +465,8 @@
           email:data.email||'',
           photo_url:photoUrl,
           proof_url:proofUrl,
-          fee:REGISTRATION_FEE,
-          payment_amount:REGISTRATION_FEE,
+          fee:999,
+          payment_amount:999,
           payment_currency:'INR',
           assigned_category:'Pending until trials & auction',
           payment_status:'Payment Pending'
@@ -507,8 +508,9 @@
       <div><span>Role</span><strong>${esc(reg.role || '')}</strong></div>
       <div><span>Payment Status</span><strong>${esc(reg.payment_status || 'Payment Pending')}</strong></div>
       <div><span>Gateway</span><strong>Cashfree</strong></div>
-      <div><span>Total Amount</span><strong>₹${REGISTRATION_FEE}</strong></div>
+      <div><span>Total Amount</span><strong>${TMPCL_FIXED_FEE_TEXT}</strong></div>
     </div>`;
+    document.querySelectorAll('.checkout-total strong, #regFee, #regTotal').forEach(el=>{ el.textContent = TMPCL_FIXED_FEE_TEXT; });
   }
 
   async function verifyCashfreePayment(registrationId, orderId){
