@@ -2243,3 +2243,94 @@ body[data-page="home"] .prize-image-showcase{padding-top:16px!important}
   .brand-copy small{display:none!important}
   .brand-copy b{font-size:21px!important}
 }
+
+/* ===== FINAL HERO + HEADER POLISH V4 =====
+   Clean changes only: mobile hero compact, image more visible, prize starts sooner,
+   and brand full-name text is more readable without increasing header height. */
+.brand-copy small{
+  font-size:11.2px!important;
+  letter-spacing:.45px!important;
+  line-height:1.15!important;
+  color:#eef6f0!important;
+  opacity:.98!important;
+}
+body[data-page="home"] .prize-image-showcase{
+  padding-top:10px!important;
+}
+@media(max-width:960px){
+  .brand-copy small{
+    font-size:10.2px!important;
+    max-width:238px!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+}
+@media(max-width:640px){
+  .brand-copy small{
+    font-size:9.7px!important;
+    max-width:248px!important;
+    letter-spacing:.28px!important;
+  }
+  body[data-page="home"] .home-premium-scene-hero{
+    min-height:676px!important;
+    padding:22px 0 10px!important;
+    align-items:flex-end!important;
+    background:
+      linear-gradient(180deg, rgba(2,7,13,.06) 0%, rgba(2,7,13,.20) 18%, rgba(2,7,13,.66) 56%, rgba(2,7,13,.96) 100%),
+      linear-gradient(90deg, rgba(2,7,13,.94) 0%, rgba(2,7,13,.64) 47%, rgba(2,7,13,.08) 100%),
+      url('hero-scene-premium.webp') 96% bottom / auto 96% no-repeat,
+      linear-gradient(145deg,#061320 0%,#02070d 58%,#010409 100%)!important;
+  }
+  body[data-page="home"] .home-premium-scene-hero::before{
+    background:linear-gradient(180deg, rgba(2,7,13,.02) 0%, rgba(2,7,13,.16) 26%, rgba(2,7,13,.91) 100%)!important;
+  }
+  body[data-page="home"] .home-premium-scene-hero .hero-main-title{
+    font-size:clamp(32px,9.8vw,46px)!important;
+    margin:12px 0 10px!important;
+    max-width:82vw!important;
+  }
+  body[data-page="home"] .hero-scene-subtitle{
+    font-size:clamp(18px,4.9vw,24px)!important;
+    max-width:84vw!important;
+    margin-bottom:8px!important;
+  }
+  body[data-page="home"] .hero-scene-meta{
+    font-size:13.8px!important;
+    line-height:1.55!important;
+    max-width:86vw!important;
+  }
+  body[data-page="home"] .home-premium-scene-hero .actions{
+    margin-top:15px!important;
+  }
+  body[data-page="home"] .hero-stat-grid{
+    margin-top:13px!important;
+    gap:8px!important;
+  }
+  body[data-page="home"] .hero-stat-card{
+    min-height:100px!important;
+    padding:10px 7px!important;
+    border-radius:15px!important;
+  }
+  body[data-page="home"] .hero-stat-icon{
+    width:36px!important;
+    height:36px!important;
+    margin-bottom:7px!important;
+    font-size:18px!important;
+  }
+  body[data-page="home"] .hero-stat-card strong{
+    font-size:15.5px!important;
+  }
+  body[data-page="home"] .hero-stat-card span{
+    font-size:9px!important;
+    margin-top:5px!important;
+  }
+  body[data-page="home"] .prize-image-showcase{
+    padding-top:6px!important;
+  }
+}
+@media(max-width:390px){
+  .brand-copy small{font-size:8.8px!important;max-width:210px!important}
+  body[data-page="home"] .home-premium-scene-hero{min-height:664px!important;background-size:auto 94%, auto!important;background-position:96% bottom, center!important}
+  body[data-page="home"] .hero-stat-card{min-height:96px!important}
+}
