@@ -1355,7 +1355,7 @@ body[data-page="home"] .home-final-hero{
   background:
     linear-gradient(90deg, rgba(2,7,13,.98) 0%, rgba(2,7,13,.92) 38%, rgba(2,7,13,.42) 64%, rgba(2,7,13,.22) 100%),
     radial-gradient(circle at 78% 18%, rgba(141,255,57,.16), transparent 26%),
-    url('hero-player-full.webp') right bottom / min(48vw,680px) auto no-repeat,
+    url('hero-scene-premium.webp') right bottom / min(48vw,680px) auto no-repeat,
     linear-gradient(135deg,#061320 0%,#02070d 55%,#010409 100%)!important;
 }
 body[data-page="home"] .home-final-hero:before{
@@ -1452,7 +1452,7 @@ body[data-page="home"] .home-final-hero .actions{margin-top:24px!important}
       linear-gradient(180deg, rgba(2,7,13,.12) 0%, rgba(2,7,13,.34) 20%, rgba(2,7,13,.72) 61%, rgba(2,7,13,.96) 100%),
       linear-gradient(90deg, rgba(2,7,13,.94) 0%, rgba(2,7,13,.68) 48%, rgba(2,7,13,.22) 100%),
       radial-gradient(circle at 78% 24%, rgba(141,255,57,.12), transparent 28%),
-      url('hero-player-full.webp') 80% bottom / min(112vw,520px) auto no-repeat,
+      url('hero-scene-premium.webp') 80% bottom / min(112vw,520px) auto no-repeat,
       linear-gradient(145deg,#061320 0%,#02070d 58%,#010409 100%)!important;
   }
   body[data-page="home"] .home-final-hero:before{
@@ -2143,3 +2143,7 @@ body[data-page="home"] .home-premium-scene-hero::after{
   content:none !important;
   display:none !important;
 }
+
+
+/* ===== CLEAN FINAL SAFETY OVERRIDES ===== */
+body[data-page="home"] .home-premium-scene-hero::after{content:none!important;display:none!important;}
