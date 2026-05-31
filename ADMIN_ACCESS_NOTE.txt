@@ -1,2 +1,0 @@
-Admin panel footer/public pages se hide kar diya gaya hai. Admin direct URL: /admin-login.html
-Login page aur dashboard files ZIP me available hain, bas public footer me link nahi dikhayega.
