@@ -379,7 +379,7 @@
     function updateAgeGroup(){
       if(!dob || !ageGroup) return;
       const age=ageFromDob(dob.value);
-      ageGroup.value = dob.value ? (age<=19 ? 'U19' : 'Open') : '';
+      ageGroup.value = dob.value ? (age<=19 ? 'D Category - U19' : 'Not Eligible') : 'D Category - U19';
       ageGroup.setAttribute('readonly','readonly');
       ageGroup.setAttribute('aria-readonly','true');
     }
@@ -434,11 +434,12 @@
         if(!data.mobile) throw new Error('Mobile Number mandatory hai.');
         if(!data.city) throw new Error('City / District mandatory hai.');
         if(!data.dob) throw new Error('Date of Birth mandatory hai.');
-        if(!data.ageGroup) throw new Error('Age Group DOB se auto select nahi hua. DOB dobara select karein.');
+        if(!data.ageGroup) throw new Error('Registration category verify nahi hui. DOB dobara select karein.');
         if(!data.role) throw new Error('Playing Role select karein.');
         if(!photoInput || !photoInput.files.length) throw new Error('Player photo upload mandatory hai.');
         if(!proofInput || !proofInput.files.length) throw new Error('Aadhaar Card / Age Proof upload mandatory hai.');
-        if(data.ageGroup==='U19' && age>19) throw new Error('U19 age group ke liye age 19 ya usse kam honi chahiye.');
+        if(age>19) throw new Error('Abhi registration sirf D Category - U19 players ke liye open hai. Age 19 ya usse kam honi chahiye.');
+        data.ageGroup = 'D Category - U19';
 
         const id=makeId('TMPCL');
 
@@ -468,7 +469,7 @@
           fee:999,
           payment_amount:999,
           payment_currency:'INR',
-          assigned_category:'Pending until trials & auction',
+          assigned_category:'D Category - U19',
           payment_status:'Payment Pending'
         };
 
