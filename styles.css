@@ -2176,8 +2176,8 @@ body[data-page="home"] .home-premium-scene-hero::after{content:none!important;di
 }
 .brand-copy small{
   margin-top:4px!important;
-  font-size:10.5px!important;
-  font-weight:900!important;
+  font-size:12.4px!important;
+  font-weight:950!important;
   letter-spacing:.45px!important;
   color:#d9e6de!important;
   text-transform:uppercase!important;
@@ -2211,21 +2211,21 @@ body[data-page="home"] .prize-image-showcase{padding-top:16px!important}
 @media(max-width:1100px){
   .brand-lockup{min-width:210px!important;gap:10px!important}
   .brand-copy b{font-size:22px!important}
-  .brand-copy small{font-size:9.4px!important;max-width:190px!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  .brand-copy small{font-size:10.3px!important;max-width:220px!important;overflow:hidden!important;text-overflow:ellipsis!important}
   .links{gap:9px!important;font-size:11.8px!important}
 }
 @media(max-width:960px){
   .brand-lockup{min-width:auto!important}
   .brand-lockup img{width:54px!important;height:54px!important}
   .brand-copy b{font-size:23px!important}
-  .brand-copy small{font-size:9.2px!important;max-width:230px!important}
+  .brand-copy small{font-size:10.4px!important;max-width:245px!important}
 }
 @media(max-width:640px){
   .nav{min-height:66px!important}
   .brand-lockup{gap:9px!important;max-width:76vw!important}
   .brand-lockup img{width:46px!important;height:46px!important}
   .brand-copy b{font-size:20px!important;line-height:1!important}
-  .brand-copy small{font-size:8.2px!important;max-width:205px!important;letter-spacing:.25px!important;white-space:nowrap!important}
+  .brand-copy small{font-size:9.2px!important;max-width:225px!important;letter-spacing:.25px!important;white-space:nowrap!important}
   body[data-page="home"] .home-premium-scene-hero{
     min-height:660px!important;
     padding-bottom:10px!important;
