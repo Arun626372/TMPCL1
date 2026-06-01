@@ -2243,3 +2243,11 @@ body[data-page="home"] .prize-image-showcase{padding-top:16px!important}
   .brand-copy small{display:none!important}
   .brand-copy b{font-size:21px!important}
 }
+
+
+/* ===== v3 header brand text size only ===== */
+.brand-copy small{font-size:14px!important;letter-spacing:.42px!important;}
+@media(max-width:1100px){.brand-copy small{font-size:11.6px!important;max-width:250px!important;}}
+@media(max-width:960px){.brand-copy small{font-size:11.6px!important;max-width:265px!important;}}
+@media(max-width:640px){.brand-copy small{font-size:10.2px!important;max-width:245px!important;}}
+@media(max-width:380px){.brand-copy small{display:none!important}.brand-copy b{font-size:21px!important}}
