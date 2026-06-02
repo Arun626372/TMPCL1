@@ -450,7 +450,7 @@
     if(regFee) regFee.textContent='₹' + REGISTRATION_FEE;
     if(regTotal) regTotal.textContent='₹' + REGISTRATION_FEE;
 
-    const dob=$('#dobInput'), ageGroup=$('#ageGroupSelect');
+    const dob=$('#dobInput'), ageGroup=$('#ageGroupSelect'), ageGroupHidden=$('#ageGroupHidden');
     const roleSelect=$('#roleSelect');
     const battingField=$('#battingStyleField'), bowlingField=$('#bowlingStyleField');
     const battingSelect=$('#battingStyleSelect'), bowlingSelect=$('#bowlingStyleSelect');
@@ -458,7 +458,19 @@
     function updateAgeGroup(){
       if(!dob || !ageGroup) return;
       const age=ageFromDob(dob.value);
-      ageGroup.value = dob.value ? (age<=19 ? 'D Category - U19' : 'Not Eligible') : 'D Category - U19';
+      let group='';
+      let label='DOB ke baad auto-set hoga';
+      if(dob.value && age >= 0){
+        if(age <= 19){
+          group = 'U19';
+          label = 'D Category (U19 Trials)';
+        } else {
+          group = 'Open';
+          label = 'Open Trials (A/B/C after trials)';
+        }
+      }
+      ageGroup.value = label;
+      if(ageGroupHidden) ageGroupHidden.value = group;
       ageGroup.setAttribute('readonly','readonly');
       ageGroup.setAttribute('aria-readonly','true');
     }
@@ -514,12 +526,11 @@
         if(!data.city) throw new Error('City / District mandatory hai.');
         if(!data.trialLocation) throw new Error('Trial Location select karein.');
         if(!data.dob) throw new Error('Date of Birth mandatory hai.');
-        if(!data.ageGroup) throw new Error('Registration category verify nahi hui. DOB dobara select karein.');
+        if(!data.ageGroup) data.ageGroup = age <= 19 ? 'U19' : 'Open';
         if(!data.role) throw new Error('Playing Role select karein.');
         if(!photoInput || !photoInput.files.length) throw new Error('Player photo upload mandatory hai.');
-        if(!proofInput || !proofInput.files.length) throw new Error('Aadhaar Card / Age Proof upload mandatory hai.');
-        if(age>19) throw new Error('Abhi registration sirf D Category - U19 players ke liye open hai. Age 19 ya usse kam honi chahiye.');
-        data.ageGroup = 'D Category - U19';
+        if(!proofInput || !proofInput.files.length) throw new Error('Aadhaar / ID Proof upload mandatory hai.');
+        data.ageGroup = age <= 19 ? 'U19' : 'Open';
 
         const id=makeId('TMPCL');
 
@@ -550,7 +561,7 @@
           fee:999,
           payment_amount:999,
           payment_currency:'INR',
-          assigned_category:'D Category - U19',
+          assigned_category: age <= 19 ? 'D Category (U19)' : 'Category Pending (A/B/C after trials)',
           payment_status:'Payment Pending'
         };
 
