@@ -2630,3 +2630,30 @@ body[data-page="home"] .prize-premium-title p{
     padding-top:22px!important;
   }
 }
+
+/* ===== v21: Home mobile hero player full visibility fix ===== */
+@media (max-width: 768px){
+  body[data-page="home"] .home-final-hero{
+    min-height: 650px !important;
+    background:
+      linear-gradient(180deg, rgba(2,7,13,.08) 0%, rgba(2,7,13,.28) 22%, rgba(2,7,13,.70) 62%, rgba(2,7,13,.96) 100%),
+      linear-gradient(90deg, rgba(2,7,13,.94) 0%, rgba(2,7,13,.70) 48%, rgba(2,7,13,.20) 100%),
+      radial-gradient(circle at 78% 24%, rgba(141,255,57,.12), transparent 28%),
+      url('hero-scene-premium.webp') right 22px bottom 18px / min(84vw,350px) auto no-repeat,
+      linear-gradient(145deg,#061320 0%,#02070d 58%,#010409 100%) !important;
+  }
+}
+@media (max-width: 420px){
+  body[data-page="home"] .home-final-hero{
+    min-height: 650px !important;
+    background-size: auto, auto, auto, min(82vw,338px) auto, auto !important;
+    background-position: center, center, center, right 14px bottom 16px, center !important;
+  }
+  body[data-page="home"] .home-final-hero .hero-grid{min-height:596px!important}
+}
+@media (max-width: 360px){
+  body[data-page="home"] .home-final-hero{
+    background-size: auto, auto, auto, min(80vw,312px) auto, auto !important;
+    background-position: center, center, center, right 10px bottom 14px, center !important;
+  }
+}
