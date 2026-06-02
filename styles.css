@@ -2531,3 +2531,26 @@ body.modal-open{overflow:hidden!important;}
   body[data-page="dashboard"] .dash-tab{min-width:112px!important;font-size:10.5px!important;}
   body[data-page="dashboard"] .compact-dash-top h1{font-size:23px!important;}
 }
+
+
+/* v13: final publish-only/cache + mobile CTA polish */
+body.modal-open{overflow:hidden;}
+.home-live-preview-section.is-hidden,
+.gallery-main-section.is-hidden,
+.teams-showcase-section.is-hidden,
+.published-partners-section.is-hidden,
+.news-list-section.is-hidden{display:none!important;}
+@media(max-width:960px){.mobile-cta a:last-child{white-space:nowrap;}}
+
+
+/* v13: extra admin mobile stability after testing */
+@media(max-width:768px){
+  body[data-page="dashboard"] .topbar .links,
+  body[data-page="dashboard"] .topbar .hamb{display:none!important;}
+  body[data-page="dashboard"] .dashboard-sidebar::-webkit-scrollbar{display:none;}
+  body[data-page="dashboard"] .dashboard-sidebar{scrollbar-width:none!important;}
+  body[data-page="dashboard"] .admin-tab-panel{width:100%!important;min-width:0!important;}
+  body[data-page="dashboard"] .success{font-size:12px!important;line-height:1.45!important;word-break:break-word!important;}
+  body[data-page="dashboard"] .table-scroll{overscroll-behavior-x:contain!important;}
+  body[data-page="dashboard"] .table-scroll:before{content:"Swipe table →";display:block;position:sticky;left:0;top:0;z-index:2;padding:8px 10px;font-size:11px;font-weight:950;color:var(--gold);background:rgba(2,8,14,.92);border-bottom:1px solid rgba(255,255,255,.08);}
+}

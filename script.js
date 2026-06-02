@@ -797,17 +797,22 @@
     const whatsappLinks = $$('[data-whatsapp-link], a[href*="wa.me"], .mobile-cta a:last-child');
     const whatsappNumber = String(settings.footer_whatsapp || '').replace(/\D/g,'');
     whatsappLinks.forEach(a => {
+      const isMobileCta = a.closest('.mobile-cta');
       if(whatsappNumber){
         a.href = `https://wa.me/${whatsappNumber}`;
         a.target = '_blank';
         a.rel = 'noopener';
         a.style.display = '';
+        if(isMobileCta) a.textContent = 'WhatsApp';
       } else if(a.matches('[data-whatsapp-link]')){
         a.href = '#';
         a.style.display = 'none';
       } else {
         a.href = 'contact.html';
         a.removeAttribute('target');
+        a.removeAttribute('rel');
+        a.style.display = '';
+        if(isMobileCta) a.textContent = 'Contact';
       }
     });
   }
