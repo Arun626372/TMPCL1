@@ -2657,3 +2657,32 @@ body[data-page="home"] .prize-premium-title p{
     background-position: center, center, center, right 10px bottom 14px, center !important;
   }
 }
+
+
+/* ===== v22 final mobile hero image full visibility fix =====
+   This block is intentionally last so older hero overrides cannot cancel it.
+   Mobile: keep layout same, only make the hero background image contained and fully visible. */
+@media (max-width: 640px){
+  body[data-page="home"] .home-premium-scene-hero{
+    min-height:660px!important;
+    padding-top:24px!important;
+    padding-bottom:10px!important;
+    align-items:flex-end!important;
+    background:
+      linear-gradient(180deg, rgba(2,7,13,.10) 0%, rgba(2,7,13,.18) 18%, rgba(2,7,13,.66) 58%, rgba(2,7,13,.97) 100%),
+      linear-gradient(90deg, rgba(2,7,13,.94) 0%, rgba(2,7,13,.66) 48%, rgba(2,7,13,.12) 100%),
+      url('hero-scene-premium.webp') right 8px top 66px / min(84vw,340px) auto no-repeat,
+      linear-gradient(145deg,#061320 0%,#02070d 58%,#010409 100%)!important;
+  }
+  body[data-page="home"] .home-premium-scene-hero::before{
+    background:linear-gradient(180deg, rgba(2,7,13,.02) 0%, rgba(2,7,13,.16) 30%, rgba(2,7,13,.92) 100%)!important;
+  }
+  body[data-page="home"] .hero-scene-copy{padding-bottom:0!important;}
+  body[data-page="home"] .prize-image-showcase{padding-top:12px!important;}
+}
+@media (max-width: 380px){
+  body[data-page="home"] .home-premium-scene-hero{
+    background-size:auto, auto, min(82vw,318px) auto, auto!important;
+    background-position:center, center, right 6px top 72px, center!important;
+  }
+}
