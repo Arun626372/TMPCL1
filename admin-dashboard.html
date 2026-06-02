@@ -74,7 +74,7 @@
               <div class="admin-field"><label>Team Name *</label><input name="teamName" id="teamName" required placeholder="Example: TMPCL Titans"></div>
               <div class="admin-field"><label>City / District *</label><input name="teamCity" id="teamCity" required placeholder="Bhopal"></div>
               <div class="admin-field"><label>Owner / Captain</label><input name="teamOwner" id="teamOwner" placeholder="Optional"></div>
-              <div class="admin-field"><label>Status</label><select name="teamStatus" id="teamStatus"><option>Coming Soon</option><option>Player Auction Pending</option><option>Auction Completed</option><option>Squad Final</option></select></div>
+              <div class="admin-field"><label>Status</label><select name="teamStatus" id="teamStatus"><option>Draft</option><option>Player Auction Pending</option><option>Auction Completed</option><option>Squad Final</option></select></div>
               <div class="admin-field"><label>Team Logo</label><input name="teamLogo" id="teamLogo" type="file" accept="image/*"></div>
               <div class="admin-field"><label>Squad Banner / Poster</label><input name="squadBanner" id="squadBanner" type="file" accept="image/*"><small class="muted">Best size: 1080×1350 ya 1080×1920. View Squad par ye banner popup me open hoga.</small></div>
               <button class="btn" type="submit">Save / Update Team</button>
@@ -89,7 +89,7 @@
           <div class="admin-two-column">
             <article class="card"><h3>Manage Gallery Media</h3><p class="muted">TMPCL Team photos, video thumbnails aur highlights publish karegi. Public Gallery page par sirf yahin se add media show hoga.</p><form id="galleryForm" class="admin-small-form">
               <input type="hidden" name="mediaId" id="mediaId">
-              <div class="admin-field"><label>Media Title *</label><input name="mediaTitle" id="mediaTitle" required placeholder="Opening Ceremony Highlights"></div>
+              <div class="admin-field"><label>Media Title *</label><input name="mediaTitle" id="mediaTitle" required placeholder="Enter media title"></div>
               <div class="admin-field"><label>Media Type</label><select name="mediaType" id="mediaType"><option value="photos">Photo</option><option value="videos">Video</option></select></div>
               <div class="admin-field"><label>Category</label><select name="mediaCategory" id="mediaCategory"><option value="events">Events</option><option value="trials">Trials</option><option value="matches">Matches</option><option value="videos">Videos</option><option value="awards">Awards</option></select></div>
               <div class="admin-field"><label>Date</label><input name="mediaDate" id="mediaDate" type="date"></div>
@@ -107,10 +107,10 @@
           <div class="admin-two-column">
             <article class="card"><h3>Manage News Updates</h3><p class="muted">Official news publish/edit/delete karein. Public News page par sirf yahin se published news cards show honge.</p><form id="newsForm" class="admin-small-form">
               <input type="hidden" name="newsId" id="newsId">
-              <div class="admin-field"><label>News Title *</label><input name="newsTitle" id="newsTitle" required placeholder="TMPCL Opening Ceremony on 01 June"></div>
-              <div class="admin-field"><label>Category / Tag</label><select name="newsTag" id="newsTag"><option>Announcement</option><option>Trials</option><option>Opening Ceremony</option><option>Selection</option><option>Results</option><option>Sponsors</option></select></div>
+              <div class="admin-field"><label>News Title *</label><input name="newsTitle" id="newsTitle" required placeholder="Enter official news title"></div>
+              <div class="admin-field"><label>Category / Tag</label><select name="newsTag" id="newsTag"><option>Announcement</option><option>Trials</option><option>Event Update</option><option>Selection</option><option>Results</option><option>Sponsors</option></select></div>
               <div class="admin-field"><label>Date</label><input name="newsDate" id="newsDate" type="date"></div>
-              <div class="admin-field"><label>Short Summary *</label><textarea name="newsSummary" id="newsSummary" required placeholder="Opening ceremony update short text"></textarea></div>
+              <div class="admin-field"><label>Short Summary *</label><textarea name="newsSummary" id="newsSummary" required placeholder="Write official update summary"></textarea></div>
               <div class="admin-field"><label>Thumbnail / News Image</label><input name="newsImage" id="newsImage" type="file" accept="image/*"><small class="muted">Optional. Image upload karne par news card me show hogi.</small></div>
               <button class="btn" type="submit">Publish / Update News</button>
               <button class="btn ghost" type="button" id="newsFormReset">Clear Form</button>
@@ -164,10 +164,10 @@
 
         <div class="admin-tab-panel" data-panel="settings">
           <article class="card"><h3>Website Footer & Contact Settings</h3><p class="muted">Footer ka phone, WhatsApp, email, location aur social text yahan se change hoga.</p><form id="siteSettingsForm" class="admin-small-form admin-settings-grid">
-            <div class="admin-field"><label>Footer Phone Number</label><input name="footerPhone" id="footerPhone" placeholder="+91 70000 12345"></div>
-            <div class="admin-field"><label>WhatsApp Number</label><input name="footerWhatsapp" id="footerWhatsapp" placeholder="917000012345"><small class="muted">Country code ke saath number likhein, jaise 917000012345.</small></div>
-            <div class="admin-field"><label>Email</label><input name="footerEmail" id="footerEmail" type="email" placeholder="info@tmpcl.com"></div>
-            <div class="admin-field"><label>Location / Address</label><input name="footerLocation" id="footerLocation" placeholder="Bhopal, Madhya Pradesh"></div>
+            <div class="admin-field"><label>Footer Phone Number</label><input name="footerPhone" id="footerPhone" placeholder="Enter official phone number"></div>
+            <div class="admin-field"><label>WhatsApp Number</label><input name="footerWhatsapp" id="footerWhatsapp" placeholder="91XXXXXXXXXX"><small class="muted">Country code ke saath number likhein, jaise 91XXXXXXXXXX.</small></div>
+            <div class="admin-field"><label>Email</label><input name="footerEmail" id="footerEmail" type="email" placeholder="Enter official email"></div>
+            <div class="admin-field"><label>Location / Address</label><input name="footerLocation" id="footerLocation" placeholder="Enter official location / address"></div>
             <div class="admin-field"><label>Social Text</label><input name="footerSocialText" id="footerSocialText" placeholder="Instagram · YouTube · Facebook"></div>
             <div class="admin-field admin-save-field"><label>&nbsp;</label><button class="btn" type="submit">Save Footer Settings</button></div>
             <div id="settingsSuccess" class="success"></div>

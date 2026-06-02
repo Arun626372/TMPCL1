@@ -739,13 +739,22 @@
     $$('[data-setting="footer_email"]').forEach(el => el.textContent = settings.footer_email || DEFAULT_SITE_SETTINGS.footer_email);
     $$('[data-setting="footer_location"]').forEach(el => el.textContent = settings.footer_location || DEFAULT_SITE_SETTINGS.footer_location);
     $$('[data-setting="footer_social_text"]').forEach(el => el.textContent = settings.footer_social_text || DEFAULT_SITE_SETTINGS.footer_social_text);
-    if(settings.footer_whatsapp){
-      $$('a[href*="wa.me"], .mobile-cta a:last-child').forEach(a => {
-        a.href = `https://wa.me/${String(settings.footer_whatsapp).replace(/\D/g,'')}`;
+    const whatsappLinks = $$('[data-whatsapp-link], a[href*="wa.me"], .mobile-cta a:last-child');
+    const whatsappNumber = String(settings.footer_whatsapp || '').replace(/\D/g,'');
+    whatsappLinks.forEach(a => {
+      if(whatsappNumber){
+        a.href = `https://wa.me/${whatsappNumber}`;
         a.target = '_blank';
         a.rel = 'noopener';
-      });
-    }
+        a.style.display = '';
+      } else if(a.matches('[data-whatsapp-link]')){
+        a.href = '#';
+        a.style.display = 'none';
+      } else {
+        a.href = 'contact.html';
+        a.removeAttribute('target');
+      }
+    });
   }
 
   async function initSiteSettings(){
