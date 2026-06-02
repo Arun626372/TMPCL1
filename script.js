@@ -290,7 +290,7 @@
       grid.innerHTML = teams.map(team=>{
         const logo=team.logo_url?`<img src="${esc(team.logo_url)}" alt="${esc(team.name)} logo">`:`<span>${initials(team.name)}</span>`;
         return `<article class="team-card" data-team-id="${esc(team.id)}"><div class="team-card-head"><div class="team-logo-box">${logo}</div><div><h3>${esc(team.name)}</h3><div class="team-city">${esc(team.city||'')}</div><span class="team-status">${esc(team.status||'Player Auction Pending')}</span></div></div><div class="team-meta-row"><div class="team-meta"><strong>18</strong><span>Total Squad</span></div><div class="team-meta"><strong>A-5</strong><span>Category A</span></div><div class="team-meta"><strong>D-3</strong><span>Only U19</span></div></div><button class="btn ghost team-toggle" type="button">View Squad</button></article>`;
-      }).join('') || `<article class="card"><h3>Teams Coming Soon</h3></article>`;
+      }).join('') || '';
       $$('.team-card', grid).forEach(card=>card.addEventListener('click',()=>{ const team=teams.find(t=>t.id===card.dataset.teamId); if(team) openSquadBanner(team); }));
     } catch(err){ console.error(err); }
   }
@@ -299,7 +299,7 @@
     const grid=$('#publishedPartnersGrid'); if(!grid) return;
     try{
       const published = await selectRows('partners', 'select=*&status=eq.Published&order=created_at.desc');
-      const empty=$('#partnersEmpty'); if(empty) empty.style.display=published.length?'none':'block';
+      const empty=$('#partnersEmpty'); if(empty) empty.style.display='none';
       grid.innerHTML=published.map(p=>{ const logo=p.logo_url?`<img src="${esc(p.logo_url)}" alt="${esc(p.name)} logo">`:`<span>${initials(p.name,'TP')}</span>`; const link=p.link?`<a href="${esc(p.link)}" target="_blank" rel="noopener" class="mini-btn">Visit Link</a>`:''; return `<article class="partner-public-card"><div class="partner-public-logo">${logo}</div><div><span class="tag">${esc(p.category||'Partner')}</span><h3>${esc(p.name)}</h3><p>${esc(p.description||'Official TMPCL partner.')}</p>${link}</div></article>`; }).join('');
     } catch(err){ console.error(err); }
   }
@@ -308,7 +308,7 @@
     const newsList=$('#newsList'); if(!newsList) return;
     try{
       const posts = await selectRows('news_updates','select=*&order=date.desc,created_at.desc');
-      const empty=$('#newsEmpty'); if(empty) empty.style.display=posts.length?'none':'block';
+      const empty=$('#newsEmpty'); if(empty) empty.style.display='none';
       newsList.innerHTML=posts.map(p=>{ const img=p.image_url?`<div class="thumb news-thumb-img" style="background-image:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.55)),url('${esc(p.image_url)}')"></div>`:`<div class="thumb"></div>`; const date=p.date?`<small class="muted">${esc(p.date)}</small>`:''; return `<article class="card news-card">${img}<div><span class="tag">${esc(p.tag||'Update')}</span><h3>${esc(p.title)}</h3>${date}<p>${esc(p.summary||'')}</p></div></article>`; }).join('');
     } catch(err){ console.error(err); }
   }
@@ -318,18 +318,30 @@
     const newsEl=$('#homeNewsPreview'), galleryEl=$('#homeGalleryPreview'), partnersEl=$('#homePartnersPreview');
     if(!newsEl && !galleryEl && !partnersEl) return;
     try{
+      let visiblePreviews = 0;
       if(newsEl){
         const posts = await selectRows('news_updates','select=*&order=date.desc,created_at.desc&limit=1');
-        newsEl.textContent = posts[0]?.title || 'Official announcements and trial updates';
+        const has = !!posts[0];
+        newsEl.textContent = has ? posts[0].title : '';
+        newsEl.closest('.home-preview-card')?.classList.toggle('is-hidden', !has);
+        if(has) visiblePreviews++;
       }
       if(galleryEl){
         const media = await selectRows('gallery_media','select=*&order=created_at.desc&limit=1');
-        galleryEl.textContent = media[0]?.title || 'Media Gallery';
+        const has = !!media[0];
+        galleryEl.textContent = has ? media[0].title : '';
+        galleryEl.closest('.home-preview-card')?.classList.toggle('is-hidden', !has);
+        if(has) visiblePreviews++;
       }
       if(partnersEl){
         const partners = await selectRows('partners','select=*&status=eq.Published&order=created_at.desc&limit=1');
-        partnersEl.textContent = partners[0]?.name || 'Official sponsors and partner brands';
+        const has = !!partners[0];
+        partnersEl.textContent = has ? partners[0].name : '';
+        partnersEl.closest('.home-preview-card')?.classList.toggle('is-hidden', !has);
+        if(has) visiblePreviews++;
       }
+      const previewSection = document.querySelector('.home-live-preview-section');
+      if(previewSection) previewSection.classList.toggle('is-hidden', visiblePreviews === 0);
     } catch(err){ console.error(err); }
   }
 
@@ -338,12 +350,12 @@
     const empty=$('#galleryEmpty'), modal=$('#galleryModal'), title=$('#galleryModalTitle'), visual=modal?modal.querySelector('.gallery-modal-visual'):null, desc=modal?modal.querySelector('p'):null;
     let allItems=[];
     try{ allItems = await selectRows('gallery_media','select=*&order=created_at.desc'); }catch(err){ console.error(err); }
-    function card(item){ const bg=item.image_url?`style="background-image:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.76)),url('${esc(item.image_url)}')"`:''; const play=item.type==='videos'||item.url?'<div class="play">▶</div>':''; const date=item.date?`<p>${esc(item.date)}</p>`:'<p>TMPCL published media</p>'; return `<article class="card media-card" data-id="${esc(item.id)}" data-type="${esc(item.category)}" ${bg}>${play}<div class="label"><span class="tag">${esc(item.category)}</span><h3>${esc(item.title)}</h3>${date}</div></article>`; }
+    function card(item){ const bg=item.image_url?`style="background-image:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.76)),url('${esc(item.image_url)}')"`:''; const play=item.type==='videos'||item.url?'<div class="play">▶</div>':''; const date=item.date?`<p>${esc(item.date)}</p>`:''; return `<article class="card media-card" data-id="${esc(item.id)}" data-type="${esc(item.category)}" ${bg}>${play}<div class="label"><span class="tag">${esc(item.category)}</span><h3>${esc(item.title)}</h3>${date}</div></article>`; }
     function render(filter='all'){
       const items=allItems.filter(item=>filter==='all'||item.category===filter||(filter==='videos'&&item.type==='videos'));
       galleryGrid.innerHTML=items.map(card).join('');
-      if(empty) empty.style.display=allItems.length?'none':'block';
-      $$('.media-card',galleryGrid).forEach(c=>c.addEventListener('click',()=>{ const item=allItems.find(g=>g.id===c.dataset.id); if(!item||!modal) return; if(title) title.textContent=item.title||'TMPCL Media'; if(visual){ visual.innerHTML=item.type==='videos'||item.url?'<div class="play modal-play">▶</div>':''; visual.style.backgroundImage=item.image_url?`linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.55)),url('${item.image_url}')`:''; } if(desc) desc.textContent=item.url?`Video/Reel Link: ${item.url}`:'TMPCL published gallery media.'; modal.classList.add('open'); }));
+      if(empty) empty.style.display='none';
+      $$('.media-card',galleryGrid).forEach(c=>c.addEventListener('click',()=>{ const item=allItems.find(g=>g.id===c.dataset.id); if(!item||!modal) return; if(title) title.textContent=item.title||'TMPCL Media'; if(visual){ visual.innerHTML=item.type==='videos'||item.url?'<div class="play modal-play">▶</div>':''; visual.style.backgroundImage=item.image_url?`linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.55)),url('${item.image_url}')`:''; } if(desc) desc.textContent=item.url?`Video/Reel Link: ${item.url}`:''; modal.classList.add('open'); }));
     }
     render();
     $$('.filter-btn').forEach(btn=>btn.addEventListener('click',()=>{ $$('.filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); render(btn.dataset.filter); }));
@@ -362,7 +374,7 @@
       const ambassadorCard = (p,i) => { const photo=p.photo_url?`<img src="${esc(p.photo_url)}" alt="${esc(p.name)}">`:`<span>BA</span>`; return `<article class="ambassador-card ${i%2?'featured':''} auto-profile-card" data-profile-card="true" data-photo="${esc(p.photo_url||'')}" data-type="${esc(p.type||'Brand Ambassador')}" data-name="${esc(p.name||'Brand Ambassador')}" data-designation="${esc(p.designation||'Brand Ambassador, TMPCL')}" data-bio="${esc(p.bio||'Supporting TMPCL mission to promote tennis ball cricket talent across Madhya Pradesh.')}" title="Tap to view full profile"><div class="ambassador-photo dynamic-ambassador-photo">${photo}</div><div class="ambassador-copy"><small>${esc(p.designation||'Brand Ambassador, TMPCL')}</small><h3>${esc(p.name||'Brand Ambassador')}</h3><p>${esc(p.bio||'Supporting TMPCL mission to promote tennis ball cricket talent across Madhya Pradesh.')}</p><div class="ambassador-tags"><span>Official Face</span><span>TMPCL</span><span>Talent Support</span></div><span class="profile-view-hint">Tap to view full photo</span></div></article>`; };
       if(home && founder) { home.innerHTML = card(founder); bindProfileCards(home); }
       if(about) { about.innerHTML = leaders.filter(x=>(x.type||'').includes('Founder')).map(card).join('') || (founder?card(founder):''); bindProfileCards(about); }
-      if(amb){ amb.innerHTML = ambassadors.length ? ambassadors.slice(0,2).map(ambassadorCard).join('') : `<article class="card empty-state"><h3>Brand Ambassadors Coming Soon</h3></article>`; bindProfileCards(amb); }
+      if(amb){ amb.innerHTML = ambassadors.length ? ambassadors.slice(0,2).map(ambassadorCard).join('') : ''; bindProfileCards(amb); }
       if(sel){ sel.innerHTML = selectors.map(card).join(''); if(empty) empty.style.display=selectors.length?'none':'block'; bindProfileCards(sel); }
     } catch(err){ console.error(err); }
   }

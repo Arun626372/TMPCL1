@@ -2325,3 +2325,6 @@ body[data-page="home"] .home-premium-scene-hero{
   .registration-status-banner strong{font-size:18px}
   .fixed-category-box strong{font-size:20px}
 }
+
+/* v7: hide public preview/empty blocks until admin-published content exists */
+.is-hidden{display:none!important}
