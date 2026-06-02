@@ -39,6 +39,29 @@
   const initials = (name, fallback='TM') => (name||fallback).split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase() || fallback;
 
 
+  const cleanUrl = (url='') => {
+    const v = String(url || '').trim();
+    if(!v) return '';
+    return /^https?:\/\//i.test(v) ? v : `https://${v}`;
+  };
+  const youtubeEmbedUrl = (url='') => {
+    const value = cleanUrl(url);
+    if(!value) return '';
+    try{
+      const u = new URL(value);
+      const host = u.hostname.replace(/^www\./,'').toLowerCase();
+      let id = '';
+      if(host === 'youtu.be') id = u.pathname.split('/').filter(Boolean)[0] || '';
+      if(host.includes('youtube.com')){
+        if(u.pathname.startsWith('/shorts/')) id = u.pathname.split('/').filter(Boolean)[1] || '';
+        if(u.pathname.startsWith('/embed/')) id = u.pathname.split('/').filter(Boolean)[1] || '';
+        if(!id) id = u.searchParams.get('v') || '';
+      }
+      return id ? `https://www.youtube.com/embed/${id}` : '';
+    }catch(e){ return ''; }
+  };
+
+
   function formatDateSafe(value){
     if(!value) return '';
     const d = new Date(value);
@@ -361,16 +384,48 @@
     const filters = section ? section.querySelector('.filters') : document.querySelector('.filters');
     if(section) section.classList.toggle('is-hidden', allItems.length === 0);
     if(filters) filters.classList.toggle('is-hidden', allItems.length === 0);
-    function card(item){ const bg=item.image_url?`style="background-image:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.76)),url('${esc(item.image_url)}')"`:''; const play=item.type==='videos'||item.url?'<div class="play">▶</div>':''; const date=item.date?`<p>${esc(item.date)}</p>`:''; return `<article class="card media-card" data-id="${esc(item.id)}" data-type="${esc(item.category)}" ${bg}>${play}<div class="label"><span class="tag">${esc(item.category)}</span><h3>${esc(item.title)}</h3>${date}</div></article>`; }
+    const closeGalleryModal = () => {
+      if(!modal) return;
+      modal.classList.remove('open');
+      if(visual){ visual.innerHTML=''; visual.style.backgroundImage=''; }
+      document.body.classList.remove('modal-open');
+    };
+    function card(item){ const bg=item.image_url?`style="background-image:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.76)),url('${esc(item.image_url)}')"`:''; const play=item.type==='videos'||item.url?'<div class="play">▶</div>':''; const date=item.date?`<p>${esc(item.date)}</p>`:''; return `<article class="card media-card" data-id="${esc(item.id)}" data-type="${esc(item.category)}" ${bg}>${play}<div class="label"><span class="tag">${esc(item.category || item.type || 'media')}</span><h3>${esc(item.title)}</h3>${date}</div></article>`; }
+    function openItem(item){
+      if(!item||!modal) return;
+      const url = cleanUrl(item.url || '');
+      const isVideo = (item.type === 'videos') || !!url;
+      const embed = isVideo ? youtubeEmbedUrl(url) : '';
+      if(title) title.textContent=item.title||'TMPCL Media';
+      if(visual){
+        visual.style.backgroundImage = (!embed && item.image_url) ? `linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.55)),url('${item.image_url}')` : '';
+        if(embed){
+          visual.innerHTML = `<iframe class="gallery-video-frame" src="${esc(embed)}" title="${esc(item.title || 'TMPCL video')}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`;
+        } else if(isVideo && url){
+          visual.innerHTML = `<div class="gallery-video-link-box"><div class="play modal-play">▶</div><a class="btn gold" href="${esc(url)}" target="_blank" rel="noopener">Open Video Link</a></div>`;
+        } else {
+          visual.innerHTML = item.image_url ? '' : '<span class="muted">TMPCL Media</span>';
+        }
+      }
+      if(desc){
+        desc.innerHTML = url ? `<a class="gallery-modal-link" href="${esc(url)}" target="_blank" rel="noopener">Open video / reel link</a>` : '';
+      }
+      modal.classList.add('open');
+      document.body.classList.add('modal-open');
+    }
     function render(filter='all'){
       const items=allItems.filter(item=>filter==='all'||item.category===filter||(filter==='videos'&&item.type==='videos'));
       galleryGrid.innerHTML=items.map(card).join('');
       if(empty) empty.style.display='none';
-      $$('.media-card',galleryGrid).forEach(c=>c.addEventListener('click',()=>{ const item=allItems.find(g=>g.id===c.dataset.id); if(!item||!modal) return; if(title) title.textContent=item.title||'TMPCL Media'; if(visual){ visual.innerHTML=item.type==='videos'||item.url?'<div class="play modal-play">▶</div>':''; visual.style.backgroundImage=item.image_url?`linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.55)),url('${item.image_url}')`:''; } if(desc) desc.textContent=item.url?`Video/Reel Link: ${item.url}`:''; modal.classList.add('open'); }));
+      $$('.media-card',galleryGrid).forEach(c=>c.addEventListener('click',()=>openItem(allItems.find(g=>g.id===c.dataset.id))));
     }
     render();
     $$('.filter, .filter-btn').forEach(btn=>btn.addEventListener('click',()=>{ $$('.filter, .filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); render(btn.dataset.filter); }));
-    $$('[data-close-gallery], .gallery-modal-close').forEach(x=>x.addEventListener('click',()=>modal?.classList.remove('open')));
+    if(modal){
+      modal.addEventListener('click', e=>{ if(e.target === modal) closeGalleryModal(); });
+      $$('[data-close-gallery], .gallery-modal-close', modal).forEach(x=>x.addEventListener('click',closeGalleryModal));
+      document.addEventListener('keydown', e=>{ if(e.key === 'Escape' && modal.classList.contains('open')) closeGalleryModal(); });
+    }
   }
 
   async function renderPublicLeadership(){

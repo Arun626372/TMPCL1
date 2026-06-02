@@ -2459,3 +2459,75 @@ body[data-page="home"] .home-premium-scene-hero{
   body[data-page="dashboard"] .admin-tab-panel .card{padding:14px;}
   body[data-page="dashboard"] .table-scroll .table{min-width:980px;}
 }
+
+/* v12: Gallery modal video/link + mobile close fixes */
+body.modal-open{overflow:hidden!important;}
+.gallery-modal{z-index:9999!important;touch-action:none;}
+.gallery-modal.open{display:flex!important;}
+.gallery-modal-card{max-height:92vh;overflow:auto;-webkit-overflow-scrolling:touch;}
+.gallery-modal-close{position:sticky!important;top:0!important;float:right!important;z-index:20!important;display:grid!important;place-items:center!important;line-height:1!important;}
+.gallery-video-frame{width:100%;height:min(62vh,520px);border:0;border-radius:20px;background:#000;display:block;}
+.gallery-video-link-box{min-height:280px;display:grid;place-items:center;gap:16px;text-align:center;}
+.gallery-modal-link{display:inline-flex;align-items:center;justify-content:center;margin-top:8px;padding:11px 16px;border-radius:999px;background:rgba(255,211,90,.12);border:1px solid rgba(255,211,90,.32);color:var(--gold);font-weight:950;}
+@media(max-width:640px){
+  .gallery-modal{align-items:flex-start!important;padding:10px!important;overflow:auto!important;}
+  .gallery-modal-card{width:100%!important;max-height:calc(100vh - 20px)!important;padding:12px!important;border-radius:18px!important;}
+  .gallery-modal-close{width:46px!important;height:46px!important;font-size:30px!important;margin-left:auto!important;margin-bottom:8px!important;background:#071522!important;border-color:rgba(255,255,255,.35)!important;}
+  .gallery-modal-visual{min-height:220px!important;border-radius:16px!important;}
+  .gallery-video-frame{height:min(54vh,360px)!important;border-radius:16px!important;}
+  .gallery-modal-card h3{font-size:22px!important;margin:12px 0 6px!important;}
+}
+
+/* v12: Strong admin mobile fix - PC layout untouched */
+@media(max-width:768px){
+  html,body{max-width:100%;overflow-x:hidden!important;}
+  body[data-page="dashboard"]{padding-bottom:18px!important;background:#02070d!important;}
+  body[data-page="dashboard"] .topbar{position:sticky!important;top:0!important;z-index:500!important;}
+  body[data-page="dashboard"] .wrap{width:100%!important;max-width:100%!important;padding-left:12px!important;padding-right:12px!important;}
+  body[data-page="dashboard"] .nav{display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;min-height:0!important;padding:10px 0!important;gap:9px!important;}
+  body[data-page="dashboard"] .brand-lockup{width:100%!important;display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:10px!important;min-width:0!important;}
+  body[data-page="dashboard"] .brand-lockup img{width:48px!important;height:48px!important;flex:0 0 48px!important;}
+  body[data-page="dashboard"] .brand-copy{min-width:0!important;display:block!important;}
+  body[data-page="dashboard"] .brand-copy b{font-size:18px!important;line-height:1!important;display:block!important;}
+  body[data-page="dashboard"] .brand-copy small{display:block!important;white-space:normal!important;font-size:11px!important;line-height:1.2!important;max-width:none!important;}
+  body[data-page="dashboard"] .dash-header-actions{width:100%!important;display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;}
+  body[data-page="dashboard"] .dash-header-actions .btn{display:flex!important;width:100%!important;min-height:42px!important;padding:10px 8px!important;font-size:12px!important;border-radius:14px!important;}
+  body[data-page="dashboard"] .dash-shell{padding:14px 0 0!important;}
+  body[data-page="dashboard"] .compact-dash-top{padding:16px!important;border-radius:20px!important;margin-bottom:12px!important;}
+  body[data-page="dashboard"] .compact-dash-top h1{font-size:25px!important;line-height:1.05!important;letter-spacing:-.5px!important;}
+  body[data-page="dashboard"] .compact-dash-top p{font-size:12.5px!important;line-height:1.45!important;}
+  body[data-page="dashboard"] .dashboard-stat-grid.stat-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important;}
+  body[data-page="dashboard"] .dashboard-stat-grid .card{min-width:0!important;min-height:78px!important;padding:12px!important;border-radius:16px!important;}
+  body[data-page="dashboard"] .dashboard-stat-grid .card small{font-size:10px!important;line-height:1.15!important;}
+  body[data-page="dashboard"] .dashboard-stat-grid .stat-value{font-size:23px!important;line-height:1.05!important;}
+  body[data-page="dashboard"] .dashboard-layout{display:block!important;}
+  body[data-page="dashboard"] .dashboard-sidebar{position:sticky!important;top:78px!important;z-index:400!important;display:flex!important;gap:8px!important;overflow-x:auto!important;overflow-y:hidden!important;-webkit-overflow-scrolling:touch!important;margin:12px -12px 14px!important;padding:10px 12px!important;border-radius:0!important;border-left:0!important;border-right:0!important;background:rgba(2,8,14,.96)!important;}
+  body[data-page="dashboard"] .dashboard-sidebar h3{display:none!important;}
+  body[data-page="dashboard"] .dash-tab{flex:0 0 auto!important;width:auto!important;min-width:118px!important;margin:0!important;padding:10px 11px!important;font-size:11px!important;line-height:1.2!important;text-align:center!important;justify-content:center!important;border-radius:999px!important;white-space:normal!important;}
+  body[data-page="dashboard"] .dashboard-content{width:100%!important;min-width:0!important;overflow:hidden!important;}
+  body[data-page="dashboard"] .admin-tab-panel.active{display:block!important;width:100%!important;}
+  body[data-page="dashboard"] .admin-two-column{display:grid!important;grid-template-columns:1fr!important;gap:14px!important;}
+  body[data-page="dashboard"] .admin-tab-panel .card{width:100%!important;min-width:0!important;padding:15px!important;border-radius:20px!important;margin-bottom:14px!important;}
+  body[data-page="dashboard"] .admin-tab-panel .card h3{font-size:20px!important;line-height:1.15!important;}
+  body[data-page="dashboard"] .admin-tab-panel .muted{font-size:12.5px!important;line-height:1.5!important;}
+  body[data-page="dashboard"] .admin-small-form{display:grid!important;grid-template-columns:1fr!important;gap:12px!important;width:100%!important;}
+  body[data-page="dashboard"] .admin-settings-grid{display:grid!important;grid-template-columns:1fr!important;}
+  body[data-page="dashboard"] .admin-field input,
+  body[data-page="dashboard"] .admin-field select,
+  body[data-page="dashboard"] .admin-field textarea{width:100%!important;max-width:100%!important;min-height:46px!important;font-size:16px!important;border-radius:14px!important;}
+  body[data-page="dashboard"] input[type="file"]{font-size:12px!important;padding:10px!important;}
+  body[data-page="dashboard"] .panel-head{display:block!important;}
+  body[data-page="dashboard"] .panel-head .btn,
+  body[data-page="dashboard"] .admin-small-form .btn{width:100%!important;min-height:46px!important;margin-top:8px!important;}
+  body[data-page="dashboard"] .table-scroll{display:block!important;width:100%!important;max-width:100%!important;max-height:70vh!important;overflow:auto!important;-webkit-overflow-scrolling:touch!important;border-radius:14px!important;}
+  body[data-page="dashboard"] .table-scroll .table{width:max-content!important;min-width:860px!important;table-layout:auto!important;}
+  body[data-page="dashboard"] .table th,
+  body[data-page="dashboard"] .table td{font-size:12px!important;padding:10px!important;white-space:nowrap!important;}
+  body[data-page="dashboard"] .admin-table-actions{display:flex!important;gap:7px!important;flex-wrap:nowrap!important;}
+  body[data-page="dashboard"] .mini-btn{white-space:nowrap!important;padding:8px 10px!important;font-size:11px!important;}
+}
+@media(max-width:390px){
+  body[data-page="dashboard"] .dashboard-stat-grid.stat-grid{grid-template-columns:1fr!important;}
+  body[data-page="dashboard"] .dash-tab{min-width:112px!important;font-size:10.5px!important;}
+  body[data-page="dashboard"] .compact-dash-top h1{font-size:23px!important;}
+}
