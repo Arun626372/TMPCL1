@@ -34,7 +34,23 @@
 
   const esc = (v='') => String(v ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
   const fmt = () => new Date().toLocaleString('en-IN');
-  const makeId = p => p + '-' + Date.now().toString().slice(-7);
+  const REGISTRATION_YEAR = new Date().getFullYear();
+  const formatRegistrationId = n => `TMPCL-${REGISTRATION_YEAR}-${String(Math.max(1, Number(n) || 1)).padStart(4,'0')}`;
+  async function generateRegistrationId(){
+    const prefix = `TMPCL-${REGISTRATION_YEAR}-`;
+    let nextNo = 1;
+    try{
+      const rows = await selectRows('players', `select=id&id=like.${encodeURIComponent(prefix + '*')}&order=id.desc&limit=200`);
+      const re = new RegExp(`^TMPCL-${REGISTRATION_YEAR}-(\\d+)$`);
+      rows.forEach(r => {
+        const m = String(r.id || '').match(re);
+        if(m) nextNo = Math.max(nextNo, parseInt(m[1],10) + 1);
+      });
+    }catch(e){
+      nextNo = parseInt(Date.now().toString().slice(-4), 10) || 1;
+    }
+    return formatRegistrationId(nextNo);
+  }
   const ageFromDob = dob => { if(!dob) return 0; const b=new Date(dob), t=new Date(); let a=t.getFullYear()-b.getFullYear(); const m=t.getMonth()-b.getMonth(); if(m<0 || (m===0 && t.getDate()<b.getDate())) a--; return a; };
   const initials = (name, fallback='TM') => (name||fallback).split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase() || fallback;
 
@@ -532,7 +548,7 @@
         if(!proofInput || !proofInput.files.length) throw new Error('Aadhaar / ID Proof upload mandatory hai.');
         data.ageGroup = age <= 19 ? 'U19' : 'Open';
 
-        const id=makeId('TMPCL');
+        const id=await generateRegistrationId();
 
         // Important flow:
         // 1) Upload documents + create Payment Pending player record first.
@@ -568,7 +584,7 @@
         await insertRow('players', pendingRecord);
 
         const successBox = $('#regSuccess');
-        showSuccess(successBox, `<strong>Registration saved.</strong><br>Registration ID: <strong>${id}</strong><br>Ab Cashfree checkout par payment complete karein.<br><br><a class="btn" href="checkout.html?rid=${encodeURIComponent(id)}">Proceed to Cashfree Checkout →</a>`);
+        showSuccess(successBox, `<strong>Registration saved.</strong><br>Ab Cashfree checkout par payment complete karein. Official Registration ID payment successful hone ke baad show hogi.<br><br><a class="btn" href="checkout.html?rid=${encodeURIComponent(id)}">Proceed to Cashfree Checkout →</a>`);
         regForm.reset();
         updateAgeGroup();
         updateRoleFields();
@@ -593,8 +609,9 @@
   function renderCheckoutSummary(reg){
     const box = $('#checkoutSummary');
     if(!box) return;
+    const isPaid = String(reg.payment_status || '').toLowerCase() === 'paid';
     box.innerHTML = `<div class="checkout-summary-grid">
-      <div><span>Registration ID</span><strong>${esc(reg.id || '')}</strong></div>
+      ${isPaid ? `<div><span>Registration ID</span><strong>${esc(reg.id || '')}</strong></div>` : ''}
       <div><span>Player Name</span><strong>${esc(reg.name || '')}</strong></div>
       <div><span>Mobile</span><strong>${esc(reg.mobile || '')}</strong></div>
       <div><span>City</span><strong>${esc(reg.city || '')}</strong></div>
@@ -603,7 +620,7 @@
       <div><span>Payment Status</span><strong>${esc(reg.payment_status || 'Payment Pending')}</strong></div>
       <div><span>Gateway</span><strong>Cashfree</strong></div>
       <div><span>Total Amount</span><strong>${TMPCL_FIXED_FEE_TEXT}</strong></div>
-    </div>`;
+    </div>${!isPaid ? '<p class="muted id-lock-note">Official Registration ID payment successful hone ke baad show hogi.</p>' : ''}`;
     document.querySelectorAll('.checkout-total strong, #regFee, #regTotal').forEach(el=>{ el.textContent = TMPCL_FIXED_FEE_TEXT; });
   }
 
@@ -635,9 +652,9 @@
 
     (async()=>{
       try{
-        if(!rid) throw new Error('Registration ID missing hai. Pehle registration form submit karein.');
+        if(!rid) throw new Error('Registration link missing hai. Pehle registration form submit karein.');
         let reg = await loadPlayerById(rid);
-        if(!reg) throw new Error('Registration record nahi mila. ID check karein ya TMPCL support se contact karein.');
+        if(!reg) throw new Error('Registration record nahi mila. Link check karein ya TMPCL support se contact karein.');
         renderCheckoutSummary(reg);
 
         if(orderId && reg.payment_status !== 'Paid'){
