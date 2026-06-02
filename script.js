@@ -52,6 +52,7 @@
       ['Player Name', reg.name || ''],
       ['Mobile', reg.mobile || ''],
       ['City / District', reg.city || ''],
+      ['Trial Location', reg.trial_location || reg.trialLocation || ''],
       ['Date of Birth', reg.dob || ''],
       ['Age Group', reg.age_group || reg.ageGroup || ''],
       ['Playing Role', reg.role || ''],
@@ -91,8 +92,8 @@
   }
 
   function downloadCsv(filename, regs){
-    const header = ['Registration ID','Name','Mobile','City','DOB','Age','Age Group','Role','Batting','Bowling','Experience','Email','Payment Status','Assigned Category','Fee','Created At'];
-    const body = regs.map(r=>[r.id,r.name,r.mobile,r.city,r.dob,r.age,r.age_group,r.role,r.batting,r.bowling,r.experience,r.email,r.payment_status,r.assigned_category,r.fee,r.created_at]);
+    const header = ['Registration ID','Name','Mobile','City','Trial Location','DOB','Age','Age Group','Role','Batting','Bowling','Experience','Email','Payment Status','Assigned Category','Fee','Created At'];
+    const body = regs.map(r=>[r.id,r.name,r.mobile,r.city,r.trial_location,r.dob,r.age,r.age_group,r.role,r.batting,r.bowling,r.experience,r.email,r.payment_status,r.assigned_category,r.fee,r.created_at]);
     const csv = rowsToCsv([header, ...body]);
     const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
     const url = URL.createObjectURL(blob);
@@ -433,6 +434,7 @@
         if(!data.name) throw new Error('Full Name mandatory hai.');
         if(!data.mobile) throw new Error('Mobile Number mandatory hai.');
         if(!data.city) throw new Error('City / District mandatory hai.');
+        if(!data.trialLocation) throw new Error('Trial Location select karein.');
         if(!data.dob) throw new Error('Date of Birth mandatory hai.');
         if(!data.ageGroup) throw new Error('Registration category verify nahi hui. DOB dobara select karein.');
         if(!data.role) throw new Error('Playing Role select karein.');
@@ -456,6 +458,7 @@
           name:data.name,
           mobile:data.mobile,
           city:data.city,
+          trial_location:data.trialLocation,
           dob:data.dob,
           age,
           age_group:data.ageGroup,
@@ -506,6 +509,7 @@
       <div><span>Player Name</span><strong>${esc(reg.name || '')}</strong></div>
       <div><span>Mobile</span><strong>${esc(reg.mobile || '')}</strong></div>
       <div><span>City</span><strong>${esc(reg.city || '')}</strong></div>
+      <div><span>Trial Location</span><strong>${esc(reg.trial_location || '')}</strong></div>
       <div><span>Role</span><strong>${esc(reg.role || '')}</strong></div>
       <div><span>Payment Status</span><strong>${esc(reg.payment_status || 'Payment Pending')}</strong></div>
       <div><span>Gateway</span><strong>Cashfree</strong></div>
@@ -644,7 +648,7 @@
           const ageVal=ageFilter?.value||'all';
           const roleVal=roleFilter?.value||'all';
           return paidRegs.filter(r=>{
-            const hay=[r.id,r.name,r.mobile,r.city,r.role,r.age_group,r.assigned_category].join(' ').toLowerCase();
+            const hay=[r.id,r.name,r.mobile,r.city,r.trial_location,r.role,r.age_group,r.assigned_category].join(' ').toLowerCase();
             const matchQ=!q || hay.includes(q);
             const matchAge=ageVal==='all' || r.age_group===ageVal;
             const matchRole=roleVal==='all' || r.role===roleVal;
@@ -654,7 +658,7 @@
         const drawRegs = () => {
           const list=filteredRegs();
           $('#emptyRegs').style.display=list.length?'none':'block';
-          regTb.innerHTML=list.map(r=>`<tr><td>${esc(r.id)}</td><td>${esc(r.name||'')}</td><td>${esc(r.mobile||'')}</td><td>${esc(r.city||'')}</td><td>${esc(r.dob||'')}</td><td>${esc(r.age||'')}</td><td>${esc(r.role||'')}</td><td>${esc(r.age_group||'')}</td><td>${esc(r.payment_status||'Pending')}</td><td>${esc(r.assigned_category||'Pending until trials & auction')}</td><td>${r.photo_url?`<a href="${esc(r.photo_url)}" target="_blank">View</a>`:''}</td><td>${r.proof_url?`<a href="${esc(r.proof_url)}" target="_blank">View</a>`:''}</td><td>₹${esc(r.fee||'999')}</td><td>${esc(formatDateSafe(r.created_at)||'')}</td></tr>`).join('');
+          regTb.innerHTML=list.map(r=>`<tr><td>${esc(r.id)}</td><td>${esc(r.name||'')}</td><td>${esc(r.mobile||'')}</td><td>${esc(r.city||'')}</td><td>${esc(r.trial_location||'')}</td><td>${esc(r.dob||'')}</td><td>${esc(r.age||'')}</td><td>${esc(r.role||'')}</td><td>${esc(r.age_group||'')}</td><td>${esc(r.payment_status||'Pending')}</td><td>${esc(r.assigned_category||'Pending until trials & auction')}</td><td>${r.photo_url?`<a href="${esc(r.photo_url)}" target="_blank">View</a>`:''}</td><td>${r.proof_url?`<a href="${esc(r.proof_url)}" target="_blank">View</a>`:''}</td><td>₹${esc(r.fee||'999')}</td><td>${esc(formatDateSafe(r.created_at)||'')}</td></tr>`).join('');
         };
         [search,ageFilter,roleFilter].forEach(el=>el?.addEventListener('input',drawRegs));
         [ageFilter,roleFilter].forEach(el=>el?.addEventListener('change',drawRegs));
