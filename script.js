@@ -484,7 +484,7 @@
       if(battingSelect) battingSelect.disabled = false;
       if(bowlingSelect) bowlingSelect.disabled = false;
 
-      if(role === 'Batsman' || role === 'Wicket Keeper'){
+      if(role === 'Batsman'){
         bowlingField.classList.add('field-hidden');
         if(bowlingSelect){ bowlingSelect.value = 'Not Applicable'; bowlingSelect.disabled = true; }
       } else if(role === 'Bowler'){
