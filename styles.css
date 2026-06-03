@@ -2671,9 +2671,9 @@ body[data-page="home"] .prize-premium-title p{
 .registration-poster-photo{
   position:absolute;
   left:8.8%;
-  top:50.8%;
-  width:28.9%;
-  height:27.8%;
+  top:50.75%;
+  width:29.4%;
+  height:28.1%;
   border-radius:18px;
   overflow:hidden;
   background:linear-gradient(180deg,#18315f,#102448);
@@ -2700,44 +2700,47 @@ body[data-page="home"] .prize-premium-title p{
   position:absolute;
   color:#082143;
   font-weight:900;
-  line-height:1.06;
+  line-height:1.05;
   display:flex;
   align-items:center;
+  justify-content:flex-start;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
+  letter-spacing:.2px;
+  z-index:3;
 }
 .registration-poster-value.name{
   left:47.2%;
-  top:51.5%;
+  top:51.45%;
   width:43.5%;
   height:3.2%;
   padding:0 2.4%;
 }
 .registration-poster-value.regid{
   left:47.2%;
-  top:58.2%;
+  top:57.65%;
   width:43.5%;
   height:3.2%;
   padding:0 2.4%;
 }
 .registration-poster-value.role{
   left:47.2%;
-  top:67.1%;
+  top:63.85%;
   width:43.5%;
   height:3.2%;
   padding:0 2.4%;
 }
 .registration-poster-value.location{
   left:47.2%;
-  top:76.1%;
+  top:70.10%;
   width:43.5%;
   height:3.2%;
   padding:0 2.4%;
 }
 .registration-poster-value.category{
   left:47.2%;
-  top:85.1%;
+  top:76.35%;
   width:43.5%;
   height:3.2%;
   padding:0 2.4%;

@@ -139,11 +139,11 @@
         <div class="registration-poster-card" id="registrationPosterCard" aria-label="TMPCL Registration Social Card">
           <img class="registration-poster-template" src="${PLAYER_CARD_TEMPLATE}" alt="TMPCL registration card template">
           <div class="registration-poster-photo">${photoHtml}</div>
-          <div class="registration-poster-value autofit-text name" data-max="34" data-min="16">${esc(playerName)}</div>
-          <div class="registration-poster-value autofit-text regid" data-max="27" data-min="15">${esc(registrationId)}</div>
-          <div class="registration-poster-value autofit-text role" data-max="27" data-min="15">${esc(role)}</div>
-          <div class="registration-poster-value autofit-text location" data-max="26" data-min="14">${esc(trialLocation)}</div>
-          <div class="registration-poster-value autofit-text category" data-max="24" data-min="13">${esc(category)}</div>
+          <div class="registration-poster-value autofit-text name" data-max="22" data-min="12">${esc(playerName)}</div>
+          <div class="registration-poster-value autofit-text regid" data-max="18" data-min="11">${esc(registrationId)}</div>
+          <div class="registration-poster-value autofit-text role" data-max="18" data-min="11">${esc(role)}</div>
+          <div class="registration-poster-value autofit-text location" data-max="18" data-min="11">${esc(trialLocation)}</div>
+          <div class="registration-poster-value autofit-text category" data-max="17" data-min="10">${esc(category)}</div>
         </div>
       </div>
       <p class="muted social-card-note">Card me TMPCL logo aur website QR pre-built hai. Player photo aur details automatically website data se fill hongi.</p>
