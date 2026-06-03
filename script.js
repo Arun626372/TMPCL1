@@ -14,8 +14,6 @@
   const CASHFREE_MODE = 'production'; // Cashfree live mode: Supabase CASHFREE_ENV must also be production.
   const REGISTRATION_FEE = 999;
   const TMPCL_FIXED_FEE_TEXT = '₹999';
-  const PLAYER_CARD_TEMPLATE = 'player-registration-card-template.png';
-  let currentCardRegistration = null;
   const STORAGE_BUCKETS = {
     playerPhoto: 'player-photos',
     idProof: 'id-proofs',
@@ -114,222 +112,6 @@
       <div class="slip-note"><strong>Important:</strong> This is a registration confirmation slip, not final trial pass. Final trial pass/admit card will be issued after venue, date and reporting time are officially announced.</div>
       <div class="slip-actions"><button type="button" class="btn" id="printSlipBtn">Print / Save Slip</button></div>
     </div>`;
-  }
-
-
-  function buildRegistrationSocialCard(reg){
-    currentCardRegistration = reg || null;
-    return `<div class="social-card-wrap">
-      <div class="social-card-head">
-        <div>
-          <small>Instagram Registration Card</small>
-          <h3>Official TMPCL Player Card</h3>
-        </div>
-        <button type="button" class="btn" id="downloadPlayerCardBtn">Download Instagram Card</button>
-      </div>
-      <div class="registration-poster-preview">
-        <canvas class="registration-poster-card registration-poster-canvas" id="registrationPosterCanvas" width="1122" height="1402" aria-label="TMPCL Registration Social Card"></canvas>
-      </div>
-    </div>`;
-  }
-
-  function fitTextToBox(el){
-    if(!el) return;
-    const max = Number(el.dataset.max || 28);
-    const min = Number(el.dataset.min || 13);
-    let size = max;
-    el.style.fontSize = `${size}px`;
-    while(size > min && (el.scrollWidth > el.clientWidth || el.scrollHeight > el.clientHeight)){
-      size -= 1;
-      el.style.fontSize = `${size}px`;
-    }
-  }
-
-  function applyRegistrationCardAutoFit(root){
-    if(!root) return;
-    root.querySelectorAll('.autofit-text').forEach(fitTextToBox);
-  }
-
-  function drawRoundRectPath(ctx, x, y, w, h, r){
-    const radius = Math.min(r, w / 2, h / 2);
-    ctx.beginPath();
-    ctx.moveTo(x + radius, y);
-    ctx.arcTo(x + w, y, x + w, y + h, radius);
-    ctx.arcTo(x + w, y + h, x, y + h, radius);
-    ctx.arcTo(x, y + h, x, y, radius);
-    ctx.arcTo(x, y, x + w, y, radius);
-    ctx.closePath();
-  }
-
-  function getPhotoFallbackCrop(img, targetRatio){
-    const iw = img.naturalWidth || img.width || 1;
-    const ih = img.naturalHeight || img.height || 1;
-    let sw = iw;
-    let sh = sw / targetRatio;
-    if(sh > ih){
-      sh = ih;
-      sw = sh * targetRatio;
-    }
-    const sx = Math.max(0, (iw - sw) / 2);
-    const sy = Math.max(0, Math.min(ih - sh, (ih - sh) * 0.12));
-    return { sx, sy, sw, sh };
-  }
-
-  async function getFocusedPhotoCrop(img, targetRatio){
-    const fallback = getPhotoFallbackCrop(img, targetRatio);
-    if(!('FaceDetector' in window)) return fallback;
-    try{
-      const detector = new FaceDetector({ fastMode: true, maxDetectedFaces: 1 });
-      const faces = await detector.detect(img);
-      const face = faces && faces[0] && faces[0].boundingBox;
-      if(!face) return fallback;
-      const iw = img.naturalWidth || img.width || 1;
-      const ih = img.naturalHeight || img.height || 1;
-      const cx = face.x + face.width / 2;
-      const cy = face.y + face.height * 0.44;
-      let sh = Math.max(face.height * 3.4, ih * 0.44);
-      let sw = sh * targetRatio;
-      if(sw > iw){
-        sw = iw;
-        sh = sw / targetRatio;
-      }
-      if(sh > ih){
-        sh = ih;
-        sw = sh * targetRatio;
-      }
-      let sx = cx - sw / 2;
-      let sy = cy - sh * 0.30;
-      sx = Math.max(0, Math.min(iw - sw, sx));
-      sy = Math.max(0, Math.min(ih - sh, sy));
-      return { sx, sy, sw, sh };
-    }catch(err){
-      return fallback;
-    }
-  }
-
-  function fitCanvasText(ctx, text, width, maxSize, minSize, weight='900'){
-    const value = String(text || '-');
-    let size = maxSize;
-    while(size > minSize){
-      ctx.font = `${weight} ${size}px Arial, Helvetica, sans-serif`;
-      if(ctx.measureText(value).width <= width) break;
-      size -= 1;
-    }
-    ctx.font = `${weight} ${size}px Arial, Helvetica, sans-serif`;
-    return { text: value, size };
-  }
-
-  async function loadImageElement(src){
-    return await new Promise((resolve, reject) => {
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.onload = () => resolve(img);
-      img.onerror = () => reject(new Error(`Image load failed: ${src}`));
-      img.src = src;
-    });
-  }
-
-  async function renderRegistrationCardCanvas(reg, canvas){
-    if(!canvas || !reg) return;
-    const ctx = canvas.getContext('2d');
-    const W = canvas.width = 1122;
-    const H = canvas.height = 1402;
-    const template = await loadImageElement(PLAYER_CARD_TEMPLATE);
-    ctx.clearRect(0, 0, W, H);
-    ctx.drawImage(template, 0, 0, W, H);
-
-    const photoBox = {
-      x: Math.round(W * 0.088),
-      y: Math.round(H * 0.508),
-      w: Math.round(W * 0.289),
-      h: Math.round(H * 0.278),
-      r: 28
-    };
-
-    const photoUrl = reg.photo_url || '';
-    if(photoUrl){
-      try{
-        const photo = await loadImageElement(photoUrl);
-        const crop = await getFocusedPhotoCrop(photo, photoBox.w / photoBox.h);
-        ctx.save();
-        drawRoundRectPath(ctx, photoBox.x, photoBox.y, photoBox.w, photoBox.h, photoBox.r);
-        ctx.clip();
-        ctx.drawImage(photo, crop.sx, crop.sy, crop.sw, crop.sh, photoBox.x, photoBox.y, photoBox.w, photoBox.h);
-        ctx.restore();
-      }catch(err){
-        ctx.save();
-        drawRoundRectPath(ctx, photoBox.x, photoBox.y, photoBox.w, photoBox.h, photoBox.r);
-        ctx.clip();
-        ctx.fillStyle = '#102448';
-        ctx.fillRect(photoBox.x, photoBox.y, photoBox.w, photoBox.h);
-        ctx.restore();
-      }
-    }else{
-      ctx.save();
-      drawRoundRectPath(ctx, photoBox.x, photoBox.y, photoBox.w, photoBox.h, photoBox.r);
-      ctx.clip();
-      ctx.fillStyle = '#102448';
-      ctx.fillRect(photoBox.x, photoBox.y, photoBox.w, photoBox.h);
-      ctx.fillStyle = '#dbe5fb';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.font = '900 28px Arial, Helvetica, sans-serif';
-      ctx.fillText('PLAYER PHOTO', photoBox.x + photoBox.w / 2, photoBox.y + photoBox.h / 2);
-      ctx.restore();
-    }
-
-    const category = reg.assigned_category || (String(reg.age_group || '').toLowerCase() === 'u19' ? 'D Category (U19)' : 'Category Pending');
-    const fields = [
-      { text: reg.name || 'TMPCL Player', left: 0.472, top: 0.515, w: 0.435, h: 0.032, max: 34, min: 16 },
-      { text: reg.id || 'TMPCL-XXXX', left: 0.472, top: 0.582, w: 0.435, h: 0.032, max: 27, min: 15 },
-      { text: reg.role || 'Player', left: 0.472, top: 0.671, w: 0.435, h: 0.032, max: 27, min: 15 },
-      { text: reg.trial_location || reg.trialLocation || '-', left: 0.472, top: 0.761, w: 0.435, h: 0.032, max: 26, min: 14 },
-      { text: category, left: 0.472, top: 0.851, w: 0.435, h: 0.032, max: 24, min: 13 }
-    ];
-
-    ctx.fillStyle = '#082143';
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'middle';
-    fields.forEach(field => {
-      const x = Math.round(W * field.left);
-      const y = Math.round(H * field.top);
-      const w = Math.round(W * field.w);
-      const h = Math.round(H * field.h);
-      const fitted = fitCanvasText(ctx, field.text, w - 32, field.max, field.min, '900');
-      ctx.fillText(fitted.text, x + 16, y + h / 2);
-    });
-  }
-
-  async function renderRegistrationCardPreview(reg){
-    currentCardRegistration = reg || currentCardRegistration;
-    const canvas = $('#registrationPosterCanvas');
-    if(!canvas || !currentCardRegistration) return;
-    try{
-      await renderRegistrationCardCanvas(currentCardRegistration, canvas);
-    }catch(err){
-      console.error('Registration card preview render failed', err);
-    }
-  }
-
-  async function downloadRegistrationCard(){
-    const canvas = $('#registrationPosterCanvas');
-    if(!canvas || !currentCardRegistration) return;
-    const btn = $('#downloadPlayerCardBtn');
-    if(btn) setLoading(btn,true,'Preparing Card...');
-    try{
-      await renderRegistrationCardCanvas(currentCardRegistration, canvas);
-      const link = document.createElement('a');
-      link.href = canvas.toDataURL('image/png');
-      link.download = `TMPCL-Registration-Card-${currentCardRegistration.id || Date.now()}.png`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    }catch(err){
-      console.error('Registration card download failed', err);
-      alert('Card download nahi ho paya. Please try again.');
-    }finally{
-      if(btn) setLoading(btn,false);
-    }
   }
 
   function printRegistrationSlip(){
@@ -873,7 +655,6 @@
         if(!rid) throw new Error('Registration link missing hai. Pehle registration form submit karein.');
         let reg = await loadPlayerById(rid);
         if(!reg) throw new Error('Registration record nahi mila. Link check karein ya TMPCL support se contact karein.');
-        document.body.classList.remove('checkout-success-mode');
         renderCheckoutSummary(reg);
 
         if(orderId && reg.payment_status !== 'Paid'){
@@ -885,14 +666,9 @@
 
         if(reg.payment_status === 'Paid'){
           if(payBtn) payBtn.style.display='none';
-          if(printBox){
-            printBox.innerHTML = buildRegistrationSlip(reg) + buildRegistrationSocialCard(reg);
-            $('#printSlipBtn')?.addEventListener('click', printRegistrationSlip);
-            $('#downloadPlayerCardBtn')?.addEventListener('click', downloadRegistrationCard);
-            document.body.classList.add('checkout-success-mode');
-            renderRegistrationCardPreview(reg);
-          }
-          await showStatus(`<strong>Payment successful. Registration confirmed!</strong><br>Registration ID: <strong>${esc(reg.id)}</strong><br>Instagram card download is now available.`);
+          if(printBox) printBox.innerHTML = buildRegistrationSlip(reg);
+          $('#printSlipBtn')?.addEventListener('click', printRegistrationSlip);
+          await showStatus(`<strong>Payment successful. Registration confirmed!</strong><br>Registration ID: <strong>${esc(reg.id)}</strong><br>Amount: ₹${REGISTRATION_FEE}`);
           return;
         }
 
