@@ -2752,3 +2752,12 @@ body[data-page="home"] .prize-premium-title p{
   .social-card-head h3{font-size:24px}
   .registration-poster-card{width:min(100%,420px)}
 }
+
+
+/* TMPCL checkout card render fix v25 */
+.registration-poster-canvas{display:block;width:100%;height:auto;background:transparent}
+body[data-page="checkout"].checkout-success-mode .checkout-side,
+body[data-page="checkout"].checkout-success-mode .checkout-note,
+body[data-page="checkout"].checkout-success-mode .mobile-cta{display:none!important}
+body[data-page="checkout"].checkout-success-mode .checkout-wrap{grid-template-columns:1fr}
+body[data-page="checkout"].checkout-success-mode .checkout-card{max-width:820px;margin:0 auto}
