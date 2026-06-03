@@ -14,6 +14,7 @@
   const CASHFREE_MODE = 'production'; // Cashfree live mode: Supabase CASHFREE_ENV must also be production.
   const REGISTRATION_FEE = 999;
   const TMPCL_FIXED_FEE_TEXT = '₹999';
+  const PLAYER_CARD_TEMPLATE = 'player-registration-card-template.png';
   const STORAGE_BUCKETS = {
     playerPhoto: 'player-photos',
     idProof: 'id-proofs',
@@ -112,6 +113,89 @@
       <div class="slip-note"><strong>Important:</strong> This is a registration confirmation slip, not final trial pass. Final trial pass/admit card will be issued after venue, date and reporting time are officially announced.</div>
       <div class="slip-actions"><button type="button" class="btn" id="printSlipBtn">Print / Save Slip</button></div>
     </div>`;
+  }
+
+
+  function buildRegistrationSocialCard(reg){
+    const playerName = reg.name || 'TMPCL Player';
+    const registrationId = reg.id || 'TMPCL-XXXX';
+    const role = reg.role || 'Player';
+    const trialLocation = reg.trial_location || reg.trialLocation || '-';
+    const category = reg.assigned_category || (String(reg.age_group||'').toLowerCase()==='u19' ? 'D Category (U19)' : 'Category Pending');
+    const photoUrl = reg.photo_url || '';
+    const photoHtml = photoUrl
+      ? `<img src="${esc(photoUrl)}" alt="${esc(playerName)}" crossorigin="anonymous">`
+      : `<div class="registration-poster-photo-placeholder">Player Photo</div>`;
+    return `<div class="social-card-wrap">
+      <div class="social-card-head">
+        <div>
+          <small>Instagram Registration Card</small>
+          <h3>Your TMPCL social media card is ready</h3>
+          <p>Download karke Instagram, WhatsApp Status aur Facebook par share kar sakte hain.</p>
+        </div>
+        <button type="button" class="btn" id="downloadPlayerCardBtn">Download Instagram Card</button>
+      </div>
+      <div class="registration-poster-preview">
+        <div class="registration-poster-card" id="registrationPosterCard" aria-label="TMPCL Registration Social Card">
+          <img class="registration-poster-template" src="${PLAYER_CARD_TEMPLATE}" alt="TMPCL registration card template">
+          <div class="registration-poster-photo">${photoHtml}</div>
+          <div class="registration-poster-value autofit-text name" data-max="34" data-min="16">${esc(playerName)}</div>
+          <div class="registration-poster-value autofit-text regid" data-max="27" data-min="15">${esc(registrationId)}</div>
+          <div class="registration-poster-value autofit-text role" data-max="27" data-min="15">${esc(role)}</div>
+          <div class="registration-poster-value autofit-text location" data-max="26" data-min="14">${esc(trialLocation)}</div>
+          <div class="registration-poster-value autofit-text category" data-max="24" data-min="13">${esc(category)}</div>
+        </div>
+      </div>
+      <p class="muted social-card-note">Card me TMPCL logo aur website QR pre-built hai. Player photo aur details automatically website data se fill hongi.</p>
+    </div>`;
+  }
+
+  function fitTextToBox(el){
+    if(!el) return;
+    const max = Number(el.dataset.max || 28);
+    const min = Number(el.dataset.min || 13);
+    let size = max;
+    el.style.fontSize = `${size}px`;
+    while(size > min && (el.scrollWidth > el.clientWidth || el.scrollHeight > el.clientHeight)){
+      size -= 1;
+      el.style.fontSize = `${size}px`;
+    }
+  }
+
+  function applyRegistrationCardAutoFit(root){
+    if(!root) return;
+    root.querySelectorAll('.autofit-text').forEach(fitTextToBox);
+  }
+
+  async function downloadRegistrationCard(){
+    const card = $('#registrationPosterCard');
+    if(!card) return;
+    if(typeof html2canvas !== 'function'){
+      alert('Card download library load nahi hui. Please refresh and try again.');
+      return;
+    }
+    const btn = $('#downloadPlayerCardBtn');
+    if(btn) setLoading(btn,true,'Preparing Card...');
+    try{
+      applyRegistrationCardAutoFit(card);
+      const canvas = await html2canvas(card, {
+        backgroundColor: null,
+        useCORS: true,
+        allowTaint: false,
+        scale: 2
+      });
+      const link = document.createElement('a');
+      link.href = canvas.toDataURL('image/png');
+      link.download = `TMPCL-Registration-Card-${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    }catch(err){
+      console.error('Registration card download failed', err);
+      alert('Card download nahi ho paya. Please try again.');
+    }finally{
+      if(btn) setLoading(btn,false);
+    }
   }
 
   function printRegistrationSlip(){
@@ -666,9 +750,13 @@
 
         if(reg.payment_status === 'Paid'){
           if(payBtn) payBtn.style.display='none';
-          if(printBox) printBox.innerHTML = buildRegistrationSlip(reg);
-          $('#printSlipBtn')?.addEventListener('click', printRegistrationSlip);
-          await showStatus(`<strong>Payment successful. Registration confirmed!</strong><br>Registration ID: <strong>${esc(reg.id)}</strong><br>Amount: ₹${REGISTRATION_FEE}`);
+          if(printBox){
+            printBox.innerHTML = buildRegistrationSlip(reg) + buildRegistrationSocialCard(reg);
+            $('#printSlipBtn')?.addEventListener('click', printRegistrationSlip);
+            $('#downloadPlayerCardBtn')?.addEventListener('click', downloadRegistrationCard);
+            requestAnimationFrame(()=>applyRegistrationCardAutoFit($('#registrationPosterCard')));
+          }
+          await showStatus(`<strong>Payment successful. Registration confirmed!</strong><br>Registration ID: <strong>${esc(reg.id)}</strong><br>Amount: ₹${REGISTRATION_FEE}<br>Instagram player card download ab available hai.`);
           return;
         }
 

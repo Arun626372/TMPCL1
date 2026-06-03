@@ -2617,3 +2617,135 @@ body[data-page="home"] .prize-premium-title p{
   body[data-page="home"] .prize-premium-title h2{font-size:clamp(28px,8vw,42px);letter-spacing:-.7px;margin:10px 0 6px;}
   body[data-page="home"] .prize-premium-title p{font-size:12.5px;line-height:1.45;max-width:330px;}
 }
+
+
+/* TMPCL Instagram registration card */
+.social-card-wrap{
+  margin-top:22px;
+  padding:20px;
+  border-radius:22px;
+  border:1px solid rgba(255,255,255,.08);
+  background:linear-gradient(180deg,rgba(10,25,39,.96),rgba(4,11,18,.98));
+}
+.social-card-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:18px;
+  margin-bottom:16px;
+}
+.social-card-head small{
+  display:block;
+  text-transform:uppercase;
+  letter-spacing:.8px;
+  color:var(--green);
+  font-weight:900;
+  margin-bottom:6px;
+}
+.social-card-head h3{
+  margin:0 0 6px;
+  font-size:28px;
+}
+.social-card-head p{margin:0;color:#b9c8d5;max-width:560px}
+.registration-poster-preview{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:8px 0 2px;
+}
+.registration-poster-card{
+  width:min(100%,560px);
+  aspect-ratio:1122/1402;
+  position:relative;
+  border-radius:26px;
+  overflow:hidden;
+  box-shadow:0 18px 50px rgba(0,0,0,.34);
+}
+.registration-poster-template{
+  width:100%;
+  height:100%;
+  display:block;
+  user-select:none;
+  pointer-events:none;
+}
+.registration-poster-photo{
+  position:absolute;
+  left:8.8%;
+  top:50.8%;
+  width:28.9%;
+  height:27.8%;
+  border-radius:18px;
+  overflow:hidden;
+  background:linear-gradient(180deg,#18315f,#102448);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.registration-poster-photo img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center top;
+  display:block;
+}
+.registration-poster-photo-placeholder{
+  color:#c7d5ee;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.6px;
+  text-align:center;
+  padding:12px;
+}
+.registration-poster-value{
+  position:absolute;
+  color:#082143;
+  font-weight:900;
+  line-height:1.06;
+  display:flex;
+  align-items:center;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.registration-poster-value.name{
+  left:47.2%;
+  top:51.5%;
+  width:43.5%;
+  height:3.2%;
+  padding:0 2.4%;
+}
+.registration-poster-value.regid{
+  left:47.2%;
+  top:58.2%;
+  width:43.5%;
+  height:3.2%;
+  padding:0 2.4%;
+}
+.registration-poster-value.role{
+  left:47.2%;
+  top:67.1%;
+  width:43.5%;
+  height:3.2%;
+  padding:0 2.4%;
+}
+.registration-poster-value.location{
+  left:47.2%;
+  top:76.1%;
+  width:43.5%;
+  height:3.2%;
+  padding:0 2.4%;
+}
+.registration-poster-value.category{
+  left:47.2%;
+  top:85.1%;
+  width:43.5%;
+  height:3.2%;
+  padding:0 2.4%;
+}
+.social-card-note{margin:14px 0 0;color:#95a7b7}
+@media(max-width:760px){
+  .social-card-wrap{padding:16px;border-radius:18px}
+  .social-card-head{flex-direction:column;align-items:stretch}
+  .social-card-head h3{font-size:24px}
+  .registration-poster-card{width:min(100%,420px)}
+}
