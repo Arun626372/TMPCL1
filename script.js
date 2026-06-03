@@ -36,11 +36,16 @@
   const fmt = () => new Date().toLocaleString('en-IN');
   const REGISTRATION_YEAR = new Date().getFullYear();
   const formatRegistrationId = n => `TMPCL-${REGISTRATION_YEAR}-${String(Math.max(1, Number(n) || 1)).padStart(4,'0')}`;
+  const isOfficialRegistrationId = id => new RegExp(`^TMPCL-${REGISTRATION_YEAR}-\\d{4}$`).test(String(id || ''));
+  function generatePendingRegistrationId(){
+    const rand = Math.floor(1000 + Math.random() * 9000);
+    return `TMPCL-PENDING-${Date.now()}-${rand}`;
+  }
   async function generateRegistrationId(){
     const prefix = `TMPCL-${REGISTRATION_YEAR}-`;
     let nextNo = 1;
     try{
-      const rows = await selectRows('players', `select=id&id=like.${encodeURIComponent(prefix + '*')}&order=id.desc&limit=200`);
+      const rows = await selectRows('players', `select=id,payment_status&id=like.${encodeURIComponent(prefix + '*')}&payment_status=eq.Paid&order=id.desc&limit=500`);
       const re = new RegExp(`^TMPCL-${REGISTRATION_YEAR}-(\\d+)$`);
       rows.forEach(r => {
         const m = String(r.id || '').match(re);
@@ -50,6 +55,32 @@
       nextNo = parseInt(Date.now().toString().slice(-4), 10) || 1;
     }
     return formatRegistrationId(nextNo);
+  }
+  async function assignOfficialRegistrationId(reg){
+    if(!reg || !reg.id) return reg;
+    if(isOfficialRegistrationId(reg.id)) return reg;
+
+    let officialId = await generateRegistrationId();
+
+    // Safety: if an old pending/cancelled record already used this clean ID,
+    // move to the next free ID instead of failing the paid registration.
+    for(let i = 0; i < 50; i++){
+      const exists = await selectRows('players', `select=id&id=eq.${encodeURIComponent(officialId)}&limit=1`).catch(()=>[]);
+      if(!exists.length) break;
+      const m = String(officialId).match(/(\\d+)$/);
+      officialId = formatRegistrationId((m ? parseInt(m[1], 10) : 1) + 1);
+    }
+
+    const updated = await updateRow('players', reg.id, { id: officialId });
+    if(updated && updated.id){
+      try{
+        const url = new URL(location.href);
+        url.searchParams.set('rid', updated.id);
+        history.replaceState(null, '', url.toString());
+      }catch(e){}
+      return { ...reg, ...updated, id: updated.id };
+    }
+    return reg;
   }
   const ageFromDob = dob => { if(!dob) return 0; const b=new Date(dob), t=new Date(); let a=t.getFullYear()-b.getFullYear(); const m=t.getMonth()-b.getMonth(); if(m<0 || (m===0 && t.getDate()<b.getDate())) a--; return a; };
   const initials = (name, fallback='TM') => (name||fallback).split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase() || fallback;
@@ -548,7 +579,7 @@
         if(!proofInput || !proofInput.files.length) throw new Error('Aadhaar / ID Proof upload mandatory hai.');
         data.ageGroup = age <= 19 ? 'U19' : 'Open';
 
-        const id=await generateRegistrationId();
+        const id=generatePendingRegistrationId();
 
         // Important flow:
         // 1) Upload documents + create Payment Pending player record first.
@@ -661,10 +692,13 @@
           await showStatus('Payment status verify ho raha hai...');
           await verifyCashfreePayment(rid, orderId);
           reg = await loadPlayerById(rid) || reg;
+          if(reg.payment_status === 'Paid') reg = await assignOfficialRegistrationId(reg);
           renderCheckoutSummary(reg);
         }
 
         if(reg.payment_status === 'Paid'){
+          reg = await assignOfficialRegistrationId(reg);
+          renderCheckoutSummary(reg);
           if(payBtn) payBtn.style.display='none';
           if(printBox) printBox.innerHTML = buildRegistrationSlip(reg);
           $('#printSlipBtn')?.addEventListener('click', printRegistrationSlip);
