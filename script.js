@@ -782,17 +782,19 @@
 
       const regTb=$('#regTable tbody');
       if(regTb){
-        const search=$('#regSearch'), ageFilter=$('#regAgeFilter'), roleFilter=$('#regRoleFilter');
+        const search=$('#regSearch'), ageFilter=$('#regAgeFilter'), roleFilter=$('#regRoleFilter'), trialLocationFilter=$('#regTrialLocationFilter');
         const filteredRegs = () => {
           const q=(search?.value||'').toLowerCase().trim();
           const ageVal=ageFilter?.value||'all';
           const roleVal=roleFilter?.value||'all';
+          const trialLocationVal=trialLocationFilter?.value||'all';
           return paidRegs.filter(r=>{
             const hay=[r.id,r.name,r.mobile,r.city,r.trial_location,r.role,r.age_group,r.assigned_category].join(' ').toLowerCase();
             const matchQ=!q || hay.includes(q);
             const matchAge=ageVal==='all' || r.age_group===ageVal;
             const matchRole=roleVal==='all' || r.role===roleVal;
-            return matchQ && matchAge && matchRole;
+            const matchTrialLocation=trialLocationVal==='all' || r.trial_location===trialLocationVal;
+            return matchQ && matchAge && matchRole && matchTrialLocation;
           });
         };
         const drawRegs = () => {
@@ -800,8 +802,8 @@
           $('#emptyRegs').style.display=list.length?'none':'block';
           regTb.innerHTML=list.map(r=>`<tr><td>${esc(r.id)}</td><td>${esc(r.name||'')}</td><td>${esc(r.mobile||'')}</td><td>${esc(r.city||'')}</td><td>${esc(r.trial_location||'')}</td><td>${esc(r.dob||'')}</td><td>${esc(r.age||'')}</td><td>${esc(r.role||'')}</td><td>${esc(r.age_group||'')}</td><td>${esc(r.payment_status||'Pending')}</td><td>${esc(r.assigned_category||'Pending until trials & auction')}</td><td>${r.photo_url?`<a href="${esc(r.photo_url)}" target="_blank">View</a>`:''}</td><td>${r.proof_url?`<a href="${esc(r.proof_url)}" target="_blank">View</a>`:''}</td><td>₹${esc(r.fee||'999')}</td><td>${esc(formatDateSafe(r.created_at)||'')}</td></tr>`).join('');
         };
-        [search,ageFilter,roleFilter].forEach(el=>el?.addEventListener('input',drawRegs));
-        [ageFilter,roleFilter].forEach(el=>el?.addEventListener('change',drawRegs));
+        [search,ageFilter,roleFilter,trialLocationFilter].forEach(el=>el?.addEventListener('input',drawRegs));
+        [ageFilter,roleFilter,trialLocationFilter].forEach(el=>el?.addEventListener('change',drawRegs));
         $('#exportAllRegs')?.addEventListener('click',()=>downloadCsv('tmpcl-paid-registrations.csv', paidRegs));
         $('#exportU19Regs')?.addEventListener('click',()=>downloadCsv('tmpcl-paid-u19-registrations.csv', paidRegs.filter(r=>r.age_group==='U19')));
         $('#exportOpenRegs')?.addEventListener('click',()=>downloadCsv('tmpcl-paid-open-registrations.csv', paidRegs.filter(r=>r.age_group==='Open')));
