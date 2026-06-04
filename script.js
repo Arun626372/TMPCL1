@@ -929,6 +929,90 @@
 
 
 
+
+  function setupDownloadSlip(){
+    if(page !== 'download-slip') return;
+    const form = $('#downloadSlipForm');
+    const input = $('#downloadSlipInput');
+    const result = $('#downloadSlipResult');
+    const status = $('#downloadSlipStatus');
+    if(!form || !input || !result) return;
+
+    const showSlipMessage = (html, type='info') => {
+      if(!status) return;
+      status.style.display='block';
+      status.className = type === 'error' ? 'error-box slip-status' : 'success slip-status';
+      status.innerHTML = html;
+    };
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      result.innerHTML = '';
+      if(status) { status.style.display='none'; status.innerHTML=''; }
+
+      const raw = String(input.value || '').trim();
+      const digits = raw.replace(/\D/g, '');
+      if(!raw) {
+        showSlipMessage('Please enter your Registration ID or registered mobile number.', 'error');
+        return;
+      }
+
+      const btn = form.querySelector('button[type="submit"]');
+      setLoading(btn, true, 'Searching...');
+      try{
+        let rows = [];
+        if(/^TMPCL-/i.test(raw)){
+          rows = await selectRows('players', `select=*&id=eq.${encodeURIComponent(raw)}&limit=1`);
+        } else if(/^\d{10}$/.test(digits.slice(-10))){
+          const mobile = digits.slice(-10);
+          rows = await selectRows('players', `select=*&mobile=eq.${encodeURIComponent(mobile)}&order=created_at.desc&limit=20`);
+        } else {
+          throw new Error('Enter a valid Registration ID or 10 digit mobile number.');
+        }
+
+        const paidRows = rows.filter(r => String(r.payment_status || '').toLowerCase() === 'paid');
+
+        if(!paidRows.length){
+          const hasPending = rows.some(r => String(r.payment_status || '').toLowerCase() !== 'paid');
+          showSlipMessage(
+            hasPending
+              ? 'Registration found, but payment is not confirmed yet. Please contact TMPCL support.'
+              : 'No paid registration found with this detail. Please check Registration ID or mobile number.',
+            'error'
+          );
+          return;
+        }
+
+        if(paidRows.length === 1){
+          result.innerHTML = buildRegistrationSlip(paidRows[0]);
+          $('#printSlipBtn')?.addEventListener('click', printRegistrationSlip);
+          showSlipMessage('Registration slip found. You can print or save it now.');
+          return;
+        }
+
+        result.innerHTML = `<div class="card multi-slip-card"><h3>Select Registration</h3><p class="muted">Multiple paid registrations found with this mobile number.</p><div class="slip-result-list">${paidRows.map((r,i)=>`
+          <button type="button" class="slip-result-item" data-slip-index="${i}">
+            <span><strong>${esc(r.name || 'TMPCL Player')}</strong><small>${esc(r.id || '')} · ${esc(r.trial_location || '')}</small></span>
+            <b>View Slip →</b>
+          </button>`).join('')}</div></div>`;
+
+        $$('.slip-result-item', result).forEach(btn => {
+          btn.addEventListener('click', () => {
+            const index = Number(btn.dataset.slipIndex || 0);
+            result.innerHTML = buildRegistrationSlip(paidRows[index]);
+            $('#printSlipBtn')?.addEventListener('click', printRegistrationSlip);
+            showSlipMessage('Registration slip found. You can print or save it now.');
+          });
+        });
+      }catch(err){
+        showDbError('Download Slip', err);
+        showSlipMessage(err.message || 'Slip search failed. Please try again.', 'error');
+      }finally{
+        setLoading(btn, false);
+      }
+    });
+  }
+
   function setupDashboardTabs(){
     if(page !== 'dashboard') return;
     const tabs = $$('.dash-tab');
@@ -946,6 +1030,7 @@
 
   setupRegistration();
   setupCheckout();
+  setupDownloadSlip();
   setupContact();
   setupDashboardForms();
   setupDashboardTabs();

@@ -2617,3 +2617,30 @@ body[data-page="home"] .prize-premium-title p{
   body[data-page="home"] .prize-premium-title h2{font-size:clamp(28px,8vw,42px);letter-spacing:-.7px;margin:10px 0 6px;}
   body[data-page="home"] .prize-premium-title p{font-size:12.5px;line-height:1.45;max-width:330px;}
 }
+
+
+/* TMPCL Download Slip page */
+.download-slip-hero{min-height:360px}
+.download-slip-layout{display:grid;grid-template-columns:1.12fr .88fr;gap:20px;align-items:start}
+.download-slip-card h2{font-size:clamp(30px,4vw,48px);line-height:1;margin:12px 0}
+.download-slip-form{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:end;margin-top:20px}
+.download-slip-form .btn{min-height:49px}
+.download-slip-result{margin-top:22px}
+.slip-status{margin-top:16px}
+.error-box{display:block;padding:13px;border-radius:15px;background:rgba(255,65,65,.12);border:1px solid rgba(255,90,90,.35);color:#ffe6e6}
+.multi-slip-card{margin-top:18px}
+.slip-result-list{display:grid;gap:10px;margin-top:14px}
+.slip-result-item{width:100%;border:1px solid rgba(141,255,57,.18);background:rgba(3,12,20,.72);color:#fff;border-radius:18px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:14px;text-align:left;cursor:pointer}
+.slip-result-item:hover{border-color:rgba(141,255,57,.45);background:rgba(8,28,41,.92)}
+.slip-result-item strong{display:block;font-size:16px}
+.slip-result-item small{display:block;color:#9fb2c4;margin-top:4px}
+.slip-result-item b{color:var(--green);white-space:nowrap}
+.already-slip-strip{padding:26px 0 0}
+.already-slip-box{display:flex;align-items:center;justify-content:space-between;gap:18px;background:linear-gradient(135deg,rgba(255,211,90,.12),rgba(13,34,48,.9),rgba(141,255,57,.08));border-color:rgba(255,211,90,.25)}
+.already-slip-box h3{font-size:clamp(24px,3vw,36px);margin:9px 0 8px}
+.already-slip-box p{margin:0;color:var(--muted)}
+@media(max-width:850px){
+  .download-slip-layout{grid-template-columns:1fr}
+  .download-slip-form{grid-template-columns:1fr}
+  .already-slip-box{display:grid;text-align:center}
+}
