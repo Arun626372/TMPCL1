@@ -810,8 +810,30 @@
         $('#exportFilteredRegs')?.addEventListener('click',()=>downloadCsv('tmpcl-filtered-registrations.csv', filteredRegs()));
         drawRegs();
       }
-      const msgTb=$('#msgTable tbody'); if(msgTb){ $('#emptyMsgs').style.display=msgs.length?'none':'block'; msgTb.innerHTML=msgs.map(m=>`<tr><td>${esc(m.name||'')}</td><td>${esc(m.mobile||'')}</td><td>${esc(m.email||'')}</td><td>${esc(m.enquiry_type||'General Support')}</td><td>${esc(m.message||'')}</td><td>${esc(m.created_at||'')}</td></tr>`).join(''); }
-      const pEnqTb=$('#partnerEnquiriesTable tbody'); if(pEnqTb){ $('#emptyPartnerEnquiries').style.display=partnerEnq.length?'none':'block'; pEnqTb.innerHTML=partnerEnq.map(m=>`<tr><td>${esc(m.name||'')}</td><td>${esc(m.brand||'')}</td><td>${esc(m.category||'')}</td><td>${esc(m.mobile||'')}</td><td>${esc(m.email||'')}</td><td>${esc(m.message||'')}</td><td>${esc(m.created_at||'')}</td></tr>`).join(''); }
+      const msgTb=$('#msgTable tbody'); if(msgTb){
+        $('#emptyMsgs').style.display=msgs.length?'none':'block';
+        msgTb.innerHTML=msgs.map(m=>`<tr><td>${esc(m.name||'')}</td><td>${esc(m.mobile||'')}</td><td>${esc(m.email||'')}</td><td>${esc(m.enquiry_type||'General Support')}</td><td>${esc(m.message||'')}</td><td>${esc(m.created_at||'')}</td><td><button class="mini-btn danger" type="button" data-delete-contact-enquiry="${esc(m.id||'')}">Remove</button></td></tr>`).join('');
+        $$('[data-delete-contact-enquiry]', msgTb).forEach(btn=>btn.addEventListener('click', async ()=>{
+          const id=btn.dataset.deleteContactEnquiry;
+          if(!id) return alert('Enquiry ID missing.');
+          if(!confirm('Remove this contact enquiry from admin?')) return;
+          setLoading(btn,true,'Removing...');
+          try{ await deleteRow('contact_enquiries', id); await renderDashboard(); }
+          catch(err){ showDbError('Remove contact enquiry', err); setLoading(btn,false); }
+        }));
+      }
+      const pEnqTb=$('#partnerEnquiriesTable tbody'); if(pEnqTb){
+        $('#emptyPartnerEnquiries').style.display=partnerEnq.length?'none':'block';
+        pEnqTb.innerHTML=partnerEnq.map(m=>`<tr><td>${esc(m.name||'')}</td><td>${esc(m.brand||'')}</td><td>${esc(m.category||'')}</td><td>${esc(m.mobile||'')}</td><td>${esc(m.email||'')}</td><td>${esc(m.message||'')}</td><td>${esc(m.created_at||'')}</td><td><button class="mini-btn danger" type="button" data-delete-partner-enquiry="${esc(m.id||'')}">Remove</button></td></tr>`).join('');
+        $$('[data-delete-partner-enquiry]', pEnqTb).forEach(btn=>btn.addEventListener('click', async ()=>{
+          const id=btn.dataset.deletePartnerEnquiry;
+          if(!id) return alert('Enquiry ID missing.');
+          if(!confirm('Remove this partnership enquiry from admin?')) return;
+          setLoading(btn,true,'Removing...');
+          try{ await deleteRow('partner_enquiries', id); await renderDashboard(); }
+          catch(err){ showDbError('Remove partnership enquiry', err); setLoading(btn,false); }
+        }));
+      }
     } catch(err){ showDbError('Dashboard load',err); }
   }
 

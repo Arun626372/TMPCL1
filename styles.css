@@ -2644,3 +2644,14 @@ body[data-page="home"] .prize-premium-title p{
   .download-slip-form{grid-template-columns:1fr}
   .already-slip-box{display:grid;text-align:center}
 }
+
+/* TMPCL admin enquiry remove button */
+.mini-btn.danger{
+  border-color:rgba(255,90,90,.45)!important;
+  color:#ffd7d7!important;
+  background:rgba(140,20,20,.22)!important;
+}
+.mini-btn.danger:hover{
+  background:rgba(190,35,35,.34)!important;
+  border-color:rgba(255,120,120,.7)!important;
+}
