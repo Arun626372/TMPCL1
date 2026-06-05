@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>TMPCL | TMPCL Team Dashboard</title>
-  <link rel="stylesheet" href="styles.css?v=20260603-enquiry-remove-v30">
+  <link rel="stylesheet" href="styles.css?v=20260605-r2-url-support-v31">
 </head>
 <body data-page="dashboard">
 <header class="topbar">
@@ -76,8 +76,10 @@
               <div class="admin-field"><label>City / District *</label><input name="teamCity" id="teamCity" required placeholder="Bhopal"></div>
               <div class="admin-field"><label>Owner / Captain</label><input name="teamOwner" id="teamOwner" placeholder="Optional"></div>
               <div class="admin-field"><label>Status</label><select name="teamStatus" id="teamStatus"><option>Draft</option><option>Player Auction Pending</option><option>Auction Completed</option><option>Squad Final</option></select></div>
-              <div class="admin-field"><label>Team Logo</label><input name="teamLogo" id="teamLogo" type="file" accept="image/*"></div>
-              <div class="admin-field"><label>Squad Banner / Poster</label><input name="squadBanner" id="squadBanner" type="file" accept="image/*"><small class="muted">Best size: 1080×1350 ya 1080×1920. View Squad par ye banner popup me open hoga.</small></div>
+              <div class="admin-field"><label>Team Logo</label><input name="teamLogo" id="teamLogo" type="file" accept="image/*"><small class="muted">Upload optional. R2 URL below is preferred for public logo.</small></div>
+              <div class="admin-field"><label>Team Logo URL (R2 / CDN)</label><input name="teamLogoUrl" id="teamLogoUrl" placeholder="https://assets.tmpcl.in/teams/team-logo.webp"></div>
+              <div class="admin-field"><label>Squad Banner / Poster</label><input name="squadBanner" id="squadBanner" type="file" accept="image/*"><small class="muted">Upload optional. R2 URL below is preferred.</small></div>
+              <div class="admin-field"><label>Squad Banner URL (R2 / CDN)</label><input name="squadBannerUrl" id="squadBannerUrl" placeholder="https://assets.tmpcl.in/teams/squad-banner.webp"><small class="muted">Best size: 1080×1350 ya 1080×1920. View Squad par ye banner popup me open hoga.</small></div>
               <button class="btn" type="submit">Save / Update Team</button>
               <button class="btn ghost" type="button" id="teamFormReset">Clear Form</button>
               <div id="teamSuccess" class="success"></div>
@@ -94,7 +96,8 @@
               <div class="admin-field"><label>Media Type</label><select name="mediaType" id="mediaType"><option value="photos">Photo</option><option value="videos">Video</option></select></div>
               <div class="admin-field"><label>Category</label><select name="mediaCategory" id="mediaCategory"><option value="events">Events</option><option value="trials">Trials</option><option value="matches">Matches</option><option value="videos">Videos</option><option value="awards">Awards</option></select></div>
               <div class="admin-field"><label>Date</label><input name="mediaDate" id="mediaDate" type="date"></div>
-              <div class="admin-field"><label>Thumbnail / Photo</label><input name="mediaImage" id="mediaImage" type="file" accept="image/*"><small class="muted">Photo ya video thumbnail upload karein.</small></div>
+              <div class="admin-field"><label>Thumbnail / Photo</label><input name="mediaImage" id="mediaImage" type="file" accept="image/*"><small class="muted">Upload optional. R2 URL below is preferred for public gallery images.</small></div>
+              <div class="admin-field"><label>Thumbnail / Photo URL (R2 / CDN)</label><input name="mediaImageUrl" id="mediaImageUrl" placeholder="https://assets.tmpcl.in/gallery/photo.webp"></div>
               <div class="admin-field"><label>Video URL / Reel Link</label><input name="mediaUrl" id="mediaUrl" placeholder="YouTube / Instagram / Facebook link optional"></div>
               <button class="btn" type="submit">Publish / Update Media</button>
               <button class="btn ghost" type="button" id="galleryFormReset">Clear Form</button>
@@ -112,7 +115,8 @@
               <div class="admin-field"><label>Category / Tag</label><select name="newsTag" id="newsTag"><option>Announcement</option><option>Trials</option><option>Event Update</option><option>Selection</option><option>Results</option><option>Sponsors</option></select></div>
               <div class="admin-field"><label>Date</label><input name="newsDate" id="newsDate" type="date"></div>
               <div class="admin-field"><label>Short Summary *</label><textarea name="newsSummary" id="newsSummary" required placeholder="Write official update summary"></textarea></div>
-              <div class="admin-field"><label>Thumbnail / News Image</label><input name="newsImage" id="newsImage" type="file" accept="image/*"><small class="muted">Optional. Image upload karne par news card me show hogi.</small></div>
+              <div class="admin-field"><label>Thumbnail / News Image</label><input name="newsImage" id="newsImage" type="file" accept="image/*"><small class="muted">Upload optional. R2 URL below is preferred for public news images.</small></div>
+              <div class="admin-field"><label>News Image URL (R2 / CDN)</label><input name="newsImageUrl" id="newsImageUrl" placeholder="https://assets.tmpcl.in/news/news-image.webp"></div>
               <button class="btn" type="submit">Publish / Update News</button>
               <button class="btn ghost" type="button" id="newsFormReset">Clear Form</button>
               <div id="newsSuccess" class="success"></div>
@@ -129,7 +133,8 @@
               <div class="admin-field"><label>Partner Category</label><select name="partnerCategory" id="partnerCategory"><option>Title Sponsor</option><option>Powered By Partner</option><option>Official Kit Partner</option><option>Official Media Partner</option><option>Ground Partner</option><option>Fitness Partner</option><option>Food & Beverage Partner</option><option>Community Partner</option></select></div>
               <div class="admin-field"><label>Website / Instagram Link</label><input name="partnerLink" id="partnerLink" placeholder="https://..."></div>
               <div class="admin-field"><label>Description</label><textarea name="partnerDescription" id="partnerDescription" placeholder="Short partner description"></textarea></div>
-              <div class="admin-field"><label>Partner Logo</label><input name="partnerLogo" id="partnerLogo" type="file" accept="image/*"><small class="muted">Logo upload optional hai.</small></div>
+              <div class="admin-field"><label>Partner Logo</label><input name="partnerLogo" id="partnerLogo" type="file" accept="image/*"><small class="muted">Upload optional. R2 URL below is preferred for public logo.</small></div>
+              <div class="admin-field"><label>Partner Logo URL (R2 / CDN)</label><input name="partnerLogoUrl" id="partnerLogoUrl" placeholder="https://assets.tmpcl.in/partners/logo.webp"></div>
               <div class="admin-field"><label>Status</label><select name="partnerStatus" id="partnerStatus"><option>Published</option><option>Draft</option></select></div>
               <button class="btn" type="submit">Publish / Update Partner</button>
               <button class="btn ghost" type="button" id="partnerFormReset">Clear Form</button>
@@ -147,7 +152,8 @@
               <div class="admin-field"><label>Role Type</label><select name="personType" id="personType"><option>Founder & League Owner</option><option>Brand Ambassador</option><option>Head Selector</option><option>Selector</option><option>Coach / Advisor</option></select></div>
               <div class="admin-field"><label>Designation</label><input name="personDesignation" id="personDesignation" placeholder="Founder & League Owner, TMPCL"></div>
               <div class="admin-field"><label>Short Bio / Message</label><textarea name="personBio" id="personBio" placeholder="Short message, experience or responsibility"></textarea></div>
-              <div class="admin-field"><label>Photo</label><input name="personPhoto" id="personPhoto" type="file" accept="image/*"><small class="muted">Photo optional hai.</small></div>
+              <div class="admin-field"><label>Photo</label><input name="personPhoto" id="personPhoto" type="file" accept="image/*"><small class="muted">Upload optional. R2 URL below is preferred for public leadership photos.</small></div>
+              <div class="admin-field"><label>Photo URL (R2 / CDN)</label><input name="personPhotoUrl" id="personPhotoUrl" placeholder="https://assets.tmpcl.in/leadership/person.webp"></div>
               <button class="btn" type="submit">Save / Update Profile</button>
               <button class="btn ghost" type="button" id="leadershipFormReset">Clear Form</button>
               <div id="leadershipSuccess" class="success"></div>
@@ -178,6 +184,6 @@
     </div>
   </div>
 </main>
-<script src="script.js?v=20260603-enquiry-remove-v30"></script>
+<script src="script.js?v=20260605-r2-url-support-v31"></script>
 </body>
 </html>
