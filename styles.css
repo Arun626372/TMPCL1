@@ -2717,3 +2717,31 @@ body[data-page="home"] .prize-premium-title p{
   .prize-compliance-note p{font-size:12.5px}
   .prize-compliance-note .note-icon{width:30px;height:30px;min-width:30px}
 }
+
+/* TMPCL privacy-safe document verification */
+.verification-consent-card{
+  display:grid;
+  gap:14px;
+  padding:18px;
+  margin:10px 0 20px;
+  border-radius:22px;
+  border:1px solid rgba(255,214,107,.20);
+  background:
+    radial-gradient(circle at top left, rgba(255,214,107,.13), transparent 36%),
+    linear-gradient(135deg, rgba(7,20,30,.94), rgba(2,10,16,.96));
+  box-shadow:0 18px 44px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.05);
+}
+.consent-check{
+  display:flex;
+  gap:11px;
+  align-items:flex-start;
+  padding:13px 14px;
+  border-radius:16px;
+  background:rgba(255,255,255,.045);
+  border:1px solid rgba(255,255,255,.08);
+  color:#dce8ee;
+  font-weight:800;
+  line-height:1.45;
+}
+.consent-check input{margin-top:3px;accent-color:#ffca55}
+.verification-consent-card small{color:#aebfca}

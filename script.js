@@ -167,8 +167,8 @@
   }
 
   function downloadCsv(filename, regs){
-    const header = ['Registration ID','Name','Mobile','City','Trial Location','DOB','Age','Age Group','Role','Batting','Bowling','Experience','Email','Payment Status','Assigned Category','Fee','Created At'];
-    const body = regs.map(r=>[r.id,r.name,r.mobile,r.city,r.trial_location,r.dob,r.age,r.age_group,r.role,r.batting,r.bowling,r.experience,r.email,r.payment_status,r.assigned_category,r.fee,r.created_at]);
+    const header = ['Registration ID','Name','Mobile','City','Trial Location','DOB','Age','Age Group','Role','Batting','Bowling','Experience','Email','Aadhaar Last 4','Document Consent','Payment Status','Assigned Category','Fee','Created At'];
+    const body = regs.map(r=>[r.id,r.name,r.mobile,r.city,r.trial_location,r.dob,r.age,r.age_group,r.role,r.batting,r.bowling,r.experience,r.email,r.aadhaar_last4 || '',r.document_consent ? 'Yes' : 'No',r.payment_status,r.assigned_category,r.fee,r.created_at]);
     const csv = rowsToCsv([header, ...body]);
     const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
     const url = URL.createObjectURL(blob);
@@ -580,8 +580,8 @@
         if(bowlingSelect?.disabled) data.bowling = 'Not Applicable';
 
         const age=ageFromDob(data.dob);
-        const photoInput=regForm.querySelector('input[name="photo"]');
-        const proofInput=regForm.querySelector('input[name="aadhaar"]');
+        const aadhaarLast4 = String(data.aadhaarLast4 || '').replace(/\D/g,'');
+        const documentConsent = data.documentConsent === 'on';
 
         if(!data.name) throw new Error('Full Name mandatory hai.');
         if(!data.mobile) throw new Error('Mobile Number mandatory hai.');
@@ -590,19 +590,18 @@
         if(!data.dob) throw new Error('Date of Birth mandatory hai.');
         if(!data.ageGroup) data.ageGroup = age <= 19 ? 'U19' : 'Open';
         if(!data.role) throw new Error('Playing Role select karein.');
-        if(!photoInput || !photoInput.files.length) throw new Error('Player photo upload mandatory hai.');
-        if(!proofInput || !proofInput.files.length) throw new Error('Aadhaar / ID Proof upload mandatory hai.');
+        if(!/^\d{4}$/.test(aadhaarLast4)) throw new Error('Aadhaar ke last 4 digits enter karein.');
+        if(!documentConsent) throw new Error('Original Aadhaar / valid age proof trial venue par carry karne ki consent mandatory hai.');
         data.ageGroup = age <= 19 ? 'U19' : 'Open';
 
         const id=generatePendingRegistrationId();
 
         // Important flow:
-        // 1) Upload documents + create Payment Pending player record first.
+        // 1) Create Payment Pending player record first.
         // 2) Redirect to checkout.html where Cashfree order is created by Supabase Edge Function.
         // 3) Final Paid status must be updated by secure payment verification, not by browser-only code.
+        // 4) Aadhaar image/player photo upload disabled for privacy and storage saving.
         setLoading(btn,true,'Saving Registration...');
-        const photoUrl=await uploadFile(STORAGE_BUCKETS.playerPhoto, photoInput, id);
-        const proofUrl=await uploadFile(STORAGE_BUCKETS.idProof, proofInput, id);
 
         const pendingRecord={
           id,
@@ -618,8 +617,10 @@
           bowling:data.bowling || 'Not Applicable',
           experience:data.experience,
           email:data.email||'',
-          photo_url:photoUrl,
-          proof_url:proofUrl,
+          aadhaar_last4:aadhaarLast4,
+          document_consent:documentConsent,
+          photo_url:'',
+          proof_url:'',
           fee:999,
           payment_amount:999,
           payment_currency:'INR',
