@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>TMPCL | TMPCL Team Dashboard</title>
-  <link rel="stylesheet" href="styles.css?v=20260605-razorpay-safe-v33">
+  <link rel="stylesheet" href="styles.css?v=20260605-gateway-text-safe-v34">
 </head>
 <body data-page="dashboard">
 <header class="topbar">
@@ -70,12 +70,12 @@
 
         <div class="admin-tab-panel" data-panel="teams">
           <div class="admin-two-column">
-            <article class="card"><h3>Manage Teams & Auction Squads</h3><p class="muted">Team card public Teams page par show hoga. Team logo aur squad banner dono yahan se upload kar sakte hain.</p><form id="teamForm" class="admin-small-form">
+            <article class="card"><h3>Manage Teams & Selection Squads</h3><p class="muted">Team card public Teams page par show hoga. Team logo aur squad banner dono yahan se upload kar sakte hain.</p><form id="teamForm" class="admin-small-form">
               <input type="hidden" name="teamId" id="teamId">
               <div class="admin-field"><label>Team Name *</label><input name="teamName" id="teamName" required placeholder="Example: TMPCL Titans"></div>
               <div class="admin-field"><label>City / District *</label><input name="teamCity" id="teamCity" required placeholder="Bhopal"></div>
               <div class="admin-field"><label>Owner / Captain</label><input name="teamOwner" id="teamOwner" placeholder="Optional"></div>
-              <div class="admin-field"><label>Status</label><select name="teamStatus" id="teamStatus"><option>Draft</option><option>Player Auction Pending</option><option>Auction Completed</option><option>Squad Final</option></select></div>
+              <div class="admin-field"><label>Status</label><select name="teamStatus" id="teamStatus"><option>Draft</option><option>Team Selection Pending</option><option>Selection Completed</option><option>Squad Final</option></select></div>
               <div class="admin-field"><label>Team Logo</label><input name="teamLogo" id="teamLogo" type="file" accept="image/*"><small class="muted">Upload optional. R2 URL below is preferred for public logo.</small></div>
               <div class="admin-field"><label>Team Logo URL (R2 / CDN)</label><input name="teamLogoUrl" id="teamLogoUrl" placeholder="https://assets.tmpcl.in/teams/team-logo.webp"></div>
               <div class="admin-field"><label>Squad Banner / Poster</label><input name="squadBanner" id="squadBanner" type="file" accept="image/*"><small class="muted">Upload optional. R2 URL below is preferred.</small></div>
@@ -184,6 +184,6 @@
     </div>
   </div>
 </main>
-<script src="script.js?v=20260605-razorpay-safe-v33"></script>
+<script src="script.js?v=20260605-gateway-text-safe-v34"></script>
 </body>
 </html>
