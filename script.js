@@ -375,9 +375,22 @@
       const section = grid.closest('.teams-showcase-section');
       if(section) section.classList.toggle('is-hidden', teams.length === 0);
       grid.innerHTML = teams.map(team=>{
-        const logo=team.logo_url?`<img src="${esc(team.logo_url)}" alt="${esc(team.name)} logo">`:`<span>${initials(team.name)}</span>`;
+        const logo=team.logo_url?`<img loading="lazy" src="${esc(team.logo_url)}" alt="${esc(team.name)} logo">`:`<span>${initials(team.name)}</span>`;
         const hasBanner = !!(team.squad_banner_url || team.squadBanner);
-        return `<article class="team-card" data-team-id="${esc(team.id)}"><div class="team-card-head"><div class="team-logo-box">${logo}</div><div><h3>${esc(team.name)}</h3><div class="team-city">${esc(team.city||'')}</div><span class="team-status">${esc(team.status||'Team Selection Pending')}</span></div></div><div class="team-meta-row"><div class="team-meta"><strong>18</strong><span>Total Squad</span></div><div class="team-meta"><strong>A-5</strong><span>Category A</span></div><div class="team-meta"><strong>D-3</strong><span>Only U19</span></div></div>${hasBanner?`<button class="btn ghost team-toggle" type="button">View Squad</button>`:''}</article>`;
+        return `<article class="team-card premium-team-card" data-team-id="${esc(team.id)}">
+          <div class="team-card-shine"></div>
+          <div class="team-card-head">
+            <div class="team-logo-box premium-team-logo">${logo}</div>
+            <div><span class="team-kicker">TMPCL Team</span><h3>${esc(team.name)}</h3><div class="team-city">${esc(team.city||'')}</div></div>
+          </div>
+          <span class="team-status premium-team-status">${esc(team.status||'Team Selection Pending')}</span>
+          <div class="team-meta-row premium-team-meta-row">
+            <div class="team-meta"><strong>18</strong><span>Squad</span></div>
+            <div class="team-meta"><strong>A/B/C</strong><span>Core</span></div>
+            <div class="team-meta"><strong>D-3</strong><span>U19</span></div>
+          </div>
+          ${hasBanner?`<button class="btn ghost team-toggle" type="button">View Squad</button>`:`<div class="squad-coming-soon">Squad Coming Soon</div>`}
+        </article>`;
       }).join('') || '';
       $$('.team-card', grid).forEach(card=>card.addEventListener('click',()=>{ const team=teams.find(t=>t.id===card.dataset.teamId); if(team && (team.squad_banner_url || team.squadBanner)) openSquadBanner(team); }));
     } catch(err){ console.error(err); }
