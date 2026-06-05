@@ -249,21 +249,31 @@
   }
 
   async function api(path, options={}){
-    const res = await fetch(`${SUPABASE_URL}${path}`, {
-      ...options,
-      headers: {
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-        ...(options.body instanceof FormData ? {} : {'Content-Type':'application/json'}),
-        ...(options.headers || {})
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 25000);
+    try{
+      const res = await fetch(`${SUPABASE_URL}${path}`, {
+        ...options,
+        signal: options.signal || controller.signal,
+        headers: {
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          ...(options.body instanceof FormData ? {} : {'Content-Type':'application/json'}),
+          ...(options.headers || {})
+        }
+      });
+      if(!res.ok){
+        let text = await res.text().catch(()=>res.statusText);
+        throw new Error(text || res.statusText);
       }
-    });
-    if(!res.ok){
-      let text = await res.text().catch(()=>res.statusText);
-      throw new Error(text || res.statusText);
+      if(res.status === 204) return null;
+      return res.json().catch(()=>null);
+    }catch(err){
+      if(err && err.name === 'AbortError') throw new Error('Server response timeout. Please refresh and try again.');
+      throw err;
+    }finally{
+      clearTimeout(timeout);
     }
-    if(res.status === 204) return null;
-    return res.json().catch(()=>null);
   }
 
   async function selectRows(table, query='select=*'){
@@ -642,6 +652,21 @@
     return rows[0] || null;
   }
 
+  async function loadPlayerByOrderId(orderId){
+    if(!orderId) return null;
+    const rows = await selectRows('players', `select=*&cashfree_order_id=eq.${encodeURIComponent(orderId)}&limit=1`);
+    return rows[0] || null;
+  }
+
+  function updateCheckoutUrlToOfficialId(reg){
+    if(!reg || !reg.id) return;
+    try{
+      const url = new URL(location.href);
+      url.searchParams.set('rid', reg.id);
+      history.replaceState(null, '', url.toString());
+    }catch(e){}
+  }
+
   function renderCheckoutSummary(reg){
     const box = $('#checkoutSummary');
     if(!box) return;
@@ -690,19 +715,22 @@
       try{
         if(!rid) throw new Error('Registration link missing hai. Pehle registration form submit karein.');
         let reg = await loadPlayerById(rid);
+        if(!reg && orderId) reg = await loadPlayerByOrderId(orderId);
         if(!reg) throw new Error('Registration record nahi mila. Link check karein ya TMPCL support se contact karein.');
         renderCheckoutSummary(reg);
 
-        if(orderId && reg.payment_status !== 'Paid'){
+        if(orderId && String(reg.payment_status || '').toLowerCase() !== 'paid'){
           await showStatus('Payment status verify ho raha hai...');
-          await verifyCashfreePayment(rid, orderId);
-          reg = await loadPlayerById(rid) || reg;
-          if(reg.payment_status === 'Paid') reg = await assignOfficialRegistrationId(reg);
+          const verifyData = await verifyCashfreePayment(rid, orderId);
+          const finalId = verifyData?.registration_id || rid;
+          reg = await loadPlayerById(finalId) || await loadPlayerByOrderId(orderId) || reg;
+          if(String(reg.payment_status || '').toLowerCase() === 'paid') reg = await assignOfficialRegistrationId(reg);
           renderCheckoutSummary(reg);
         }
 
-        if(reg.payment_status === 'Paid'){
+        if(String(reg.payment_status || '').toLowerCase() === 'paid'){
           reg = await assignOfficialRegistrationId(reg);
+          updateCheckoutUrlToOfficialId(reg);
           renderCheckoutSummary(reg);
           if(payBtn) payBtn.style.display='none';
           if(printBox) printBox.innerHTML = buildRegistrationSlip(reg);
@@ -992,7 +1020,7 @@
           rows = await selectRows('players', `select=*&id=eq.${encodeURIComponent(raw)}&limit=1`);
         } else if(/^\d{10}$/.test(digits.slice(-10))){
           const mobile = digits.slice(-10);
-          rows = await selectRows('players', `select=*&mobile=eq.${encodeURIComponent(mobile)}&order=created_at.desc&limit=20`);
+          rows = await selectRows('players', `select=*&or=(mobile.eq.${encodeURIComponent(mobile)},mobile.ilike.*${encodeURIComponent(mobile)}*)&order=created_at.desc&limit=20`);
         } else {
           throw new Error('Enter a valid Registration ID or 10 digit mobile number.');
         }
