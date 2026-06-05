@@ -2745,3 +2745,11 @@ body[data-page="home"] .prize-premium-title p{
 }
 .consent-check input{margin-top:3px;accent-color:#ffca55}
 .verification-consent-card small{color:#aebfca}
+
+.admin-last4-note{
+  margin:10px 0 12px;
+  padding:10px 12px;
+  border-radius:14px;
+  background:rgba(255,214,107,.08);
+  border:1px solid rgba(255,214,107,.18);
+}
