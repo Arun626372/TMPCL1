@@ -465,13 +465,13 @@
       if(visual){ visual.innerHTML=''; visual.style.backgroundImage=''; }
       document.body.classList.remove('modal-open');
     };
-    function card(item){ const bg=item.image_url?`style="background-image:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.76)),url('${esc(item.image_url)}')"`:''; const play=item.type==='videos'||item.url?'<div class="play">▶</div>':''; const date=item.date?`<p>${esc(item.date)}</p>`:''; return `<article class="card media-card" data-id="${esc(item.id)}" data-type="${esc(item.category)}" ${bg}>${play}<div class="label"><span class="tag">${esc(item.category || item.type || 'media')}</span><h3>${esc(item.title)}</h3>${date}</div></article>`; }
+    function card(item){ const bg=item.image_url?`style="background-image:linear-gradient(180deg,rgba(0,0,0,.03),rgba(0,0,0,.76)),url('${esc(item.image_url)}')"`:''; const isVideo=item.type==='videos'||item.url; const play=isVideo?'<div class="play premium-play">▶</div>':''; const date=item.date?`<p>${esc(item.date)}</p>`:''; return `<article class="card media-card premium-media-card" data-id="${esc(item.id)}" data-type="${esc(item.category)}" ${bg}>${play}<div class="media-card-top"><span>${esc(item.category || item.type || 'media')}</span>${isVideo?'<b>Video</b>':'<b>Photo</b>'}</div><div class="label premium-media-label"><h3>${esc(item.title)}</h3>${date}<small>Tap to view</small></div></article>`; }
     function openItem(item){
       if(!item||!modal) return;
       const url = cleanUrl(item.url || '');
       const isVideo = (item.type === 'videos') || !!url;
       const embed = isVideo ? youtubeEmbedUrl(url) : '';
-      if(title) title.textContent=item.title||'TMPCL Media';
+      if(title) title.textContent=item.title||'TMPCL Moment';
       if(visual){
         visual.style.backgroundImage = (!embed && item.image_url) ? `linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.55)),url('${item.image_url}')` : '';
         if(embed){
