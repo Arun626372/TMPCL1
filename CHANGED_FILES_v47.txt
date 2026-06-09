@@ -1,0 +1,12 @@
+TMPCL CrickBro Official Partner Update v47
+
+Changed files:
+- index.html: Added official CrickBro scoring & registration partner notice on home page.
+- partners.html: Added CrickBro as Official Scoring & Registration Partner section.
+- registration.html: Updated redirect messaging to clearly mention CrickBro.
+- download-slip.html: Updated redirect messaging to clearly mention CrickBro.
+- All public HTML pages: Added footer partner note where footer exists.
+- styles.css: Added clean premium styling for CrickBro partner sections and notices.
+
+Partner URL:
+https://auction.crickbro.com/landing-page/6a2696087851fd459747183a/6a27ae9676637539a0ac24ca
