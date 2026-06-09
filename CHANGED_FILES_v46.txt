@@ -1,0 +1,6 @@
+TMPCL Partner Registration Redirect Update v46
+
+- index.html and all public HTML navigation/button links: Register/Download Slip now point to the partner portal
+- registration.html: replaced with clean official partner redirect page
+- download-slip.html: replaced with clean official partner redirect page
+- styles.css: added partner redirect page styling

@@ -3256,3 +3256,76 @@ body[data-page="home"] .prize-premium-title p{
   .gallery-clean-head{padding:18px;border-radius:22px}
   .gallery-head-actions .btn{flex:1;text-align:center}
 }
+
+
+/* ===== Partner registration redirect pages v46 ===== */
+.partner-redirect-hero{
+  min-height:calc(100vh - 82px)!important;
+  display:flex!important;
+  align-items:center!important;
+  background:
+    radial-gradient(circle at 18% 18%,rgba(141,255,57,.14),transparent 30%),
+    radial-gradient(circle at 86% 16%,rgba(255,211,90,.14),transparent 28%),
+    linear-gradient(135deg,#061320 0%,#02070d 58%,#010409 100%)!important;
+}
+.partner-redirect-card{
+  max-width:840px;
+  margin:44px auto;
+  text-align:center;
+  padding:36px!important;
+  border-color:rgba(255,211,90,.28)!important;
+}
+.partner-redirect-card .title{
+  margin:18px auto 14px!important;
+  font-size:clamp(42px,7vw,86px)!important;
+  line-height:.9!important;
+  letter-spacing:-2px!important;
+}
+.partner-redirect-card .lead{
+  margin:0 auto 18px!important;
+  max-width:720px!important;
+}
+.partner-notice{
+  margin:24px auto 4px;
+  padding:18px 20px;
+  max-width:720px;
+  border-radius:22px;
+  border:1px solid rgba(141,255,57,.22);
+  background:rgba(7,22,33,.62);
+  text-align:left;
+}
+.partner-notice strong{
+  display:block;
+  color:var(--gold);
+  font-size:17px;
+  margin-bottom:8px;
+}
+.partner-notice p{
+  margin:0;
+  color:#d9e9df;
+  line-height:1.62;
+}
+.partner-small-note{
+  margin:16px 0 0;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.5;
+}
+@media(max-width:640px){
+  .partner-redirect-card{
+    padding:24px 18px!important;
+    margin:28px auto;
+    text-align:left;
+  }
+  .partner-redirect-card .title{
+    font-size:42px!important;
+    letter-spacing:-1px!important;
+  }
+  .partner-redirect-card .actions{
+    display:grid!important;
+    gap:10px!important;
+  }
+  .partner-redirect-card .actions .btn{
+    width:100%!important;
+  }
+}
