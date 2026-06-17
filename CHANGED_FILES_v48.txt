@@ -1,0 +1,18 @@
+TMPCL Professional Trial + News Update v48
+
+Base used:
+- TMPCL_v19_crickbro_official_partner_v47.zip
+
+Changed/added:
+- index.html: Added Official Trial Process section.
+- index.html: Added Trial Rules & Selection Process section.
+- index.html: Added Grand Launch / latest news block.
+- trial-rules.html: New dedicated Trial Rules page.
+- news-grand-launch.html: New Grand Launch news article page.
+- news.html: Added featured Grand Launch article card.
+- all HTML pages: Added Trial Rules nav link where possible and updated cache version.
+- styles.css: Added premium styling for trial process, trial rules, Golden Ticket, and news blocks.
+
+Important:
+- Registration and Download Slip still redirect to the official CrickBro partner portal.
+- No old registration form/payment flow was re-enabled.
