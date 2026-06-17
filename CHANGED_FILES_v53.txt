@@ -1,0 +1,35 @@
+TMPCL Home Cleanup Premium Update v53
+
+Base used:
+- TMPCL_v19_fifty_premium_leadership_update_v52.zip
+
+Removed from home page:
+- Duplicate final CTA section: "Register for TMPCL Player Trials"
+- Duplicate auction explainer section: "Trials Ke Baad Auction Pool"
+
+Kept on home page:
+- Hero section
+- CrickBro Official Partner section
+- Prize Pool & Awards
+- TMPCL Player Journey: Registration se Player Auction tak
+- The Fifty premium section
+- Why Join TMPCL
+- Trial Schedule Coming Soon
+- FAQ
+- League Owner / Leadership
+- Brand Ambassadors
+- Footer
+
+Repositioned:
+- CrickBro Official Partner section is now placed immediately after the hero for better user clarity.
+
+Other:
+- CSS/JS cache version updated to v53.
+- Added small spacing polish for the cleaned home page.
+
+Removed list from script:
+- auction-home-section: Trials Ke Baad Auction Pool duplicate block
+- duplicate final CTA section: Register for TMPCL Player Trials
+
+Also removed:
+- Hidden Live League Updates section from home page code.
