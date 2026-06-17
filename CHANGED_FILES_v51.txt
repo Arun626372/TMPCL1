@@ -1,0 +1,18 @@
+TMPCL The Fifty + FAQ Premium Update v51
+
+Base used:
+- TMPCL_v19_auction_visible_home_fix_v50.zip
+
+Added/updated:
+- index.html: Premium The Fifty Format section.
+- index.html: Premium Why Join TMPCL section.
+- index.html: Trial Schedule Coming Soon section.
+- index.html: Premium FAQ section.
+- the-fifty.html: New dedicated The Fifty format page.
+- all HTML pages: Added The Fifty navigation link where possible.
+- styles.css: Added premium responsive styling for format, why join, schedule and FAQ sections.
+
+Still active:
+- Register and Download Slip links go to official CrickBro partner portal.
+- Auction Process page remains active.
+- Trial Rules page remains active.
