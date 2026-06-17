@@ -1,0 +1,18 @@
+TMPCL Auction Visible Home Fix v50
+
+Issue fixed:
+- v49 added auction-process.html, but the home page's already-existing Player Journey section still showed old wording like Final Squad / Selection Review.
+- This made it look like the auction update was not applied on the main website.
+
+Updated:
+- index.html: Hero meta/stat wording changed to Auction Pool Process.
+- index.html: Existing TMPCL Player Journey now says Registration Se Player Auction Tak.
+- index.html: Step 05 changed to Auction Pool.
+- index.html: Step 06 changed to Team Allocation.
+- index.html: Added a visible Player Selection Auction / Auction Pool section on home page.
+- trial-rules.html: CTA updated to View Auction Process.
+- styles.css: Added premium styling for new home auction block.
+- all HTML files: cache version updated to v50.
+
+Still active:
+- Register and Download Slip links still go to official CrickBro partner portal.
