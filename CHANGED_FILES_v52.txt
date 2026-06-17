@@ -1,0 +1,17 @@
+TMPCL The Fifty Premium + Leadership/Ambassador Update v52
+
+Base used:
+- TMPCL_v19_format_faq_premium_update_v51.zip
+
+Updated:
+- Home The Fifty section wording upgraded to premium positioning.
+- The Fifty page hero wording upgraded.
+- Added luxury highlight strip: New Era Tennis Cricket, 5-Ball Set Format, Floating Powerplay, Auction Pool Pathway.
+- Kept League Owner and Brand Ambassadors on home page.
+- Added a premium intro before Owner/Ambassadors: Owner Vision & Brand Ambassadors.
+- styles.css updated for premium The Fifty visual treatment.
+- Cache version updated to v52.
+
+Important:
+- Register and Download Slip still go to CrickBro partner portal.
+- Owner and ambassador dynamic sections remain visible and use the existing admin/content data.
