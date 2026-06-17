@@ -1,0 +1,20 @@
+TMPCL Player Selection Auction Update v49
+
+Base used:
+- TMPCL_v19_professional_trial_rules_update_v48.zip
+
+Updated:
+- index.html: Trial process now clearly includes Player Selection Auction.
+- index.html: Golden Ticket / shortlist wording updated to Auction Pool, not direct final selection.
+- trial-rules.html: Added Player Selection Auction Pool clarity.
+- news-grand-launch.html: News article wording updated to mention auction pool / player selection auction process.
+- auction-process.html: New dedicated Player Selection Auction Process page.
+- Navigation: Added Auction Process link where possible.
+- styles.css: Added premium Auction Pool and Auction Process styling.
+- Registration/Download Slip links still go to official CrickBro partner portal.
+
+Important wording:
+- Registration does not guarantee selection.
+- Golden Ticket/shortlist does not guarantee final team selection.
+- Trial-shortlisted players may qualify for TMPCL Player Selection Auction Pool.
+- Final team allocation will happen through auction/selection process, team requirements and TMPCL committee rules.

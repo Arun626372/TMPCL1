@@ -3582,3 +3582,66 @@ body[data-page="home"] .prize-premium-title p{
   .trial-step-card{min-height:auto}
   .trial-rules-main h2,.launch-news-card h2{font-size:34px}
 }
+
+
+/* ===== TMPCL player selection auction update v49 ===== */
+.auction-pool-note{
+  margin-top:18px;
+  padding:18px 20px;
+  border-radius:22px;
+  background:rgba(255,211,90,.09);
+  border:1px solid rgba(255,211,90,.25);
+}
+.auction-pool-note strong{
+  display:block;
+  color:var(--gold);
+  font-size:18px;
+  margin-bottom:8px;
+}
+.auction-pool-note p{
+  margin:0;
+  color:#e8f4ed;
+  line-height:1.62;
+}
+.auction-process-hero{
+  background:
+    radial-gradient(circle at 18% 18%,rgba(255,211,90,.14),transparent 30%),
+    radial-gradient(circle at 86% 18%,rgba(141,255,57,.12),transparent 28%),
+    linear-gradient(135deg,#061320 0%,#02070d 60%,#010409 100%)!important;
+}
+.auction-process-section{
+  position:relative;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 20% 10%,rgba(255,211,90,.09),transparent 32%),
+    radial-gradient(circle at 88% 82%,rgba(141,255,57,.08),transparent 30%);
+}
+.auction-flow-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:16px;
+}
+.auction-disclaimer-card{
+  margin-top:18px;
+  border-color:rgba(255,211,90,.30)!important;
+  background:
+    radial-gradient(circle at 70% 0%,rgba(255,211,90,.12),transparent 36%),
+    linear-gradient(180deg,rgba(13,34,48,.92),rgba(4,12,18,.98))!important;
+}
+.auction-disclaimer-card h3{
+  margin:12px 0 10px;
+  font-size:clamp(28px,4vw,46px);
+  line-height:1;
+  text-transform:uppercase;
+  color:var(--gold);
+}
+.auction-disclaimer-card p{
+  color:var(--muted);
+  line-height:1.7;
+}
+@media(max-width:960px){
+  .auction-flow-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:560px){
+  .auction-flow-grid{grid-template-columns:1fr}
+}
